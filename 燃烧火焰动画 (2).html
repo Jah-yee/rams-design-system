@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>燃烧的火焰</title>
+  <style>
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body, html {
+          height: 100%;
+          overflow: hidden;
+          background: radial-gradient(circle at center, #1a0a00, #000000);
+      }
+
+      .flame-container {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: min(80vw, 600px);
+          height: min(80vh, 700px);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+      }
+
+      .flame {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          filter: blur(0.5px);
+      }
+
+      .flame-layer {
+          position: absolute;
+          bottom: 20%;
+          left: 50%;
+          transform: translateX(-50%);
+          border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+      }
+
+      /* 主火焰层 - 最大最亮 */
+      .flame-core {
+          width: 60%;
+          height: 70%;
+          background: radial-gradient(ellipse at bottom,
+              #ffff99 0%,
+              #ffcc33 15%,
+              #ff6737 35%,
+              #ff4444 55%,
+              #cc2200 75%,
+              transparent 95%);
+          animation: flameCore 2s ease-in-out infinite alternate;
+          z-index: 5;
+      }
+
+      /* 中层火焰 */
+      .flame-mid {
+          width: 70%;
+          height: 80%;
+          background: radial-gradient(ellipse at bottom,
+              transparent 0%,
+              #ff6737 20%,
+              #ff4422 40%,
+              #cc1100 60%,
+              #990000 80%,
+              transparent 100%);
+          animation: flameMid 2.5s ease-in-out infinite alternate;
+          z-index: 4;
+      }
+
+      /* 外层火焰 */
+      .flame-outer {
+          width: 80%;
+          height: 90%;
+          background: radial-gradient(ellipse at bottom,
+              transparent 0%,
+              #ff6737 10%,
+              #cc3300 30%,
+              #990000 50%,
+              #660000 70%,
+              transparent 90%);
+          animation: flameOuter 3s ease-in-out infinite alternate;
+          z-index: 3;
+      }
+
+      /* 火花粒子 */
+      .sparks {
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+      }
+
+      .spark {
+          position: absolute;
+          width: 3px;
+          height: 3px;
+          background: #ff6737;
+          border-radius: 50%;
+          opacity: 0;
+      }
+
+      /* 热浪效果 */
+      .heat-wave {
+          position: absolute;
+          bottom: 10%;
+          left: 10%;
+          width: 80%;
+          height: 100%;
+          background: linear-gradient(to top,
+              rgba(255, 103, 55, 0.1) 0%,
+              rgba(255, 103, 55, 0.05) 30%,
+              transparent 60%);
+          animation: heatWave 1.5s ease-in-out infinite;
+          z-index: 1;
+          border-radius: 50%;
+      }
+
+      /* 动画定义 */
+      @keyframes flameCore {
+          0% {
+              transform: translateX(-50%) scale(1) rotate(-1deg);
+              border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+          }
+          25% {
+              transform: translateX(-48%) scale(1.05) rotate(1deg);
+              border-radius: 45% 55% 45% 55% / 65% 55% 45% 35%;
+          }
+          50% {
+              transform: translateX(-52%) scale(0.98) rotate(-0.5deg);
+              border-radius: 55% 45% 55% 45% / 55% 65% 35% 45%;
+          }
+          75% {
+              transform: translateX(-49%) scale(1.02) rotate(0.8deg);
+              border-radius: 48% 52% 48% 52% / 62% 58% 42% 38%;
+          }
+          100% {
+              transform: translateX(-51%) scale(1.08) rotate(-1.2deg);
+              border-radius: 52% 48% 52% 48% / 58% 62% 38% 42%;
+          }
+      }
+
+      @keyframes flameMid {
+          0% {
+              transform: translateX(-50%) scale(1) rotate(1deg);
+              opacity: 0.8;
+          }
+          33% {
+              transform: translateX(-52%) scale(1.03) rotate(-1.5deg);
+              opacity: 0.9;
+          }
+          66% {
+              transform: translateX(-48%) scale(0.97) rotate(1.2deg);
+              opacity: 0.7;
+          }
+          100% {
+              transform: translateX(-51%) scale(1.05) rotate(-0.8deg);
+              opacity: 0.85;
+          }
+      }
+
+      @keyframes flameOuter {
+          0% {
+              transform: translateX(-50%) scale(1) rotate(-0.5deg);
+              opacity: 0.6;
+          }
+          20% {
+              transform: translateX(-53%) scale(1.02) rotate(1.8deg);
+              opacity: 0.7;
+          }
+          40% {
+              transform: translateX(-47%) scale(0.95) rotate(-1.3deg);
+              opacity: 0.5;
+          }
+          60% {
+              transform: translateX(-52%) scale(1.08) rotate(0.9deg);
+              opacity: 0.8;
+          }
+          80% {
+              transform: translateX(-48%) scale(0.98) rotate(-1.6deg);
+              opacity: 0.6;
+          }
+          100% {
+              transform: translateX(-50%) scale(1.04) rotate(1.1deg);
+              opacity: 0.75;
+          }
+      }
+
+      @keyframes heatWave {
+          0%, 100% {
+              transform: scaleX(1) skewX(0deg);
+              opacity: 0.3;
+          }
+          50% {
+              transform: scaleX(1.1) skewX(2deg);
+              opacity: 0.6;
+          }
+      }
+
+      @keyframes sparkFly {
+          0% {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+          }
+          100% {
+              opacity: 0;
+              transform: translateY(-150px) scale(0.3) rotate(180deg);
+          }
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
+          .flame-container {
+              width: 90vw;
+              height: min(75vh, 600px);
+          }
+      }
+
+      @media (max-width: 480px) {
+          .flame-container {
+              width: 95vw;
+              height: min(70vh, 500px);
+          }
+      }
+
+      @media (orientation: landscape) and (max-height: 500px) {
+          .flame-container {
+              height: 90vh;
+              width: min(60vw, 400px);
+          }
+      }
+  </style>
+</head>
+<body>
+  <div class="flame-container">
+      <div class="flame">
+          <div class="heat-wave"></div>
+          <div class="flame-layer flame-outer"></div>
+          <div class="flame-layer flame-mid"></div>
+          <div class="flame-layer flame-core"></div>
+          <div class="sparks" id="sparks"></div>
+      </div>
+  </div>
+
+  <script>
+      // 创建火花粒子效果
+      function createSpark() {
+          const sparksContainer = document.getElementById('sparks');
+          const spark = document.createElement('div');
+          spark.className = 'spark';
+          
+          // 随机位置（火焰中心区域）
+          const x = Math.random() * 60 + 20; // 20% 到 80% 的位置
+          const y = Math.random() * 30 + 40; // 火焰中下部区域
+          const delay = Math.random() * 2;
+          const duration = 1.5 + Math.random() * 2;
+          
+          spark.style.left = x + '%';
+          spark.style.bottom = y + '%';
+          spark.style.animationDelay = delay + 's';
+          spark.style.animationDuration = duration + 's';
+          spark.style.animation = 'sparkFly ' + duration + 's ease-out ' + delay + 's forwards';
+          
+          // 随机颜色变化
+          const colors = ['#ff6737', '#ffcc33', '#ff4444', '#ffff99'];
+          spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+          spark.style.boxShadow = '0 0 6px ' + spark.style.background;
+          
+          sparksContainer.appendChild(spark);
+          
+          // 清理已完成的火花
+          setTimeout(() => {
+              if (spark.parentNode) {
+                  spark.parentNode.removeChild(spark);
+              }
+          }, (duration + delay) * 1000);
+      }
+
+      // 持续生成火花
+      function generateSparks() {
+          createSpark();
+          setTimeout(generateSparks, 200 + Math.random() * 300);
+      }
+
+      // 启动火花效果
+      generateSparks();
+
+      // 添加随机闪烁效果
+      function addFlicker() {
+          const flames = document.querySelectorAll('.flame-layer');
+          flames.forEach(flame => {
+              if (Math.random() < 0.1) { // 10% 概率闪烁
+                  flame.style.filter = 'brightness(' + (0.8 + Math.random() * 0.4) + ')';
+                  setTimeout(() => {
+                      flame.style.filter = 'brightness(1)';
+                  }, 50 + Math.random() * 100);
+              }
+          });
+      }
+
+      // 定期添加闪烁效果
+      setInterval(addFlicker, 500);
+
+      // 添加鼠标交互效果
+      document.addEventListener('mousemove', (e) => {
+          const flames = document.querySelectorAll('.flame-layer');
+          const centerX = window.innerWidth / 2;
+          const centerY = window.innerHeight / 2;
+          const deltaX = (e.clientX - centerX) / centerX;
+          const deltaY = (e.clientY - centerY) / centerY;
+          
+          flames.forEach((flame, index) => {
+              const intensity = (3 - index) * 2; // 内层火焰反应更强烈
+              flame.style.transform += ` translate(${deltaX * intensity}px, ${deltaY * intensity}px)`;
+          });
+      });
+  </script>
+</body>
+</html>
