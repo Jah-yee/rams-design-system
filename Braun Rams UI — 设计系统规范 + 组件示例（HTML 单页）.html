@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BRAUN Rams UI — 设计系统规范</title>
+  <style>
+    /* =========================================================
+      Braun / Dieter Rams inspired web UI (skeuomorphic-lite)
+      - neutral off-white surfaces
+      - thin warm-gray borders
+      - functional orange accents
+      - subtle, disciplined shadows
+      - grid / perforation motif (speaker grille)
+    ========================================================= */
+
+    :root{
+      /* ---- Color tokens ---- */
+      --bg: #f6f4f2;
+      --surface: #f0efec;
+      --surface-2: #ebe9e6;
+      --border: #c7c3be;
+      --border-2: #b5b0aa;
+      --text: #1f1f1f;
+      --muted: #6b6863;
+      --muted-2: #8b8781;
+      --shadow: rgba(0,0,0,.12);
+      --shadow-2: rgba(0,0,0,.06);
+
+      --accent: #ff5a1f;   /* Braun-like functional orange */
+      --accent-2: #ff7a4a;
+      --accent-ink: #2a140b;
+
+      --lcd: #dde2dc;      /* LCD panel */
+      --lcd-ink: #1d2420;
+      --good: #40c463;
+
+      /* ---- Radius / spacing ---- */
+      --r-xl: 20px;
+      --r-lg: 16px;
+      --r-md: 12px;
+      --r-sm: 10px;
+
+      --space-1: 6px;
+      --space-2: 10px;
+      --space-3: 14px;
+      --space-4: 18px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --space-7: 44px;
+
+      /* ---- Typography ---- */
+      --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC",
+                   "Hiragino Sans GB", "Noto Sans CJK SC", "Microsoft YaHei", Arial, sans-serif;
+
+      /* Type scale: requested sizes */
+      --t-xxl: 24px; /* 超大标题 */
+      --t-xl: 20px;  /* 大标题 */
+      --t-lg: 16px;  /* 中标题 */
+      --t-md: 14px;  /* 正文 */
+      --t-sm: 12px;  /* 小文本 */
+
+      --lh-tight: 1.2;
+      --lh: 1.5;
+
+      /* ---- Shadows (disciplined) ---- */
+      --elev-1: 0 1px 0 rgba(255,255,255,.65) inset,
+                0 -1px 0 rgba(0,0,0,.05) inset,
+                0 10px 24px var(--shadow-2);
+      --elev-2: 0 1px 0 rgba(255,255,255,.75) inset,
+                0 -1px 0 rgba(0,0,0,.06) inset,
+                0 16px 34px var(--shadow);
+
+      --focus: 0 0 0 3px rgba(255, 90, 31, .25);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin: 0;
+      font-family: var(--font-sans);
+      background: radial-gradient(1200px 800px at 20% 0%, #ffffff 0%, var(--bg) 55%, #f3f1ee 100%);
+      color: var(--text);
+    }
+
+    /* ---- Layout ---- */
+    .page{
+      max-width: 1080px;
+      padding: 40px 18px 80px;
+      margin: 0 auto;
+    }
+    .topbar{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: var(--space-4);
+      margin-bottom: 28px;
+    }
+    .brand{
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+    }
+    .brand .logo{
+      font-weight: 900;
+      letter-spacing: .16em;
+      font-size: 28px;
+    }
+    .brand .sub{
+      color: var(--muted);
+      font-size: var(--t-sm);
+    }
+    .top-actions{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn{
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: linear-gradient(#ffffff, var(--surface));
+      box-shadow: 0 1px 0 rgba(255,255,255,.85) inset;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+    }
+    .icon-btn:focus-visible{
+      outline: none;
+      box-shadow: var(--focus), 0 1px 0 rgba(255,255,255,.85) inset;
+    }
+    .dot3{
+      width: 14px;
+      height: 4px;
+      border-radius: 999px;
+      background:
+        radial-gradient(circle at 2px 2px, #6c6a66 2px, transparent 2px) 0 0/6px 6px;
+      opacity: .8;
+    }
+    .grid9{
+      width: 14px;
+      height: 14px;
+      background:
+        radial-gradient(circle, #6c6a66 2px, transparent 2px) 0 0/7px 7px;
+      opacity: .8;
+    }
+    .power{
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid #6c6a66;
+      position: relative;
+      opacity: .8;
+    }
+    .power::before{
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: -2px;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 6px;
+      background: #6c6a66;
+      border-radius: 2px;
+    }
+
+    /* ---- Cards / sections ---- */
+    .section{
+      margin-top: 26px;
+    }
+    .section-header{
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .h-xl{ font-size: var(--t-xl); line-height: var(--lh-tight); margin: 0; }
+    .hint{
+      color: var(--muted);
+      font-size: var(--t-sm);
+    }
+
+    .grid{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 860px){
+      .grid{
+        grid-template-columns: 1.1fr .9fr;
+        gap: 16px;
+      }
+    }
+
+    .panel{
+      border-radius: var(--r-xl);
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #fbfaf8 0%, var(--surface) 55%, var(--surface-2) 100%);
+      box-shadow: var(--elev-1);
+      padding: 18px;
+    }
+    .panel.inset{
+      background: linear-gradient(180deg, var(--surface) 0%, #f7f6f3 100%);
+    }
+    .panel-title{
+      font-size: var(--t-lg);
+      margin: 0 0 10px;
+    }
+
+    /* ---- Token tables ---- */
+    .token-grid{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+    @media (min-width: 680px){
+      .token-grid{ grid-template-columns: repeat(4, minmax(0,1fr)); }
+    }
+    .swatch{
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
+      overflow: hidden;
+    }
+    .swatch .color{
+      height: 44px;
+      border-bottom: 1px solid var(--border);
+    }
+    .swatch .meta{
+      padding: 10px;
+    }
+    .swatch .name{
+      font-size: var(--t-sm);
+      color: var(--muted);
+    }
+    .swatch .value{
+      font-size: var(--t-sm);
+      font-weight: 700;
+      letter-spacing: .02em;
+    }
+    code.k{
+      background: rgba(0,0,0,.05);
+      padding: 2px 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,0,0,.06);
+      font-size: 12px;
+    }
+
+    /* ---- Typography scale ---- */
+    .type-sample{
+      display: grid;
+      gap: 10px;
+    }
+    .type-row{
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px 12px;
+      border: 1px solid rgba(0,0,0,.06);
+      background: rgba(255,255,255,.55);
+      border-radius: 14px;
+      padding: 12px 12px;
+    }
+    .type-row .label{
+      color: var(--muted);
+      font-size: 12px;
+      min-width: 128px;
+    }
+    .type-row .spec{
+      color: var(--muted-2);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    /* ---- Components ---- */
+    .component-grid{
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 14px;
+    }
+    @media (min-width: 860px){
+      .component-grid{
+        grid-template-columns: repeat(4, minmax(0,1fr));
+      }
+    }
+
+    .device-tile{
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: linear-gradient(#ffffff, var(--surface));
+      box-shadow: var(--elev-2);
+      padding: 14px;
+      min-height: 160px;
+      position: relative;
+    }
+    .device-label{
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-top: 10px;
+      gap: 10px;
+    }
+    .device-label .left{
+      font-weight: 800;
+      letter-spacing: .08em;
+      font-size: 12px;
+      color: #2b2b2b;
+    }
+    .device-label .right{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* Button */
+    .btn{
+      --btn-bg-top: #ffffff;
+      --btn-bg-bot: #e9e6e2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, var(--btn-bg-top) 0%, var(--btn-bg-bot) 100%);
+      box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 10px 18px rgba(0,0,0,.08);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .btn:active{
+      transform: translateY(1px);
+      box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 6px 12px rgba(0,0,0,.10);
+    }
+    .btn:focus-visible{
+      outline: none;
+      box-shadow: var(--focus), 0 1px 0 rgba(255,255,255,.8) inset, 0 10px 18px rgba(0,0,0,.08);
+    }
+    .btn--orange{
+      --btn-bg-top: #ff7a4a;
+      --btn-bg-bot: var(--accent);
+      border-color: #d44a1c;
+      color: #1b0f0a;
+    }
+
+    /* Indicator LED */
+    .led{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.18);
+      background: radial-gradient(circle at 30% 30%, #ffffff 0%, #bdb8b2 30%, #7f7b75 70%, #6c6863 100%);
+      box-shadow: 0 1px 0 rgba(255,255,255,.75) inset;
+    }
+    .led.is-on{
+      background: radial-gradient(circle at 30% 30%, #fff6ee 0%, #ffd5c4 25%, var(--accent) 60%, #c9441b 100%);
+    }
+
+    /* LCD */
+    .lcd{
+      border-radius: 12px;
+      border: 1px solid var(--border-2);
+      background: linear-gradient(180deg, #eef2ed 0%, var(--lcd) 100%);
+      box-shadow: 0 2px 0 rgba(255,255,255,.7) inset, 0 -2px 0 rgba(0,0,0,.06) inset;
+      padding: 10px 10px;
+      color: var(--lcd-ink);
+    }
+    .lcd .row{
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .seven{
+      font-variant-numeric: tabular-nums;
+      letter-spacing: .08em;
+      font-weight: 900;
+      font-size: 22px;
+    }
+    .unit{
+      font-size: 12px;
+      font-weight: 800;
+      opacity: .8;
+      margin-left: 6px;
+    }
+
+    /* Switch */
+    .switch{
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .toggle{
+      width: 48px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: linear-gradient(#ffffff, #ebe7e2);
+      position: relative;
+      box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;
+      cursor: pointer;
+    }
+    .knob{
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid var(--border-2);
+      background: radial-gradient(circle at 30% 30%, #ffffff 0%, #f0eeea 55%, #d9d5cf 100%);
+      position: absolute;
+      top: 50%;
+      left: 4px;
+      transform: translateY(-50%);
+      transition: left .18s ease, box-shadow .18s ease;
+      box-shadow: 0 10px 16px rgba(0,0,0,.10);
+    }
+    input[type="checkbox"].toggle-input{
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .toggle-wrap{
+      position: relative;
+      display: inline-block;
+    }
+    .toggle-wrap input:checked + .toggle{
+      border-color: #d44a1c;
+      background: linear-gradient(#ffd9ca, #ff7a4a);
+    }
+    .toggle-wrap input:checked + .toggle .knob{
+      left: 22px;
+    }
+
+    /* Dial (orange function knob) */
+    .dial{
+      width: 56px;
+      height: 56px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 30%, #ffb18f 0%, var(--accent-2) 30%, var(--accent) 70%, #c9441b 100%);
+      border: 1px solid #d44a1c;
+      box-shadow: 0 2px 0 rgba(255,255,255,.35) inset, 0 14px 18px rgba(0,0,0,.18);
+      position: relative;
+    }
+    .dial::after{
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 9px;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 10px;
+      border-radius: 2px;
+      background: rgba(0,0,0,.22);
+    }
+
+    /* Speaker grille pattern */
+    .grille{
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,.10);
+      background:
+        radial-gradient(circle, rgba(0,0,0,.28) 1.2px, transparent 1.25px) 0 0/8px 8px,
+        linear-gradient(180deg, rgba(255,255,255,.55) 0%, rgba(255,255,255,.2) 100%);
+      box-shadow: 0 2px 0 rgba(255,255,255,.7) inset, 0 -2px 0 rgba(0,0,0,.06) inset;
+    }
+
+    /* Camera lens (photo 1) */
+    .lens{
+      width: 88px;
+      height: 88px;
+      border-radius: 999px;
+      border: 1px solid var(--border-2);
+      background: radial-gradient(circle at 35% 35%, #ffffff 0%, #f0eeea 40%, #d8d4ce 100%);
+      box-shadow: 0 2px 0 rgba(255,255,255,.75) inset, 0 20px 30px rgba(0,0,0,.14);
+      display: grid;
+      place-items: center;
+      margin: 0 auto;
+      position: relative;
+    }
+    .lens::before{
+      content:"";
+      width: 44px;
+      height: 44px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,0,0,.25);
+      background: radial-gradient(circle at 35% 30%, #434a52 0%, #1f252b 55%, #0f1418 100%);
+      box-shadow: 0 2px 0 rgba(255,255,255,.12) inset;
+      display: block;
+    }
+    .flash{
+      width: 26px;
+      height: 16px;
+      border-radius: 5px;
+      border: 1px solid rgba(0,0,0,.16);
+      background: linear-gradient(#ffffff, #e7e4df);
+      position: absolute;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .side-accent{
+      width: 18px;
+      height: 6px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent) 0%, #ff9a74 100%);
+      position: absolute;
+      top: 10px;
+      left: 12px;
+      box-shadow: 0 1px 0 rgba(255,255,255,.3) inset;
+    }
+
+    /* Prototype canvas / screens */
+    .proto-grid{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 860px){
+      .proto-grid{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+    }
+    .screen{
+      border-radius: 26px;
+      border: 1px solid var(--border);
+      background: linear-gradient(#ffffff, var(--surface));
+      box-shadow: var(--elev-2);
+      padding: 14px;
+      min-height: 240px;
+      position: relative;
+      overflow: hidden;
+    }
+    .screen .title{
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: .12em;
+      color: #2b2b2b;
+      margin: 0 0 10px;
+    }
+    .screen .content{
+      display: grid;
+      gap: 10px;
+    }
+
+    .row{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .hr{
+      height: 1px;
+      background: rgba(0,0,0,.08);
+      margin: 8px 0;
+    }
+
+    /* Small tags */
+    .tag{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid rgba(0,0,0,.10);
+      background: rgba(255,255,255,.55);
+      padding: 8px 10px;
+      border-radius: 999px;
+    }
+
+    /* Footer blocks */
+    .list{
+      display: grid;
+      gap: 10px;
+    }
+    .list .item{
+      border: 1px solid rgba(0,0,0,.06);
+      background: rgba(255,255,255,.55);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .list .item .k{
+      display: inline-block;
+      margin-bottom: 6px;
+    }
+    .muted{ color: var(--muted); }
+
+    /* Motion preferences */
+    @media (prefers-reduced-motion: reduce){
+      .knob{ transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">BRAUN</div>
+        <div class="sub">Skeuomorphic icon · 工业设计语言 Web 规范（致敬 Dieter Rams）</div>
+      </div>
+      <div class="top-actions" aria-label="Top actions">
+        <button class="icon-btn" aria-label="Power">
+          <span class="power" aria-hidden="true"></span>
+        </button>
+        <button class="icon-btn" aria-label="Grid">
+          <span class="grid9" aria-hidden="true"></span>
+        </button>
+        <button class="icon-btn" aria-label="More">
+          <span class="dot3" aria-hidden="true"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- =========================================================
+         设计系统（概述）
+    ========================================================= -->
+    <section class="section" id="design-system">
+      <div class="section-header">
+        <h2 class="h-xl">设计系统</h2>
+        <div class="hint">目标：让网站像“一个硬件整体”——同一气质的面板、按钮、孔阵列与显示屏</div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3 class="panel-title">原则（Rams-inspired）</h3>
+          <div class="list">
+            <div class="item">
+              <code class="k">P1</code><br />
+              <strong>克制的拟物（Skeuomorphic-lite）</strong>
+              <div class="muted">仅用细边框 + 轻微内高光/内阴影表达结构，不做夸张高光。</div>
+            </div>
+            <div class="item">
+              <code class="k">P2</code><br />
+              <strong>功能色彩</strong>
+              <div class="muted">橙色用于“可操作/关键功能”，其余保持中性低对比。</div>
+            </div>
+            <div class="item">
+              <code class="k">P3</code><br />
+              <strong>结构优先</strong>
+              <div class="muted">网格、对齐、留白；组件像“面板上的零件”，逻辑清晰可读。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel inset">
+          <h3 class="panel-title">Token 快速摘要</h3>
+          <div class="list">
+            <div class="item">
+              <code class="k">Surface</code><br />
+              <span class="muted">--surface / --surface-2 / --border</span>
+            </div>
+            <div class="item">
+              <code class="k">Accent</code><br />
+              <span class="muted">--accent / --accent-2</span>
+            </div>
+            <div class="item">
+              <code class="k">LCD</code><br />
+              <span class="muted">--lcd / --lcd-ink</span>
+            </div>
+            <div class="item">
+              <code class="k">Radius</code><br />
+              <span class="muted">--r-xl / --r-lg / --r-md</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         颜色系统
+    ========================================================= -->
+    <section class="section" id="color-system">
+      <div class="section-header">
+        <h2 class="h-xl">颜色系统</h2>
+        <div class="hint">中性底 + 功能橙；LCD 低饱和绿灰；阴影保持轻微</div>
+      </div>
+
+      <div class="panel">
+        <div class="token-grid">
+          <div class="swatch">
+            <div class="color" style="background: var(--bg);"></div>
+            <div class="meta">
+              <div class="name"><code class="k">--bg</code></div>
+              <div class="value">#f6f4f2</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="color" style="background: var(--surface);"></div>
+            <div class="meta">
+              <div class="name"><code class="k">--surface</code></div>
+              <div class="value">#f0efec</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="color" style="background: var(--border);"></div>
+            <div class="meta">
+              <div class="name"><code class="k">--border</code></div>
+              <div class="value">#c7c3be</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="color" style="background: var(--text);"></div>
+            <div class="meta">
+              <div class="name"><code class="k">--text</code></div>
+              <div class="value">#1f1f1f</div>
+            </div>
+          </div>
+
+          <div class="swatch">
+            <div class="color" style="background: var(--muted);"></div>
+            <div class="meta">
+              <div class="name"><code class="k">--muted</code></div>
+              <div class="value">#6b6863</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="color" style="background: var(--accent);"></div>
+            <div class="meta">
+              <div class="name"><code class="k">--accent</code></div>
+              <div class="value">#ff5a1f</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="color" style="background: var(--lcd);"></div>
+            <div class="meta">
+              <div class="name"><code class="k">--lcd</code></div>
+              <div class="value">#dde2dc</div>
+            </div>
+          </div>
+          <div class="swatch">
+            <div class="color" style="background: var(--good);"></div>
+            <div class="meta">
+              <div class="name"><code class="k">--good</code></div>
+              <div class="value">#40c463</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         排版系统（含指定字号）
+    ========================================================= -->
+    <section class="section" id="typography">
+      <div class="section-header">
+        <h2 class="h-xl">排版系统</h2>
+        <div class="hint">统一使用系统无衬线；数字建议使用等宽数字（tabular-nums）</div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3 class="panel-title">字号层级（按你的要求）</h3>
+          <div class="type-sample">
+            <div class="type-row">
+              <div class="label">超大标题</div>
+              <div style="font-size: var(--t-xxl); line-height: var(--lh-tight); font-weight: 900;">BRAUN Rams UI Spec</div>
+              <div class="spec">24px / 900</div>
+            </div>
+            <div class="type-row">
+              <div class="label">大标题</div>
+              <div style="font-size: var(--t-xl); line-height: var(--lh-tight); font-weight: 900;">Design System</div>
+              <div class="spec">20px / 900</div>
+            </div>
+            <div class="type-row">
+              <div class="label">中标题</div>
+              <div style="font-size: var(--t-lg); line-height: var(--lh-tight); font-weight: 800;">Components</div>
+              <div class="spec">16px / 800</div>
+            </div>
+            <div class="type-row">
+              <div class="label">正文文本</div>
+              <div style="font-size: var(--t-md); line-height: var(--lh); font-weight: 500; max-width: 46ch;">
+                这是一段正文，用于说明组件的行为、约束和使用方式。保持克制的对比与留白。
+              </div>
+              <div class="spec">14px / 500</div>
+            </div>
+            <div class="type-row">
+              <div class="label">小文本</div>
+              <div style="font-size: var(--t-sm); line-height: var(--lh); font-weight: 600; color: var(--muted);">
+                注释 / 标签 / 元数据
+              </div>
+              <div class="spec">12px / 600</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel inset">
+          <h3 class="panel-title">字重与数字</h3>
+          <div class="list">
+            <div class="item">
+              <code class="k">标题</code><br />
+              <span class="muted">800–900，紧凑行高（1.2）</span>
+            </div>
+            <div class="item">
+              <code class="k">正文</code><br />
+              <span class="muted">500，行高 1.5</span>
+            </div>
+            <div class="item">
+              <code class="k">数码 / 读数</code><br />
+              <span class="muted">tabular-nums + 高字重 + 字距 .08em</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         组件示例 = 效果
+    ========================================================= -->
+    <section class="section" id="components">
+      <div class="section-header">
+        <h2 class="h-xl">组件示例 = 效果</h2>
+        <div class="hint">用“面板 + 功能控件 + 指示/显示”拼装；风格统一、可复用</div>
+      </div>
+
+      <div class="panel">
+        <div class="component-grid">
+
+          <!-- Tile: Tuner -->
+          <div class="device-tile">
+            <div class="lcd" aria-label="LCD display">
+              <div class="row">
+                <div class="seven">8.0<span class="unit">MHz</span></div>
+                <div class="led is-on" title="signal" aria-label="signal led"></div>
+              </div>
+            </div>
+            <div style="display:flex; gap: 12px; align-items:center; margin-top: 12px;">
+              <div class="dial" aria-label="tuning dial"></div>
+              <div style="display:grid; gap: 10px;">
+                <button class="btn" type="button">FM</button>
+                <button class="btn" type="button">AM</button>
+              </div>
+            </div>
+            <div class="device-label">
+              <div class="left">BRAUN</div>
+              <div class="right">tuner 1</div>
+            </div>
+          </div>
+
+          <!-- Tile: Photo -->
+          <div class="device-tile">
+            <div class="side-accent" aria-hidden="true"></div>
+            <div class="flash" aria-hidden="true"></div>
+            <div class="lens" aria-label="camera lens"></div>
+            <div class="device-label">
+              <div class="left">BRAUN</div>
+              <div class="right">photo 1</div>
+            </div>
+          </div>
+
+          <!-- Tile: Ventilator -->
+          <div class="device-tile">
+            <div class="grille" style="height: 112px; width: 112px; border-radius: 999px; margin: 4px auto 0;"></div>
+            <div style="display:flex; align-items:center; justify-content: space-between; margin-top: 12px;">
+              <div class="tag"><span class="led"></span> power</div>
+              <div class="dial" style="width: 34px; height: 34px;"></div>
+            </div>
+            <div class="device-label">
+              <div class="left">BRAUN</div>
+              <div class="right">ventilator 1</div>
+            </div>
+          </div>
+
+          <!-- Tile: Controls (switch/button) -->
+          <div class="device-tile">
+            <div class="row" style="margin-top: 4px;">
+              <div class="tag"><span class="led is-on"></span> status</div>
+              <button class="btn btn--orange" type="button">Action</button>
+            </div>
+            <div class="hr"></div>
+            <div class="row">
+              <div class="switch">
+                <span>Standby</span>
+              </div>
+              <label class="toggle-wrap" aria-label="standby toggle">
+                <input class="toggle-input" type="checkbox" checked />
+                <span class="toggle" role="switch" aria-checked="true">
+                  <span class="knob" aria-hidden="true"></span>
+                </span>
+              </label>
+            </div>
+            <div class="row">
+              <div class="switch"><span>Lock</span></div>
+              <label class="toggle-wrap" aria-label="lock toggle">
+                <input class="toggle-input" type="checkbox" />
+                <span class="toggle" role="switch" aria-checked="false">
+                  <span class="knob" aria-hidden="true"></span>
+                </span>
+              </label>
+            </div>
+            <div class="hr"></div>
+            <div class="lcd" aria-label="text display">
+              <div class="row">
+                <div style="font-weight: 900; letter-spacing: .08em; font-size: 13px; color: var(--good);">GOOD LUCK</div>
+                <div class="led" aria-hidden="true"></div>
+              </div>
+            </div>
+            <div class="device-label">
+              <div class="left">BRAUN</div>
+              <div class="right">controls</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         设计系统文档 / 高保真原型（含交互）
+    ========================================================= -->
+    <section class="section" id="documentation">
+      <div class="section-header">
+        <h2 class="h-xl">设计系统文档</h2>
+        <div class="hint">以“规则 + Token + 组件 + 用例”组织；确保可复制和可扩展</div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3 class="panel-title">高保真原型</h3>
+          <p style="margin: 0 0 12px; font-size: var(--t-md); color: var(--muted); line-height: var(--lh);">
+            所有原型界面都实现了基本的交互效果，包括：
+          </p>
+          <div class="list">
+            <div class="item"><code class="k">Interaction</code><br /><strong>按钮</strong>：hover / active / focus 可见且克制</div>
+            <div class="item"><code class="k">Interaction</code><br /><strong>开关</strong>：切换状态、位置动画（可关闭动效）</div>
+            <div class="item"><code class="k">Interaction</code><br /><strong>显示屏</strong>：数值/单位呈现规范，支持 tabular-nums</div>
+            <div class="item"><code class="k">Layout</code><br /><strong>网格与对齐</strong>：组件以面板方式组合，视觉一致</div>
+          </div>
+        </div>
+
+        <div class="panel inset">
+          <h3 class="panel-title">原型界面（示例）</h3>
+          <div class="proto-grid">
+            <div class="screen">
+              <p class="title">SCREEN · TUNER</p>
+              <div class="content">
+                <div class="lcd">
+                  <div class="row">
+                    <div class="seven">8.0<span class="unit">MHz</span></div>
+                    <div class="tag"><span class="led is-on"></span> signal</div>
+                  </div>
+                </div>
+                <div class="row">
+                  <button class="btn" type="button">Preset</button>
+                  <button class="btn btn--orange" type="button">Scan</button>
+                </div>
+                <div class="row">
+                  <span class="muted" style="font-size: 12px;">Band</span>
+                  <span class="tag">FM</span>
+                </div>
+              </div>
+            </div>
+            <div class="screen">
+              <p class="title">SCREEN · CAMERA</p>
+              <div class="content">
+                <div class="row">
+                  <div class="tag"><span class="led"></span> flash</div>
+                  <div class="tag"><span class="led is-on"></span> ready</div>
+                </div>
+                <div class="lens" style="width: 96px; height: 96px;"></div>
+                <div class="row">
+                  <button class="btn" type="button">Mode</button>
+                  <button class="btn btn--orange" type="button">Shoot</button>
+                </div>
+              </div>
+            </div>
+            <div class="screen">
+              <p class="title">SCREEN · SETTINGS</p>
+              <div class="content">
+                <div class="row">
+                  <span class="muted" style="font-size: 12px;">Standby</span>
+                  <label class="toggle-wrap">
+                    <input class="toggle-input" type="checkbox" checked />
+                    <span class="toggle" role="switch">
+                      <span class="knob"></span>
+                    </span>
+                  </label>
+                </div>
+                <div class="row">
+                  <span class="muted" style="font-size: 12px;">Lock</span>
+                  <label class="toggle-wrap">
+                    <input class="toggle-input" type="checkbox" />
+                    <span class="toggle" role="switch">
+                      <span class="knob"></span>
+                    </span>
+                  </label>
+                </div>
+                <div class="lcd">
+                  <div class="row">
+                    <div style="font-weight: 900; letter-spacing: .08em;">OK</div>
+                    <div class="led is-on"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p style="margin: 12px 0 0; font-size: 12px; color: var(--muted); line-height: var(--lh);">
+            注：上面的原型仅为结构示例。你可以按具体业务把 Screen 拆成可复用模板。
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         设计资源 / 设计文件 / 技术栈
+    ========================================================= -->
+    <section class="section" id="resources">
+      <div class="section-header">
+        <h2 class="h-xl">设计资源</h2>
+        <div class="hint">把“可落地的资源”归档：token、组件、图标、栅格、动效规范</div>
+      </div>
+
+      <div class="grid">
+        <div class="panel">
+          <h3 class="panel-title">设计文件</h3>
+          <div class="list">
+            <div class="item">
+              <code class="k">Figma</code><br />
+              <strong>Design System</strong>
+              <div class="muted">颜色/字号/组件状态（Default / Hover / Active / Focus）</div>
+            </div>
+            <div class="item">
+              <code class="k">Figma</code><br />
+              <strong>Prototype</strong>
+              <div class="muted">关键流程页面，高保真交互与转场（轻量）</div>
+            </div>
+            <div class="item">
+              <code class="k">Export</code><br />
+              <strong>Assets</strong>
+              <div class="muted">孔阵列 pattern（SVG）、LCD 背景、品牌铭牌等</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel inset">
+          <h3 class="panel-title">技术栈</h3>
+          <div class="list">
+            <div class="item">
+              <code class="k">Web</code><br />
+              <strong>HTML + CSS Variables</strong>
+              <div class="muted">本页示例为单文件落地；适合作为基础规范/样式源</div>
+            </div>
+            <div class="item">
+              <code class="k">Optional</code><br />
+              <strong>Tailwind / shadcn(ui)</strong>
+              <div class="muted">用 token 驱动主题；组件层写少量“Braun skin”</div>
+            </div>
+            <div class="item">
+              <code class="k">Optional</code><br />
+              <strong>SVG Pattern</strong>
+              <div class="muted">格栅/孔阵列更精细可控（响应式与无锯齿）</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="notes">
+      <div class="section-header">
+        <h2 class="h-xl">下一步（你给我 3 个信息，我就能继续完善）</h2>
+        <div class="hint">把它从“样式示例”升级成“可发版的库”</div>
+      </div>
+      <div class="panel">
+        <ol style="margin: 0; padding-left: 18px; color: var(--muted); line-height: var(--lh); font-size: var(--t-md);">
+          <li>你希望最终交付是：<strong>纯 CSS 库</strong>（system.css 风格）还是 <strong>Tailwind theme</strong>？</li>
+          <li>目标页面类型：<strong>展示型</strong>（landing/gallery）还是 <strong>应用型</strong>（dashboard/webapp）？</li>
+          <li>橙色强调的强度：保守（少用）/ 标准（功能点）/ 强烈（品牌化）？</li>
+        </ol>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
