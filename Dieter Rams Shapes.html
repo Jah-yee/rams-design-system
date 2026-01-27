@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dieter Rams Shapes</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      background: #EAE4D9;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      padding: 20px;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      background: #F8F7F4;
+      padding: 12px 20px;
+      border-radius: 32px;
+      width: fit-content;
+    }
+    
+    .logo {
+      display: grid;
+      grid-template-columns: repeat(4, 8px);
+      gap: 2px;
+    }
+    
+    .logo-dot {
+      width: 8px;
+      height: 8px;
+      background: #080808;
+      border-radius: 50%;
+    }
+    
+    .title {
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 8px;
+    }
+    
+    .shape-card {
+      background: #C6BEAC;
+      border-radius: 16px;
+      aspect-ratio: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    /* Shape 1: Dot Pattern Circle */
+    .dot-pattern {
+      width: 100px;
+      height: 100px;
+      position: relative;
+    }
+    
+    .dot-pattern::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, #000 2px, transparent 2px);
+      background-size: 8px 8px;
+      border-radius: 50%;
+    }
+    
+    /* Shape 2: Vertical Lines Circle */
+    .line-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      gap: 3px;
+      justify-content: center;
+      padding: 0 10px;
+    }
+    
+    .v-line {
+      width: 2px;
+      height: 100%;
+      background: #000;
+    }
+    
+    /* Shape 3: Circle with pointer */
+    .dial {
+      width: 100px;
+      height: 100px;
+      border: 2px solid #000;
+      border-radius: 50%;
+      position: relative;
+    }
+    
+    .dial::after {
+      content: '';
+      position: absolute;
+      width: 6px;
+      height: 30px;
+      background: #FF5D1F;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    /* Shape 4: Solid circle with orange dot */
+    .circle-dot {
+      width: 100px;
+      height: 100px;
+      background: #000;
+      border-radius: 50%;
+      position: relative;
+    }
+    
+    .circle-dot::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      background: #FF5D1F;
+      border-radius: 50%;
+      top: 25%;
+      right: 20%;
+    }
+    
+    /* Shape 5: Concentric circles */
+    .concentric {
+      width: 100px;
+      height: 100px;
+      border: 2px solid #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .concentric-inner {
+      width: 70px;
+      height: 70px;
+      border: 12px solid #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .concentric-center {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #000;
+      border-radius: 50%;
+    }
+    
+    /* Shape 6: Horizontal lines */
+    .h-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      width: 100px;
+    }
+    
+    .h-line {
+      height: 4px;
+      background: #000;
+      border-radius: 2px;
+    }
+    
+    /* Shape 7: Record/Vinyl */
+    .vinyl {
+      width: 100px;
+      height: 100px;
+      background: #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .vinyl-center {
+      width: 12px;
+      height: 12px;
+      background: #FF5D1F;
+      border-radius: 50%;
+    }
+    
+    /* Shape 8: Cassette style */
+    .cassette {
+      width: 100px;
+      height: 60px;
+      background: #000;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+    
+    .cassette-hole {
+      width: 24px;
+      height: 24px;
+      background: #C6BEAC;
+      border-radius: 50%;
+    }
+    
+    /* Shape 9: Toggle switch */
+    .toggle {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .toggle-circle {
+      width: 24px;
+      height: 24px;
+      background: #000;
+      border-radius: 50%;
+    }
+    
+    .toggle-circle.orange {
+      background: #FF5D1F;
+    }
+    
+    /* Shape 10: Slider */
+    .slider {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .slider-track {
+      width: 4px;
+      height: 80px;
+      background: #000;
+      border-radius: 2px;
+    }
+    
+    .slider-knob {
+      width: 16px;
+      height: 8px;
+      background: #000;
+      border-radius: 2px;
+    }
+    
+    /* Shape 11: Gauge */
+    .gauge {
+      width: 100px;
+      height: 100px;
+      border: 2px solid #000;
+      border-radius: 50%;
+      position: relative;
+    }
+    
+    .gauge-hand {
+      position: absolute;
+      width: 3px;
+      height: 40px;
+      background: #000;
+      top: 50%;
+      left: 50%;
+      transform-origin: bottom center;
+      transform: translate(-50%, -100%) rotate(45deg);
+    }
+    
+    .gauge-center {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: #000;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    /* Shape 12: Grid dots */
+    .grid-dots {
+      display: grid;
+      grid-template-columns: repeat(5, 8px);
+      gap: 8px;
+    }
+    
+    .grid-dot {
+      width: 8px;
+      height: 8px;
+      background: #000;
+      border-radius: 50%;
+    }
+    
+    /* Shape 13: Semicircle */
+    .semicircle {
+      width: 100px;
+      height: 50px;
+      background: #000;
+      border-radius: 100px 100px 0 0;
+    }
+    
+    /* Shape 14: Reel */
+    .reel {
+      width: 80px;
+      height: 80px;
+      border: 8px solid #000;
+      border-radius: 50%;
+      position: relative;
+    }
+    
+    .reel::before {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: #000;
+      border-radius: 50%;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    
+    /* Shape 15: Button row */
+    .button-row {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .button {
+      width: 40px;
+      height: 20px;
+      background: #000;
+      border-radius: 2px;
+    }
+    
+    .button.white {
+      background: #F8F7F4;
+      border: 1px solid #000;
+    }
+    
+    /* Shape 16: Knob */
+    .knob {
+      width: 60px;
+      height: 60px;
+      background: #000;
+      border-radius: 50%;
+      position: relative;
+    }
+    
+    .knob::after {
+      content: '';
+      position: absolute;
+      width: 4px;
+      height: 20px;
+      background: #fff;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 2px;
+    }
+    
+    /* Shape 17: Tuner scale */
+    .tuner {
+      width: 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .tuner-line {
+      height: 3px;
+      background: #000;
+      border-radius: 1px;
+    }
+    
+    .tuner-indicator {
+      height: 2px;
+      background: #FF5D1F;
+      margin-top: 4px;
+    }
+    
+    /* Shape 18: Speaker grille */
+    .speaker {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      justify-content: center;
+    }
+    
+    .speaker-line {
+      height: 3px;
+      background: #000;
+      border-radius: 1px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="logo-dot"></div>
+      <div class="logo-dot"></div>
+      <div class="logo-dot"></div>
+      <div class="logo-dot"></div>
+      <div class="logo-dot"></div>
+      <div class="logo-dot"></div>
+      <div class="logo-dot"></div>
+      <div class="logo-dot"></div>
+    </div>
+    <span class="title">DIETER RAMS SHAPES</span>
+  </div>
+  
+  <div class="grid">
+    <div class="shape-card">
+      <div class="dot-pattern"></div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="line-circle">
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+        <div class="v-line"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="dial"></div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="circle-dot"></div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="concentric">
+        <div class="concentric-inner">
+          <div class="concentric-center"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="vinyl">
+        <div class="vinyl-center"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="grid-dots">
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+        <div class="grid-dot"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="h-lines">
+        <div class="h-line"></div>
+        <div class="h-line"></div>
+        <div class="h-line"></div>
+        <div class="h-line"></div>
+        <div class="h-line"></div>
+        <div class="h-line"></div>
+        <div class="h-line"></div>
+        <div class="h-line"></div>
+        <div class="h-line"></div>
+        <div class="h-line"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="cassette">
+        <div class="cassette-hole"></div>
+        <div class="cassette-hole"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="toggle">
+        <div class="toggle-circle"></div>
+        <div class="toggle-circle"></div>
+        <div class="toggle-circle"></div>
+        <div class="toggle-circle orange"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="gauge">
+        <div class="gauge-hand"></div>
+        <div class="gauge-center"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="reel"></div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="semicircle"></div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="knob"></div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="tuner">
+        <div class="tuner-line"></div>
+        <div class="tuner-line"></div>
+        <div class="tuner-line"></div>
+        <div class="tuner-line"></div>
+        <div class="tuner-line"></div>
+        <div class="tuner-line"></div>
+        <div class="tuner-indicator"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="speaker">
+        <div class="speaker-line"></div>
+        <div class="speaker-line"></div>
+        <div class="speaker-line"></div>
+        <div class="speaker-line"></div>
+        <div class="speaker-line"></div>
+        <div class="speaker-line"></div>
+        <div class="speaker-line"></div>
+        <div class="speaker-line"></div>
+        <div class="speaker-line"></div>
+        <div class="speaker-line"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="button-row">
+        <div class="button"></div>
+        <div class="button white"></div>
+        <div class="button white"></div>
+      </div>
+    </div>
+    
+    <div class="shape-card">
+      <div class="slider">
+        <div class="slider-knob"></div>
+        <div class="slider-track"></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
