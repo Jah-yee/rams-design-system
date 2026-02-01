@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cultural Dynamics - Jiayi Seven Du</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+      background: #f5f3ef;
+      overflow: hidden;
+    }
+    
+    #canvas {
+      width: 100vw;
+      height: 100vh;
+      cursor: pointer;
+      touch-action: none;
+    }
+    
+    .settings-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      font-size: 14px;
+      font-weight: 500;
+      color: #444;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .settings-btn:hover {
+      background: rgba(255, 255, 255, 0.95);
+      transform: translateY(-1px);
+    }
+    
+    .settings-panel {
+      position: absolute;
+      top: 70px;
+      right: 16px;
+      width: 320px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+      padding: 24px;
+      display: none;
+    }
+    
+    .settings-panel.visible {
+      display: block;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .settings-panel h2 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    
+    .settings-panel .description {
+      font-size: 12px;
+      line-height: 1.6;
+      color: #666;
+      margin-bottom: 20px;
+    }
+    
+    .settings-panel .description a {
+      color: #333;
+      text-decoration: underline;
+    }
+    
+    .section-title {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+    
+    .param-row {
+      margin-bottom: 16px;
+    }
+    
+    .param-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .param-label {
+      font-size: 14px;
+      color: #444;
+    }
+    
+    .param-value {
+      font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+      font-size: 13px;
+      color: #888;
+    }
+    
+    input[type="range"] {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      background: #e0e0e0;
+      border-radius: 2px;
+      outline: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #666;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb:hover {
+      background: #444;
+    }
+    
+    .buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 24px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: #333;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #1a1a1a;
+    }
+    
+    .btn-secondary {
+      background: #f0f0f0;
+      color: #444;
+    }
+    
+    .btn-secondary:hover {
+      background: #e5e5e5;
+    }
+    
+    .hint {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      font-size: 12px;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  
+  <button class="settings-btn" id="settingsBtn">Settings</button>
+  
+  <div class="settings-panel" id="settingsPanel">
+    <h2>Cultural Dynamics</h2>
+    <p class="description">
+      This simulation visualizes cultural dissemination, inspired by the 
+      <a href="https://www.jstor.org/stable/174371" target="_blank">Axelrod model (1997)</a>. 
+      Each particle represents an agent with discrete cultural traits. Nearby agents interact 
+      and may adopt each other's traits based on their similarity. With social repulsion enabled, 
+      dissimilar agents actively differentiate themselves, creating cultural polarization.
+    </p>
+    
+    <div class="section-title">Simulation Parameters</div>
+    
+    <div class="param-row">
+      <div class="param-header">
+        <span class="param-label">Agent Speed</span>
+        <span class="param-value" id="speedVal">0.3x</span>
+      </div>
+      <input type="range" id="agentSpeed" min="0.1" max="2" step="0.1" value="0.3">
+    </div>
+    
+    <div class="param-row">
+      <div class="param-header">
+        <span class="param-label">Day/Night Cycle Speed</span>
+        <span class="param-value" id="cycleVal">1.0x</span>
+      </div>
+      <input type="range" id="dayNightSpeed" min="0.1" max="3" step="0.1" value="1.0">
+    </div>
+    
+    <div class="param-row">
+      <div class="param-header">
+        <span class="param-label">Traits per feature (Q)</span>
+        <span class="param-value" id="traitsVal">4</span>
+      </div>
+      <input type="range" id="traitsPerFeature" min="2" max="10" step="1" value="4">
+    </div>
+    
+    <div class="param-row">
+      <div class="param-header">
+        <span class="param-label">Noise Rate</span>
+        <span class="param-value" id="noiseVal">0.000</span>
+      </div>
+      <input type="range" id="noiseRate" min="0" max="0.05" step="0.001" value="0">
+    </div>
+    
+    <div class="param-row">
+      <div class="param-header">
+        <span class="param-label">Repulsion Threshold</span>
+        <span class="param-value" id="repulsionVal">0.03</span>
+      </div>
+      <input type="range" id="repulsionThreshold" min="0" max="0.5" step="0.01" value="0.03">
+    </div>
+    
+    <div class="buttons">
+      <button class="btn btn-primary" id="resetBtn">Apply & Reset</button>
+      <button class="btn btn-secondary" id="closeBtn">Close</button>
+    </div>
+  </div>
+  
+  <div class="hint">Move cursor over text to interact • Click and hold for stronger effect</div>
+
+  <script>
+    // ============================================
+    // Cultural Dynamics Particle Text Simulation
+    // Based on Axelrod's Cultural Dissemination Model
+    // ============================================
+
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // High DPI support
+    const dpr = window.devicePixelRatio || 1;
+    
+    // State
+    let particles = [];
+    let time = 0;
+    let mouse = { x: null, y: null, pressed: false };
+    
+    // Parameters
+    let params = {
+      agentSpeed: 0.3,
+      dayNightSpeed: 1.0,
+      traitsPerFeature: 4,
+      noiseRate: 0.000,
+      repulsionThreshold: 0.03
+    };
+
+    // Color palettes for day/night cycle
+    const dayPalette = [
+      { r: 120, g: 180, b: 160 },  // teal-green
+      { r: 100, g: 160, b: 180 },  // blue-teal
+      { r: 140, g: 190, b: 150 },  // soft green
+      { r: 90, g: 150, b: 170 },   // steel blue
+      { r: 110, g: 170, b: 155 },  // sage
+    ];
+    
+    const nightPalette = [
+      { r: 200, g: 120, b: 100 },  // coral
+      { r: 180, g: 100, b: 90 },   // terracotta
+      { r: 160, g: 90, b: 80 },    // rust
+      { r: 190, g: 110, b: 95 },   // salmon
+      { r: 170, g: 95, b: 85 },    // clay
+    ];
+
+    // ============================================
+    // Particle Class
+    // ============================================
+    class Particle {
+      constructor(x, y, targetX, targetY, Q) {
+        this.x = x;
+        this.y = y;
+        this.targetX = targetX;
+        this.targetY = targetY;
+        this.vx = 0;
+        this.vy = 0;
+        this.radius = 3 + Math.random() * 2.5;
+        this.alpha = 0.65 + Math.random() * 0.3;
+        
+        // Cultural traits (5 features, Q possible values each)
+        this.traits = [];
+        for (let i = 0; i < 5; i++) {
+          this.traits.push(Math.floor(Math.random() * Q));
+        }
+        
+        this.color = { r: 120, g: 180, b: 160 };
+      }
+
+      calculateColor(dayProgress) {
+        const traitIndex = this.traits[0] % dayPalette.length;
+        const dayColor = dayPalette[traitIndex];
+        const nightColor = nightPalette[traitIndex];
+        
+        // Smooth sinusoidal day/night transition
+        const t = (Math.sin(dayProgress * Math.PI * 2) + 1) / 2;
+        
+        this.color = {
+          r: Math.round(dayColor.r * (1 - t) + nightColor.r * t),
+          g: Math.round(dayColor.g * (1 - t) + nightColor.g * t),
+          b: Math.round(dayColor.b * (1 - t) + nightColor.b * t),
+        };
+      }
+
+      // Axelrod similarity measure
+      getSimilarity(other) {
+        let matching = 0;
+        for (let i = 0; i < this.traits.length; i++) {
+          if (this.traits[i] === other.traits[i]) matching++;
+        }
+        return matching / this.traits.length;
+      }
+
+      // Cultural interaction
+      interact(other, noiseRate, Q) {
+        const similarity = this.getSimilarity(other);
+        
+        // Interact with probability proportional to similarity
+        if (similarity > 0 && similarity < 1 && Math.random() < similarity) {
+          const differingIndices = [];
+          for (let i = 0; i < this.traits.length; i++) {
+            if (this.traits[i] !== other.traits[i]) {
+              differingIndices.push(i);
+            }
+          }
+          if (differingIndices.length > 0) {
+            const idx = differingIndices[Math.floor(Math.random() * differingIndices.length)];
+            this.traits[idx] = other.traits[idx];
+          }
+        }
+
+        // Cultural noise - spontaneous mutation
+        if (Math.random() < noiseRate) {
+          const idx = Math.floor(Math.random() * this.traits.length);
+          this.traits[idx] = Math.floor(Math.random() * Q);
+        }
+      }
+
+      update(neighbors, dayProgress) {
+        // Update color
+        this.calculateColor(dayProgress);
+
+        let fx = 0, fy = 0;
+
+        // Spring force toward target
+        const dx = this.targetX - this.x;
+        const dy = this.targetY - this.y;
+        fx += dx * 0.02;
+        fy += dy * 0.02;
+
+        // Mouse interaction (ripple effect)
+        if (mouse.x !== null && mouse.y !== null) {
+          const mdx = this.x - mouse.x;
+          const mdy = this.y - mouse.y;
+          const mouseDist = Math.sqrt(mdx * mdx + mdy * mdy);
+          const radius = mouse.pressed ? 180 : 100;
+          
+          if (mouseDist < radius && mouseDist > 0) {
+            const force = (1 - mouseDist / radius) * (mouse.pressed ? 12 : 4);
+            fx += (mdx / mouseDist) * force;
+            fy += (mdy / mouseDist) * force;
+          }
+        }
+
+        // Social repulsion from dissimilar neighbors
+        for (const neighbor of neighbors) {
+          const similarity = this.getSimilarity(neighbor);
+          if (similarity < params.repulsionThreshold) {
+            const ndx = this.x - neighbor.x;
+            const ndy = this.y - neighbor.y;
+            const dist = Math.sqrt(ndx * ndx + ndy * ndy);
+            if (dist < 35 && dist > 0) {
+              const repelForce = (1 - similarity) * 0.4;
+              fx += (ndx / dist) * repelForce;
+              fy += (ndy / dist) * repelForce;
+            }
+          }
+        }
+
+        // Apply forces with damping
+        this.vx = (this.vx + fx) * 0.9;
+        this.vy = (this.vy + fy) * 0.9;
+
+        this.x += this.vx * params.agentSpeed;
+        this.y += this.vy * params.agentSpeed;
+      }
+
+      draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha})`;
+        ctx.fill();
+      }
+    }
+
+    // ============================================
+    // Text to Particles Sampling
+    // ============================================
+    function sampleTextPoints(text, width, height) {
+      const offscreen = document.createElement('canvas');
+      offscreen.width = width;
+      offscreen.height = height;
+      const offCtx = offscreen.getContext('2d');
+
+      offCtx.fillStyle = '#000';
+      offCtx.textAlign = 'center';
+      offCtx.textBaseline = 'middle';
+      
+      // Responsive font size - larger for better visibility
+      const fontSize = Math.min(width * 0.085, 110);
+      offCtx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif`;
+      
+      offCtx.fillText(text, width / 2, height / 2);
+
+      const imageData = offCtx.getImageData(0, 0, width, height);
+      const points = [];
+      const gap = 4;  // Denser sampling
+
+      for (let y = 0; y < height; y += gap) {
+        for (let x = 0; x < width; x += gap) {
+          const i = (y * width + x) * 4;
+          if (imageData.data[i + 3] > 128) {
+            points.push({
+              x: x + (Math.random() - 0.5) * gap * 0.3,
+              y: y + (Math.random() - 0.5) * gap * 0.3,
+            });
+          }
+        }
+      }
+
+      return points;
+    }
+
+    // ============================================
+    // Spatial Hash for Neighbor Lookup
+    // ============================================
+    function buildSpatialHash(particles, cellSize) {
+      const hash = {};
+      for (const p of particles) {
+        const key = `${Math.floor(p.x / cellSize)},${Math.floor(p.y / cellSize)}`;
+        if (!hash[key]) hash[key] = [];
+        hash[key].push(p);
+      }
+      return hash;
+    }
+
+    function getNeighbors(particle, hash, cellSize) {
+      const neighbors = [];
+      const cx = Math.floor(particle.x / cellSize);
+      const cy = Math.floor(particle.y / cellSize);
+      
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          const key = `${cx + dx},${cy + dy}`;
+          if (hash[key]) {
+            for (const p of hash[key]) {
+              if (p !== particle) neighbors.push(p);
+            }
+          }
+        }
+      }
+      return neighbors;
+    }
+
+    // ============================================
+    // Initialize
+    // ============================================
+    function init() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+
+      const width = rect.width;
+      const height = rect.height;
+      
+      const points = sampleTextPoints('Jiayi Seven Du', width, height);
+      particles = [];
+
+      for (const point of points) {
+        const startX = width / 2 + (Math.random() - 0.5) * width * 0.9;
+        const startY = height / 2 + (Math.random() - 0.5) * height * 0.9;
+        particles.push(new Particle(startX, startY, point.x, point.y, params.traitsPerFeature));
+      }
+    }
+
+    // ============================================
+    // Animation Loop
+    // ============================================
+    function animate() {
+      const rect = canvas.getBoundingClientRect();
+      const width = rect.width;
+      const height = rect.height;
+
+      // Clear
+      ctx.fillStyle = '#f5f3ef';
+      ctx.fillRect(0, 0, width, height);
+
+      // Update time
+      time += 0.001 * params.dayNightSpeed;
+      const dayProgress = time % 1;
+
+      // Build spatial hash
+      const hash = buildSpatialHash(particles, 35);
+
+      // Update particles
+      for (const particle of particles) {
+        const neighbors = getNeighbors(particle, hash, 35);
+        
+        // Cultural interaction
+        if (neighbors.length > 0 && Math.random() < 0.1) {
+          const neighbor = neighbors[Math.floor(Math.random() * neighbors.length)];
+          particle.interact(neighbor, params.noiseRate, params.traitsPerFeature);
+        }
+
+        particle.update(neighbors, dayProgress);
+      }
+
+      // Draw particles
+      for (const particle of particles) {
+        particle.draw();
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // ============================================
+    // Event Listeners
+    // ============================================
+    window.addEventListener('resize', init);
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+
+    canvas.addEventListener('mousedown', () => mouse.pressed = true);
+    canvas.addEventListener('mouseup', () => mouse.pressed = false);
+    canvas.addEventListener('mouseleave', () => {
+      mouse.x = null;
+      mouse.y = null;
+      mouse.pressed = false;
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.touches[0].clientX - rect.left;
+      mouse.y = e.touches[0].clientY - rect.top;
+    }, { passive: false });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      mouse.pressed = true;
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.touches[0].clientX - rect.left;
+      mouse.y = e.touches[0].clientY - rect.top;
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', () => {
+      mouse.x = null;
+      mouse.y = null;
+      mouse.pressed = false;
+    });
+
+    // Settings panel
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const closeBtn = document.getElementById('closeBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+    settingsBtn.addEventListener('click', () => {
+      settingsPanel.classList.toggle('visible');
+    });
+
+    closeBtn.addEventListener('click', () => {
+      settingsPanel.classList.remove('visible');
+    });
+
+    resetBtn.addEventListener('click', () => {
+      time = 0;
+      init();
+    });
+
+    // Slider handlers
+    document.getElementById('agentSpeed').addEventListener('input', (e) => {
+      params.agentSpeed = parseFloat(e.target.value);
+      document.getElementById('speedVal').textContent = params.agentSpeed.toFixed(1) + 'x';
+    });
+
+    document.getElementById('dayNightSpeed').addEventListener('input', (e) => {
+      params.dayNightSpeed = parseFloat(e.target.value);
+      document.getElementById('cycleVal').textContent = params.dayNightSpeed.toFixed(1) + 'x';
+    });
+
+    document.getElementById('traitsPerFeature').addEventListener('input', (e) => {
+      params.traitsPerFeature = parseInt(e.target.value);
+      document.getElementById('traitsVal').textContent = params.traitsPerFeature;
+    });
+
+    document.getElementById('noiseRate').addEventListener('input', (e) => {
+      params.noiseRate = parseFloat(e.target.value);
+      document.getElementById('noiseVal').textContent = params.noiseRate.toFixed(3);
+    });
+
+    document.getElementById('repulsionThreshold').addEventListener('input', (e) => {
+      params.repulsionThreshold = parseFloat(e.target.value);
+      document.getElementById('repulsionVal').textContent = params.repulsionThreshold.toFixed(2);
+    });
+
+    // Start
+    init();
+    animate();
+  </script>
+</body>
+</html>
