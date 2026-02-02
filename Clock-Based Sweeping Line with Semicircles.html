@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock-Based Sweeping Line</title>
+    <link href="https://fonts.googleapis.com/css2?family=Iceberg&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .indicator-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .sweeping-line {
+            transition: transform 1s linear;
+        }
+
+        .time-label {
+            font-family: 'Iceberg', cursive;
+            font-size: 12px;
+            fill: #FF5D1F;
+        }
+    </style>
+</head>
+<body>
+    <div class="indicator-container">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 -50 200 300">
+            <defs>
+                <!-- 定义裁剪路径用于顶部半圆 -->
+                <clipPath id="topHalf">
+                    <rect x="0" y="-50" width="200" height="50"/>
+                </clipPath>
+                <!-- 定义裁剪路径用于底部半圆 -->
+                <clipPath id="bottomHalf">
+                    <rect x="0" y="200" width="200" height="50"/>
+                </clipPath>
+                <!-- 定义整个容器的裁剪路径 -->
+                <clipPath id="containerClip">
+                    <rect x="56.6277" y="0" width="86.0023" height="200"/>
+                    <circle cx="100.1" cy="200" r="42.6"/>
+                </clipPath>
+            </defs>
+            
+            <!-- 下半部分橙色填充 - 使用裁剪路径限制在容器内 -->
+            <rect id="lowerFillRect" fill="#FF5D1F" x="56.6277" y="0" width="86.0023" height="242.6" clip-path="url(#containerClip)"/>
+            
+            <!-- 顶部半圆 -->
+            <circle cx="100.1" cy="0" r="42.6" stroke="#5E5D61" stroke-width="1.79372" fill="none" clip-path="url(#topHalf)"/>
+            
+            <!-- 左侧竖线 -->
+            <rect fill="#5E5D61" height="200" width="1.79372" x="56.6277"></rect>
+            <!-- 左侧显著刻度 -->
+            <rect fill="#5E5D61" height="1.79372" width="8" y="48.4305" x="48.6277"></rect>
+            <rect fill="#5E5D61" height="1.79372" width="8" y="130.045" x="48.6277"></rect>
+            <!-- 右侧竖线 -->
+            <rect fill="#5E5D61" height="200" width="1.79372" x="141.83"></rect>
+            <!-- 右侧显著刻度 -->
+            <rect fill="#5E5D61" height="1.79372" width="8" y="78.0269" x="143.623"></rect>
+            
+            <!-- 底部半圆边框 -->
+            <circle cx="100.1" cy="200" r="42.6" stroke="#5E5D61" stroke-width="1.79372" fill="none" clip-path="url(#bottomHalf)"/>
+            
+            <!-- 时间标签 -->
+            <text class="time-label" x="40" y="53" text-anchor="end">45s</text>
+            <text class="time-label" x="40" y="135" text-anchor="end">20s</text>
+            <text class="time-label" x="160" y="83" text-anchor="start">35s</text>
+            
+            <!-- 中间动态横线 - 加粗 -->
+            <rect id="sweepingLine" class="sweeping-line" fill="#FF5D1F" height="2.5" width="128.251" y="0" x="36"></rect>
+        </svg>
+    </div>
+    <script>
+        const sweepingLine = document.getElementById('sweepingLine');
+        const lowerFillRect = document.getElementById('lowerFillRect');
+
+        function updateSweepingLine() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            
+            // 计算橙色横线的 y 坐标，范围从 0 到 200，一分钟一个周期
+            const yPosition = (seconds / 60) * 200;
+            sweepingLine.setAttribute('y', yPosition);
+            
+            // 更新下半部分填充：从横线位置开始到底部
+            const fillHeight = 242.6 - yPosition;
+            lowerFillRect.setAttribute('y', yPosition);
+            lowerFillRect.setAttribute('height', fillHeight);
+        }
+
+        // 初始化
+        updateSweepingLine();
+
+        // 每秒更新一次
+        setInterval(updateSweepingLine, 1000);
+    </script>
+    </body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E1 Hour Clock — Gradient Number Colors</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Iceberg&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Iceberg', sans-serif;
+            overflow: hidden;
+        }
+
+        .clock-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Rotating pointer group */
+        .pointer-group {
+            transform-origin: 200.962px 200px;
+            transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        /* Number styles */
+        .hour-number {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 18px;
+            font-weight: 400;
+            font-style: normal;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .clock-container {
+                transform: scale(0.7);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="clock-container">
+        <svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Static black circle -->
+            <circle cx="200.962" cy="200" r="98.93" stroke="#000000" stroke-width="2.14"/>
+            
+            <!-- Dynamic number container -->
+            <g id="numberContainer"></g>
+            
+            <!-- Rotating pointer -->
+            <g id="pointerGroup" class="pointer-group">
+                <!-- Black triangular pointer -->
+                <path d="M201.8530 113.9251L207.3342 122.2496C207.7970 122.9524 207.3032 123.8897 206.4618 123.9058L195.2653 124.1179C194.4018 124.1344 193.8767 123.1728 194.3572 122.4552L200.0726 113.9186C200.4977 113.2835 201.4324 113.2874 201.8530 113.9251Z" 
+                      fill="#000000"/>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const numberContainer = document.getElementById('numberContainer');
+        const pointerGroup = document.getElementById('pointerGroup');
+        
+        // Circle parameters
+        const centerX = 200.962;
+        const centerY = 200;
+        const radius = 112; // Numbers closer to the circle
+        
+        function createNumber(hour, angle, opacity) {
+            // Calculate number position
+            const radian = (angle - 90) * Math.PI / 180; // -90 degrees to make 12 at the top
+            const x = centerX + radius * Math.cos(radian);
+            const y = centerY + radius * Math.sin(radian);
+            
+            // Create text element
+            const text = document.createElementNS(SVG_NS, 'text');
+            text.setAttribute('class', 'hour-number');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y);
+            text.textContent = String(hour).padStart(2, '0');
+            text.setAttribute('fill', `rgba(255, 93, 31, ${opacity})`); // Adjust color opacity
+            
+            // Calculate tilt angle
+            let rotationAngle = angle;
+
+            // Rotate numbers in the lower half of the circle (90°-270°) to avoid being upside down
+            if (angle > 90 && angle < 270) {
+                rotationAngle = angle + 180;
+            }
+            
+            text.setAttribute('transform', `rotate(${rotationAngle} ${x} ${y})`);
+            
+            return text;
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            // Calculate current hour angle on a 12-hour clock
+            const currentHourAngle = ((hours % 12) + minutes / 60) * 30; // 30° per hour
+            
+            // Determine the two hours to display on the 12-hour clock
+            const currentHour12 = hours % 12;
+            const nextHour12 = (currentHour12 + 1) % 12;
+            
+            // Clear existing numbers
+            numberContainer.innerHTML = '';
+            
+            // Show one number at the hour
+            if (minutes === 0) {
+                const angle = currentHour12 * 30;
+                const number = createNumber(hours, angle, 1); // Full opacity for exact hour
+                numberContainer.appendChild(number);
+            } else {
+                // Show two numbers for non-hour times
+                const currentAngle = currentHour12 * 30;
+                const nextAngle = nextHour12 * 30;
+                
+                // Current hour number (24-hour format) with higher opacity
+                const currentNumber = createNumber(hours, currentAngle, 1); // Fully visible
+                numberContainer.appendChild(currentNumber);
+                
+                // Next hour number (24-hour format) with lower opacity
+                const nextHourValue = (hours + 1) % 24;
+                const nextNumber = createNumber(nextHourValue, nextAngle, 0.4); // Less visible
+                numberContainer.appendChild(nextNumber);
+            }
+            
+            // Rotate pointer
+            pointerGroup.style.transform = `rotate(${currentHourAngle}deg)`;
+        }
+
+        // Initialize
+        updateClock();
+
+        // Update every second
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Combined Clocks Display</title>
+    <link href="https://fonts.googleapis.com/css2?family=Iceberg&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Iceberg', sans-serif;
+            overflow: hidden;
+        }
+
+        .clocks-container {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+        }
+
+        /* Sweeping line clock styles */
+        .indicator-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .indicator-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .sweeping-line {
+            transition: transform 1s linear;
+        }
+
+        .time-label {
+            font-family: 'Iceberg', cursive;
+            font-size: 12px;
+        }
+
+        /* Hour clock styles */
+        .clock-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+        }
+
+        .clock-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Rotating pointer group */
+        .pointer-group {
+            transform-origin: 200.962px 200px;
+            transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        /* Number styles */
+        .hour-number {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 18px;
+            font-weight: 400;
+            font-style: normal;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .clocks-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+            .clock-container {
+                transform: scale(0.7);
+            }
+            .indicator-container {
+                transform: scale(0.8);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="clocks-container">
+        <!-- Sweeping Line Clock -->
+        <div class="indicator-container">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 -50 200 300">
+                <defs>
+                    <!-- 定义裁剪路径用于顶部半圆 -->
+                    <clipPath id="topHalf">
+                        <rect x="0" y="-50" width="200" height="50"/>
+                    </clipPath>
+                    <!-- 定义裁剪路径用于底部半圆 -->
+                    <clipPath id="bottomHalf">
+                        <rect x="0" y="200" width="200" height="50"/>
+                    </clipPath>
+                    <!-- 定义整个容器的裁剪路径 -->
+                    <clipPath id="containerClip">
+                        <rect x="56.6277" y="0" width="86.0023" height="200"/>
+                        <circle cx="100.1" cy="200" r="42.6"/>
+                    </clipPath>
+                </defs>
+                
+                <!-- 下半部分橙色填充 - 使用裁剪路径限制在容器内 -->
+                <rect id="lowerFillRect" fill="#FF5D1F" x="56.6277" y="0" width="86.0023" height="242.6" clip-path="url(#containerClip)"/>
+                
+                <!-- 顶部半圆 -->
+                <circle cx="100.1" cy="0" r="42.6" stroke="#5E5D61" stroke-width="1.79372" fill="none" clip-path="url(#topHalf)"/>
+                
+                <!-- 左侧竖线 -->
+                <rect fill="#5E5D61" height="200" width="1.79372" x="56.6277"></rect>
+                <!-- 左侧短横线 - 保留所有原有刻度，突出显示三个 -->
+                <rect fill="#5E5D61" height="1.79372" width="3.58744" y="7.1749" x="53.0403"></rect>
+                <rect fill="#5E5D61" height="1.79372" width="8" y="46.67" x="48.6277"></rect> <!-- 14s 刻度 -->
+                <rect fill="#5E5D61" height="1.79372" width="3.58744" y="71.7489" x="53.0403"></rect>
+                <rect fill="#5E5D61" height="1.79372" width="8" y="130" x="48.6277"></rect> <!-- 39s 刻度 -->
+                <rect fill="#5E5D61" height="1.79372" width="3.58744" y="143.498" x="53.0403"></rect>
+                <rect fill="#5E5D61" height="1.79372" width="3.58744" y="198.206" x="53.0403"></rect>
+                <!-- 右侧竖线 -->
+                <rect fill="#5E5D61" height="200" width="1.79372" x="141.83"></rect>
+                <!-- 右侧短横线 - 保留所有原有刻度，突出显示一个 -->
+                <rect fill="#5E5D61" height="1.79372" width="3.58744" y="182.063" x="143.623"></rect>
+                <rect fill="#5E5D61" height="1.79372" width="3.58744" y="154.26" x="143.623"></rect>
+                <rect fill="#5E5D61" height="1.79372" width="3.58744" y="113.004" x="143.623"></rect>
+                <rect fill="#5E5D61" height="1.79372" width="8" y="76.67" x="143.623"></rect> <!-- 23s 刻度 -->
+                <rect fill="#5E5D61" height="1.79372" width="3.58744" y="28.6996" x="143.623"></rect>
+                <rect fill="#5E5D61" height="1.79372" width="3.58744" x="143.623"></rect>
+                
+                <!-- 底部半圆边框 -->
+                <circle cx="100.1" cy="200" r="42.6" stroke="#5E5D61" stroke-width="1.79372" fill="none" clip-path="url(#bottomHalf)"/>
+                
+                <!-- 时间标签 - 动态颜色 -->
+                <text id="label14s" class="time-label" x="40" y="51" text-anchor="end">14s</text>
+                <text id="label23s" class="time-label" x="160" y="81" text-anchor="start">23s</text>
+                <text id="label39s" class="time-label" x="40" y="135" text-anchor="end">39s</text>
+                
+                <!-- 中间动态横线 - 加粗 -->
+                <rect id="sweepingLine" class="sweeping-line" fill="#FF5D1F" height="2.5" width="128.251" y="0" x="36"></rect>
+            </svg>
+        </div>
+
+        <!-- Hour Clock -->
+        <div class="clock-container">
+            <svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Static black circle -->
+                <circle cx="200.962" cy="200" r="98.93" stroke="#000000" stroke-width="2.14"/>
+                
+                <!-- Dynamic number container -->
+                <g id="numberContainer"></g>
+                
+                <!-- Rotating pointer -->
+                <g id="pointerGroup" class="pointer-group">
+                    <!-- Black triangular pointer -->
+                    <path d="M201.8530 113.9251L207.3342 122.2496C207.7970 122.9524 207.3032 123.8897 206.4618 123.9058L195.2653 124.1179C194.4018 124.1344 193.8767 123.1728 194.3572 122.4552L200.0726 113.9186C200.4977 113.2835 201.4324 113.2874 201.8530 113.9251Z" 
+                          fill="#000000"/>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        // Sweeping Line Clock JavaScript
+        const sweepingLine = document.getElementById('sweepingLine');
+        const lowerFillRect = document.getElementById('lowerFillRect');
+        const label14s = document.getElementById('label14s');
+        const label23s = document.getElementById('label23s');
+        const label39s = document.getElementById('label39s');
+
+        function updateSweepingLine() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            
+            // 计算橙色横线的 y 坐标，范围从 0 到 200，一分钟一个周期
+            const yPosition = (seconds / 60) * 200;
+            sweepingLine.setAttribute('y', yPosition);
+            
+            // 更新下半部分填充：从横线位置开始到底部
+            const fillHeight = 242.6 - yPosition;
+            lowerFillRect.setAttribute('y', yPosition);
+            lowerFillRect.setAttribute('height', fillHeight);
+            
+            // 更新数字颜色：根据当前秒数判断是否已过
+            // 14s 对应 y=46.67
+            if (seconds >= 14) {
+                label14s.setAttribute('fill', 'rgba(255, 93, 31, 0.4)'); // 已过，透明
+            } else {
+                label14s.setAttribute('fill', 'rgba(255, 93, 31, 1)'); // 未过，不透明
+            }
+            
+            // 23s 对应 y=76.67
+            if (seconds >= 23) {
+                label23s.setAttribute('fill', 'rgba(255, 93, 31, 0.4)'); // 已过，透明
+            } else {
+                label23s.setAttribute('fill', 'rgba(255, 93, 31, 1)'); // 未过，不透明
+            }
+            
+            // 39s 对应 y=130
+            if (seconds >= 39) {
+                label39s.setAttribute('fill', 'rgba(255, 93, 31, 0.4)'); // 已过，透明
+            } else {
+                label39s.setAttribute('fill', 'rgba(255, 93, 31, 1)'); // 未过，不透明
+            }
+        }
+
+        // Hour Clock JavaScript
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const numberContainer = document.getElementById('numberContainer');
+        const pointerGroup = document.getElementById('pointerGroup');
+        
+        // Circle parameters
+        const centerX = 200.962;
+        const centerY = 200;
+        const radius = 112; // Numbers closer to the circle
+        
+        function createNumber(hour, angle, opacity) {
+            // Calculate number position
+            const radian = (angle - 90) * Math.PI / 180; // -90 degrees to make 12 at the top
+            const x = centerX + radius * Math.cos(radian);
+            const y = centerY + radius * Math.sin(radian);
+            
+            // Create text element
+            const text = document.createElementNS(SVG_NS, 'text');
+            text.setAttribute('class', 'hour-number');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y);
+            text.textContent = String(hour).padStart(2, '0');
+            text.setAttribute('fill', `rgba(255, 93, 31, ${opacity})`); // Adjust color opacity
+            
+            // Calculate tilt angle
+            let rotationAngle = angle;
+
+            // Rotate numbers in the lower half of the circle (90°-270°) to avoid being upside down
+            if (angle > 90 && angle < 270) {
+                rotationAngle = angle + 180;
+            }
+            
+            text.setAttribute('transform', `rotate(${rotationAngle} ${x} ${y})`);
+
+            return text;
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            // Calculate current hour angle on a 12-hour clock
+            const currentHourAngle = ((hours % 12) + minutes / 60) * 30; // 30° per hour
+            
+            // Determine the two hours to display on the 12-hour clock
+            const currentHour12 = hours % 12;
+            const nextHour12 = (currentHour12 + 1) % 12;
+            
+            // Clear existing numbers
+            numberContainer.innerHTML = '';
+            
+            // Show one number at the hour
+            if (minutes === 0) {
+                const angle = currentHour12 * 30;
+                const number = createNumber(hours, angle, 1); // Full opacity for exact hour
+                numberContainer.appendChild(number);
+            } else {
+                // Show two numbers for non-hour times
+                const currentAngle = currentHour12 * 30;
+                const nextAngle = nextHour12 * 30;
+                
+                // Current hour number (24-hour format) with higher opacity
+                const currentNumber = createNumber(hours, currentAngle, 1); // Fully visible
+                numberContainer.appendChild(currentNumber);
+                
+                // Next hour number (24-hour format) with lower opacity
+                const nextHourValue = (hours + 1) % 24;
+                const nextNumber = createNumber(nextHourValue, nextAngle, 0.4); // Less visible
+                numberContainer.appendChild(nextNumber);
+            }
+            
+            // Rotate pointer
+            pointerGroup.style.transform = `rotate(${currentHourAngle}deg)`;
+        }
+
+        // Initialize both clocks
+        updateSweepingLine();
+        updateClock();
+
+        // Update both clocks every second
+        setInterval(() => {
+            updateSweepingLine();
+            updateClock();
+        }, 1000);
+    </script>
+</body>
+</html>
