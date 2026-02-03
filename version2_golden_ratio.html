@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>版本2: 黄金比例平衡</title>
+    <link href="https://fonts.googleapis.com/css2?family=Iceberg&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Iceberg', sans-serif;
+            overflow: hidden;
+        }
+
+        .clocks-container {
+            display: flex;
+            gap: 50px;
+            align-items: center;
+        }
+
+        .indicator-container {
+            position: relative;
+            width: 240px;
+            height: 240px;
+        }
+
+        .clock-container {
+            position: relative;
+            width: 388px;
+            height: 388px;
+        }
+
+        .indicator-container svg,
+        .clock-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .sweeping-line {
+            transition: transform 1s linear;
+        }
+
+        .time-label {
+            font-family: 'Iceberg', cursive;
+            font-size: 13px;
+        }
+
+        .pointer-group {
+            transform-origin: 194px 194px;
+            transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .hour-number {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 18px;
+            font-weight: 400;
+            font-style: normal;
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        @media (max-width: 768px) {
+            .clocks-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+            .indicator-container,
+            .clock-container {
+                transform: scale(0.75);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="clocks-container">
+        <!-- Sweeping Line Clock - 放大1.2倍 -->
+        <div class="indicator-container">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 -60 240 360">
+                <defs>
+                    <clipPath id="topHalf">
+                        <rect x="0" y="-60" width="240" height="60"/>
+                    </clipPath>
+                    <clipPath id="bottomHalf">
+                        <rect x="0" y="240" width="240" height="60"/>
+                    </clipPath>
+                    <clipPath id="containerClip">
+                        <rect x="67.95" y="0" width="103.2" height="240"/>
+                        <circle cx="120.12" cy="240" r="51.12"/>
+                    </clipPath>
+                </defs>
+                
+                <rect id="lowerFillRect" fill="#FF5D1F" x="67.95" y="0" width="103.2" height="291.12" clip-path="url(#containerClip)"/>
+                
+                <circle cx="120.12" cy="0" r="51.12" stroke="#5E5D61" stroke-width="1.8" fill="none" clip-path="url(#topHalf)"/>
+                
+                <rect fill="#5E5D61" height="240" width="1.8" x="67.95"></rect>
+                <rect fill="#5E5D61" height="1.8" width="4.3" y="8.61" x="63.65"></rect>
+                <rect fill="#5E5D61" height="1.8" width="9.6" y="56" x="58.35"></rect>
+                <rect fill="#5E5D61" height="1.8" width="4.3" y="86.1" x="63.65"></rect>
+                <rect fill="#5E5D61" height="1.8" width="9.6" y="156" x="58.35"></rect>
+                <rect fill="#5E5D61" height="1.8" width="4.3" y="172.2" x="63.65"></rect>
+                <rect fill="#5E5D61" height="1.8" width="4.3" y="237.85" x="63.65"></rect>
+                
+                <rect fill="#5E5D61" height="240" width="1.8" x="170.2"></rect>
+                <rect fill="#5E5D61" height="1.8" width="4.3" y="218.48" x="172.35"></rect>
+                <rect fill="#5E5D61" height="1.8" width="4.3" y="185.11" x="172.35"></rect>
+                <rect fill="#5E5D61" height="1.8" width="4.3" y="135.6" x="172.35"></rect>
+                <rect fill="#5E5D61" height="1.8" width="9.6" y="92" x="172.35"></rect>
+                <rect fill="#5E5D61" height="1.8" width="4.3" y="34.44" x="172.35"></rect>
+                <rect fill="#5E5D61" height="1.8" width="4.3" x="172.35"></rect>
+                
+                <circle cx="120.12" cy="240" r="51.12" stroke="#5E5D61" stroke-width="1.8" fill="none" clip-path="url(#bottomHalf)"/>
+                
+                <text id="label14s" class="time-label" x="48" y="61.2" text-anchor="end">14s</text>
+                <text id="label23s" class="time-label" x="192" y="97.2" text-anchor="start">23s</text>
+                <text id="label39s" class="time-label" x="48" y="162" text-anchor="end">39s</text>
+                
+                <rect id="sweepingLine" class="sweeping-line" fill="#FF5D1F" height="2.5" width="153.9" y="0" x="43.2"></rect>
+            </svg>
+        </div>
+
+        <!-- Hour Clock - 缩小0.97倍 -->
+        <div class="clock-container">
+            <svg width="388" height="388" viewBox="0 0 388 388" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="194" cy="194" r="96" stroke="#000000" stroke-width="2.2"/>
+                
+                <g id="numberContainer"></g>
+                
+                <g id="pointerGroup" class="pointer-group">
+                    <path d="M194.85 110.36L200.61 119.12C201.1 119.86 200.58 120.85 199.7 120.87L187.81 121.1C186.91 121.12 186.36 120.1 186.87 119.35L192.87 110.33C193.32 109.66 194.32 109.67 194.85 110.36Z" 
+                          fill="#000000"/>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        const sweepingLine = document.getElementById('sweepingLine');
+        const lowerFillRect = document.getElementById('lowerFillRect');
+        const label14s = document.getElementById('label14s');
+        const label23s = document.getElementById('label23s');
+        const label39s = document.getElementById('label39s');
+
+        function updateSweepingLine() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            
+            const yPosition = (seconds / 60) * 240;
+            sweepingLine.setAttribute('y', yPosition);
+            
+            const fillHeight = 291.12 - yPosition;
+            lowerFillRect.setAttribute('y', yPosition);
+            lowerFillRect.setAttribute('height', fillHeight);
+            
+            label14s.setAttribute('fill', seconds >= 14 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+            label23s.setAttribute('fill', seconds >= 23 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+            label39s.setAttribute('fill', seconds >= 39 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+        }
+
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const numberContainer = document.getElementById('numberContainer');
+        const pointerGroup = document.getElementById('pointerGroup');
+        
+        const centerX = 194;
+        const centerY = 194;
+        const radius = 108.5;
+        
+        function createNumber(hour, angle, opacity) {
+            const radian = (angle - 90) * Math.PI / 180;
+            const x = centerX + radius * Math.cos(radian);
+            const y = centerY + radius * Math.sin(radian);
+            
+            const text = document.createElementNS(SVG_NS, 'text');
+            text.setAttribute('class', 'hour-number');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y);
+            text.textContent = String(hour).padStart(2, '0');
+            text.setAttribute('fill', `rgba(255, 93, 31, ${opacity})`);
+            
+            let rotationAngle = angle;
+            if (angle > 90 && angle < 270) {
+                rotationAngle = angle + 180;
+            }
+            
+            text.setAttribute('transform', `rotate(${rotationAngle} ${x} ${y})`);
+            return text;
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            const currentHourAngle = ((hours % 12) + minutes / 60) * 30;
+            const currentHour12 = hours % 12;
+            const nextHour12 = (currentHour12 + 1) % 12;
+            
+            numberContainer.innerHTML = '';
+            
+            if (minutes === 0) {
+                const angle = currentHour12 * 30;
+                const number = createNumber(hours, angle, 1);
+                numberContainer.appendChild(number);
+            } else {
+                const currentAngle = currentHour12 * 30;
+                const nextAngle = nextHour12 * 30;
+                
+                const currentNumber = createNumber(hours, currentAngle, 1);
+                numberContainer.appendChild(currentNumber);
+                
+                const nextHourValue = (hours + 1) % 24;
+                const nextNumber = createNumber(nextHourValue, nextAngle, 0.4);
+                numberContainer.appendChild(nextNumber);
+            }
+            
+            pointerGroup.style.transform = `rotate(${currentHourAngle}deg)`;
+        }
+
+        updateSweepingLine();
+        updateClock();
+
+        setInterval(() => {
+            updateSweepingLine();
+            updateClock();
+        }, 1000);
+    </script>
+</body>
+</html>

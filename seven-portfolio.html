@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seven Du — Researcher & Builder</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Mono:wght@400;700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Iceberg&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ============================================
+           RAMS Design System - Personal Site
+           A tribute to Dieter Rams' Braun designs
+           ============================================ */
+        
+        :root {
+            /* === RAMS Color System - Warm Grays === */
+            --rams-white: 40 20% 98%;
+            --rams-cream: 36 18% 95%;
+            --rams-shell: 34 12% 89%;
+            --rams-shell-dark: 33 10% 83%;
+            --rams-warm-gray: 32 8% 75%;
+            --rams-mid-gray: 30 6% 58%;
+            --rams-dark-gray: 28 4% 34%;
+            --rams-charcoal: 27 3% 22%;
+            --rams-black: 24 5% 10%;
+
+            /* === RAMS Accent - Braun Orange === */
+            --rams-orange-light: 16 100% 66%;
+            --rams-orange: 16 100% 59%;
+            --rams-orange-dark: 16 85% 50%;
+            --rams-orange-glow: 16 100% 59% / 0.3;
+
+            /* === RAMS LCD Screen Colors === */
+            --rams-lcd-bg: 78 22% 76%;
+            --rams-lcd-segment: 105 20% 20%;
+            --rams-lcd-segment-off: 105 20% 20% / 0.08;
+
+            /* === Typography === */
+            --font-display: 'DM Sans', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Space Mono', 'SF Mono', monospace;
+            --font-clock: 'Iceberg', sans-serif;
+
+            /* === Radius System === */
+            --radius-device: 28px;
+            --radius-device-inner: 20px;
+            --radius-screen: 12px;
+            --radius-button: 50%;
+            --radius-md: 8px;
+            --radius-sm: 4px;
+
+            /* === Shadow System === */
+            --shadow-device: 
+                0 1px 1px hsl(var(--rams-black) / 0.02),
+                0 2px 4px hsl(var(--rams-black) / 0.03),
+                0 8px 16px hsl(var(--rams-black) / 0.04),
+                0 16px 32px hsl(var(--rams-black) / 0.05),
+                0 32px 64px hsl(var(--rams-black) / 0.06);
+
+            --shadow-button:
+                0 2px 4px hsl(var(--rams-black) / 0.15),
+                0 4px 8px hsl(var(--rams-black) / 0.1),
+                0 1px 0 hsl(var(--rams-white) / 0.3) inset;
+
+            --shadow-button-pressed:
+                0 1px 2px hsl(var(--rams-black) / 0.1) inset,
+                0 2px 4px hsl(var(--rams-black) / 0.05);
+
+            --shadow-inset-screen:
+                0 2px 4px hsl(var(--rams-black) / 0.08) inset,
+                0 0 0 1px hsl(var(--rams-black) / 0.05) inset;
+        }
+
+        /* === Reset & Base === */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-display);
+            background-color: hsl(var(--rams-cream));
+            color: hsl(var(--rams-black));
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ============================================
+           MAIN DEVICE SHELL - The entire page as one device
+           ============================================ */
+        
+        .main-device {
+            position: relative;
+            min-height: 100vh;
+            background: linear-gradient(
+                175deg,
+                hsl(var(--rams-shell)) 0%,
+                hsl(var(--rams-shell-dark)) 50%,
+                hsl(var(--rams-cream)) 100%
+            );
+        }
+
+        .main-device::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(
+                90deg,
+                hsl(var(--rams-white) / 0.6) 0%,
+                hsl(var(--rams-white) / 0.3) 50%,
+                hsl(var(--rams-black) / 0.05) 100%
+            );
+            z-index: 1000;
+        }
+
+        /* === Fixed Navigation Knob === */
+        .nav-knob {
+            position: fixed;
+            top: 32px;
+            left: 32px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .knob-container {
+            position: relative;
+            width: 56px;
+            height: 56px;
+        }
+
+        .rams-knob {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(
+                145deg,
+                hsl(var(--rams-orange-light)) 0%,
+                hsl(var(--rams-orange)) 50%,
+                hsl(var(--rams-orange-dark)) 100%
+            );
+            box-shadow: var(--shadow-button);
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            position: relative;
+        }
+
+        .rams-knob::before {
+            content: '';
+            position: absolute;
+            top: 8%;
+            left: 15%;
+            width: 70%;
+            height: 35%;
+            background: linear-gradient(
+                180deg,
+                hsl(var(--rams-white) / 0.4) 0%,
+                hsl(var(--rams-white) / 0) 100%
+            );
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .knob-indicator {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 14px;
+            background: hsl(var(--rams-white) / 0.9);
+            border-radius: 2px;
+        }
+
+        .nav-brand {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.1em;
+            color: hsl(var(--rams-black));
+            text-transform: uppercase;
+        }
+
+        /* === Timer Toggle (replacing dark mode) === */
+        .timer-toggle {
+            position: fixed;
+            top: 32px;
+            right: 32px;
+            z-index: 1000;
+        }
+
+        .timer-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .mini-timer {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* === Main Content === */
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 120px 48px 80px;
+        }
+
+        /* === Hero Section === */
+        .hero-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+            align-items: start;
+            min-height: 70vh;
+            padding-top: 40px;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .greeting-text {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 4rem;
+            line-height: 1.1;
+            color: hsl(var(--rams-black));
+        }
+
+        .greeting-sub {
+            font-family: var(--font-display);
+            font-weight: 400;
+            font-style: italic;
+            font-size: 2.5rem;
+            color: hsl(var(--rams-mid-gray));
+            margin-top: -12px;
+        }
+
+        /* === Bio Card (LCD Screen Style) === */
+        .bio-device {
+            position: relative;
+            background: linear-gradient(
+                145deg,
+                hsl(var(--rams-shell)) 0%,
+                hsl(var(--rams-shell-dark)) 100%
+            );
+            border-radius: var(--radius-device);
+            box-shadow: var(--shadow-device);
+            padding: 24px;
+            overflow: visible;
+        }
+
+        .bio-device::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(
+                145deg,
+                hsl(var(--rams-white) / 0.6) 0%,
+                hsl(var(--rams-white) / 0.15) 50%,
+                hsl(var(--rams-black) / 0.08) 100%
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .bio-screen {
+            background-color: hsl(var(--rams-lcd-bg));
+            border-radius: var(--radius-screen);
+            box-shadow: var(--shadow-inset-screen);
+            padding: 28px;
+            position: relative;
+        }
+
+        .bio-screen::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                hsl(var(--rams-black) / 0.02) 2px,
+                hsl(var(--rams-black) / 0.02) 4px
+            );
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .bio-name {
+            font-family: var(--font-mono);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: hsl(var(--rams-lcd-segment));
+            letter-spacing: 0.05em;
+            margin-bottom: 4px;
+        }
+
+        .bio-title {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            color: hsl(var(--rams-lcd-segment) / 0.7);
+            margin-bottom: 16px;
+        }
+
+        .bio-description {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            color: hsl(var(--rams-lcd-segment) / 0.8);
+            line-height: 1.6;
+        }
+
+        .bio-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 16px;
+            padding-top: 12px;
+        }
+
+        .bio-brand {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.15em;
+            color: hsl(var(--rams-black));
+            text-transform: uppercase;
+        }
+
+        .bio-model {
+            font-family: var(--font-display);
+            font-size: 11px;
+            color: hsl(var(--rams-mid-gray));
+            letter-spacing: 0.05em;
+        }
+
+        /* === Hero Right - Clock === */
+        .hero-right {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 20px;
+        }
+
+        .clock-device {
+            position: relative;
+            background: linear-gradient(
+                145deg,
+                hsl(var(--rams-shell)) 0%,
+                hsl(var(--rams-shell-dark)) 100%
+            );
+            border-radius: var(--radius-device);
+            box-shadow: var(--shadow-device);
+            padding: 24px;
+        }
+
+        .clock-device::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(
+                145deg,
+                hsl(var(--rams-white) / 0.6) 0%,
+                hsl(var(--rams-white) / 0.15) 50%,
+                hsl(var(--rams-black) / 0.08) 100%
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .clock-side-switch {
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 12px;
+            height: 60px;
+            border-radius: 6px 0 0 6px;
+            background: linear-gradient(
+                180deg,
+                hsl(var(--rams-orange-light)) 0%,
+                hsl(var(--rams-orange)) 50%,
+                hsl(var(--rams-orange-dark)) 100%
+            );
+            box-shadow: 
+                -2px 0 4px hsl(var(--rams-black) / 0.15),
+                inset 1px 0 0 hsl(var(--rams-white) / 0.3);
+        }
+
+        .clocks-container {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        /* Sweeping Line Clock */
+        .indicator-container {
+            position: relative;
+            width: 180px;
+            height: 180px;
+        }
+
+        .indicator-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .time-label {
+            font-family: var(--font-clock);
+            font-size: 13px;
+        }
+
+        /* Hour Clock */
+        .hour-clock-container {
+            position: relative;
+            width: 290px;
+            height: 290px;
+        }
+
+        .hour-clock-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .pointer-group {
+            transform-origin: 145px 145px;
+            transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .hour-number {
+            font-family: var(--font-clock);
+            font-size: 14px;
+            font-weight: 400;
+            text-anchor: middle;
+        }
+
+        .clock-bottom-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-top: 16px;
+            padding-top: 8px;
+        }
+
+        /* ============================================
+           BENTO GRID SECTION
+           ============================================ */
+        
+        .bento-section {
+            margin-top: 80px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.2em;
+            color: hsl(var(--rams-black));
+            text-transform: uppercase;
+        }
+
+        .section-line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(
+                90deg,
+                hsl(var(--rams-orange) / 0.8) 0%,
+                hsl(var(--rams-orange) / 0.3) 50%,
+                hsl(var(--rams-orange) / 0.1) 100%
+            );
+        }
+
+        .section-counter {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: hsl(var(--rams-mid-gray));
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .bento-item {
+            position: relative;
+            background: linear-gradient(
+                145deg,
+                hsl(var(--rams-shell)) 0%,
+                hsl(var(--rams-shell-dark)) 100%
+            );
+            border-radius: var(--radius-device);
+            box-shadow: var(--shadow-device);
+            overflow: hidden;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+        }
+
+        .bento-item::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(
+                145deg,
+                hsl(var(--rams-white) / 0.6) 0%,
+                hsl(var(--rams-white) / 0.15) 50%,
+                hsl(var(--rams-black) / 0.08) 100%
+            );
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .bento-item:hover {
+            transform: translateY(-4px);
+        }
+
+        .bento-item--2x1 { grid-column: span 2; }
+        .bento-item--1x2 { grid-row: span 2; }
+        .bento-item--2x2 { grid-column: span 2; grid-row: span 2; }
+
+        /* === Philosophy Device (Bento) === */
+        .philosophy-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 24px;
+            min-height: 280px;
+        }
+
+        .philosophy-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .philosophy-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .philosophy-screen {
+            background-color: hsl(var(--rams-lcd-bg));
+            border-radius: var(--radius-screen);
+            box-shadow: var(--shadow-inset-screen);
+            padding: 24px;
+            position: relative;
+        }
+
+        .philosophy-screen::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                hsl(var(--rams-black) / 0.02) 2px,
+                hsl(var(--rams-black) / 0.02) 4px
+            );
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .philosophy-title {
+            font-family: var(--font-mono);
+            font-size: 2rem;
+            font-weight: 700;
+            color: hsl(var(--rams-lcd-segment));
+            line-height: 1.1;
+        }
+
+        .philosophy-text {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            color: hsl(var(--rams-lcd-segment) / 0.7);
+            line-height: 1.5;
+            margin-top: 12px;
+        }
+
+        .philosophy-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .rams-control-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: linear-gradient(to bottom, hsl(var(--rams-shell)), hsl(var(--rams-shell-dark)));
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.5);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.1s ease;
+        }
+
+        .rams-control-btn:hover {
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+
+        .rams-control-btn:active {
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .rams-control-btn svg {
+            width: 12px;
+            height: 12px;
+            fill: none;
+            stroke: hsl(var(--rams-dark-gray));
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .progress-indicators {
+            display: flex;
+            gap: 6px;
+        }
+
+        .progress-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .progress-dot--active {
+            background: hsl(var(--rams-orange));
+            box-shadow: 0 0 6px hsl(var(--rams-orange) / 0.6);
+        }
+
+        .progress-dot--inactive {
+            background: hsl(var(--rams-warm-gray));
+        }
+
+        /* === Camera Device (Bento) === */
+        .camera-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 24px;
+            min-height: 350px;
+        }
+
+        .camera-top {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        .camera-bottom {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .rams-btn-physical {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: linear-gradient(
+                145deg,
+                hsl(var(--rams-orange-light)) 0%,
+                hsl(var(--rams-orange)) 50%,
+                hsl(var(--rams-orange-dark)) 100%
+            );
+            box-shadow: var(--shadow-button);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .rams-btn-physical::before {
+            content: '';
+            position: absolute;
+            top: 8%;
+            left: 15%;
+            width: 70%;
+            height: 35%;
+            background: linear-gradient(
+                180deg,
+                hsl(var(--rams-white) / 0.4) 0%,
+                hsl(var(--rams-white) / 0) 100%
+            );
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .rams-btn-physical:hover {
+            transform: translateY(-1px);
+        }
+
+        .rams-btn-physical:active {
+            transform: translateY(1px);
+            box-shadow: var(--shadow-button-pressed);
+        }
+
+        .rams-btn-physical--sm {
+            width: 36px;
+            height: 36px;
+        }
+
+        .viewfinder {
+            width: 36px;
+            height: 27px;
+            border-radius: var(--radius-sm);
+            background: linear-gradient(135deg, hsl(var(--rams-dark-gray)), hsl(var(--rams-charcoal)));
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .viewfinder::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: hsl(var(--rams-white) / 0.2);
+            transform: translateX(-50%);
+        }
+
+        .viewfinder::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: hsl(var(--rams-white) / 0.2);
+            transform: translateY(-50%);
+        }
+
+        .lens-container {
+            width: 100px;
+            height: 100px;
+            position: relative;
+            border-radius: 50%;
+        }
+
+        .lens-outer {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            background: linear-gradient(135deg, hsl(var(--rams-shell)), hsl(var(--rams-warm-gray)));
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.4);
+        }
+
+        .lens-middle {
+            position: absolute;
+            inset: 12px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, hsl(var(--rams-dark-gray)), hsl(var(--rams-charcoal)));
+        }
+
+        .lens-inner {
+            position: absolute;
+            inset: 22px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, hsl(var(--rams-charcoal)), #1a1a2e, hsl(var(--rams-black)));
+        }
+
+        .lens-reflection {
+            position: absolute;
+            top: 15%;
+            left: 15%;
+            width: 40%;
+            height: 40%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+        }
+
+        .lens-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: hsl(var(--rams-orange) / 0.8);
+            animation: pulse-orange 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse-orange {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        .rams-brand {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: hsl(var(--rams-black));
+        }
+
+        .rams-label {
+            font-family: var(--font-display);
+            font-weight: 400;
+            font-size: 11px;
+            text-transform: lowercase;
+            letter-spacing: 0.05em;
+            color: hsl(var(--rams-mid-gray));
+        }
+
+        /* === Contact Device (Bento) === */
+        .contact-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 180px;
+            padding: 24px;
+        }
+
+        .contact-side-switch {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 40px;
+            border-radius: 0 4px 4px 0;
+            background: linear-gradient(
+                180deg,
+                hsl(var(--rams-orange-light)) 0%,
+                hsl(var(--rams-orange)) 50%,
+                hsl(var(--rams-orange-dark)) 100%
+            );
+            box-shadow: 
+                1px 0 2px hsl(var(--rams-black) / 0.1),
+                inset -1px 0 0 hsl(var(--rams-white) / 0.2);
+        }
+
+        .contact-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .contact-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .rams-btn-physical--gray {
+            background: linear-gradient(
+                145deg,
+                hsl(var(--rams-warm-gray)) 0%,
+                hsl(var(--rams-shell-dark)) 100%
+            );
+        }
+
+        .contact-btn-icon {
+            width: 14px;
+            height: 14px;
+            fill: none;
+            stroke: hsl(var(--rams-dark-gray));
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .device-label {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-top: auto;
+            padding-top: 16px;
+        }
+
+        /* === Works Device (Bento) === */
+        .works-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 24px;
+            min-height: 320px;
+        }
+
+        .works-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .works-content {
+            flex: 1;
+            display: flex;
+            gap: 16px;
+        }
+
+        .timeline-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .timeline-btn {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            padding: 4px 8px;
+            border: none;
+            background: transparent;
+            color: hsl(var(--rams-mid-gray));
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.15s ease;
+        }
+
+        .timeline-btn--active {
+            background: hsl(var(--rams-orange));
+            color: white;
+        }
+
+        .timeline-btn--inactive:hover {
+            background: hsl(var(--rams-shell-dark));
+        }
+
+        .detail-panel {
+            flex: 1;
+            background-color: hsl(var(--rams-lcd-bg));
+            border-radius: var(--radius-screen);
+            box-shadow: var(--shadow-inset-screen);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .detail-panel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                hsl(var(--rams-black) / 0.02) 2px,
+                hsl(var(--rams-black) / 0.02) 4px
+            );
+            pointer-events: none;
+            border-radius: inherit;
+        }
+
+        .detail-header {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .detail-year {
+            font-family: var(--font-mono);
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: hsl(var(--rams-lcd-segment));
+        }
+
+        .detail-title {
+            font-family: var(--font-mono);
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: hsl(var(--rams-lcd-segment));
+            margin-bottom: 8px;
+        }
+
+        .detail-description {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: hsl(var(--rams-lcd-segment) / 0.8);
+            line-height: 1.5;
+        }
+
+        .detail-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        /* === Speaker Grille (Bento) === */
+        .grille-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            min-height: 250px;
+        }
+
+        .grille-area {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 4px;
+            padding: 12px;
+        }
+
+        .grille-hole {
+            aspect-ratio: 1;
+            background: hsl(var(--rams-charcoal));
+            border-radius: 2px;
+        }
+
+        /* === Footer === */
+        .footer-section {
+            margin-top: 80px;
+            padding: 40px 0;
+            border-top: 1px solid hsl(var(--rams-shell-dark));
+            text-align: center;
+        }
+
+        .footer-text {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: hsl(var(--rams-mid-gray));
+        }
+
+        .footer-quote {
+            font-family: var(--font-display);
+            font-style: italic;
+            font-size: 14px;
+            color: hsl(var(--rams-dark-gray));
+            margin-top: 8px;
+        }
+
+        /* === Responsive === */
+        @media (max-width: 1024px) {
+            .hero-section {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-knob {
+                top: 20px;
+                left: 20px;
+            }
+
+            .timer-toggle {
+                top: 20px;
+                right: 20px;
+            }
+
+            .content-wrapper {
+                padding: 100px 24px 60px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bento-item--2x1,
+            .bento-item--2x2 {
+                grid-column: span 1;
+            }
+
+            .greeting-text {
+                font-size: 2.5rem;
+            }
+
+            .greeting-sub {
+                font-size: 1.5rem;
+            }
+
+            .clocks-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .hour-clock-container {
+                width: 220px;
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-device">
+        <!-- Navigation Knob -->
+        <div class="nav-knob">
+            <div class="knob-container">
+                <div class="rams-knob" id="nav-knob">
+                    <div class="knob-indicator"></div>
+                </div>
+            </div>
+            <span class="nav-brand">SEVEN</span>
+        </div>
+
+        <!-- Timer Toggle (right side) -->
+        <div class="timer-toggle">
+            <div class="timer-container">
+                <div class="mini-timer">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 -45 180 270">
+                        <defs>
+                            <clipPath id="topHalfMini">
+                                <rect x="0" y="-45" width="180" height="45"/>
+                            </clipPath>
+                            <clipPath id="bottomHalfMini">
+                                <rect x="0" y="180" width="180" height="45"/>
+                            </clipPath>
+                            <clipPath id="containerClipMini">
+                                <rect x="51" y="0" width="78" height="180"/>
+                                <circle cx="90" cy="180" r="38"/>
+                            </clipPath>
+                        </defs>
+                        
+                        <rect id="miniLowerFillRect" fill="#FF5D1F" x="51" y="0" width="78" height="218" clip-path="url(#containerClipMini)"/>
+                        
+                        <circle cx="90" cy="0" r="38" stroke="#5E5D61" stroke-width="1.4" fill="none" clip-path="url(#topHalfMini)"/>
+                        
+                        <rect fill="#5E5D61" height="180" width="1.4" x="51"></rect>
+                        <rect fill="#5E5D61" height="180" width="1.4" x="127.7"></rect>
+                        
+                        <circle cx="90" cy="180" r="38" stroke="#5E5D61" stroke-width="1.4" fill="none" clip-path="url(#bottomHalfMini)"/>
+                        
+                        <rect id="miniSweepingLine" fill="#FF5D1F" height="2" width="115" y="0" x="32"></rect>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content-wrapper">
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-left">
+                    <div>
+                        <h1 class="greeting-text" id="greeting-text">Morning,</h1>
+                        <p class="greeting-sub">this is</p>
+                    </div>
+                    
+                    <!-- Bio Device -->
+                    <div class="bio-device">
+                        <div class="bio-screen">
+                            <div class="bio-name">Seven Du</div>
+                            <div class="bio-title">Researcher & Builder</div>
+                            <p class="bio-description">
+                                Exploring the intersection of complex systems, scientific discovery, and human potential. Currently building at the frontier of AI and entrepreneurship.
+                            </p>
+                        </div>
+                        <div class="bio-label">
+                            <span class="bio-brand">SPARK LAB</span>
+                            <span class="bio-model">profile 1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-right">
+                    <!-- Clock Device -->
+                    <div class="clock-device">
+                        <div class="clock-side-switch"></div>
+                        <div class="clocks-container">
+                            <!-- Sweeping Line Clock -->
+                            <div class="indicator-container">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 -45 180 270">
+                                    <defs>
+                                        <clipPath id="topHalf">
+                                            <rect x="0" y="-45" width="180" height="45"/>
+                                        </clipPath>
+                                        <clipPath id="bottomHalf">
+                                            <rect x="0" y="180" width="180" height="45"/>
+                                        </clipPath>
+                                        <clipPath id="containerClip">
+                                            <rect x="51" y="0" width="78" height="180"/>
+                                            <circle cx="90" cy="180" r="38"/>
+                                        </clipPath>
+                                    </defs>
+                                    
+                                    <rect id="lowerFillRect" fill="#FF5D1F" x="51" y="0" width="78" height="218" clip-path="url(#containerClip)"/>
+                                    
+                                    <circle cx="90" cy="0" r="38" stroke="#5E5D61" stroke-width="1.4" fill="none" clip-path="url(#topHalf)"/>
+                                    
+                                    <rect fill="#5E5D61" height="180" width="1.4" x="51"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="3.2" y="6.5" x="47.8"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="7.2" y="42" x="43.8"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="3.2" y="64.5" x="47.8"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="7.2" y="117" x="43.8"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="3.2" y="129" x="47.8"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="3.2" y="178.4" x="47.8"></rect>
+                                    
+                                    <rect fill="#5E5D61" height="180" width="1.4" x="127.7"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="3.2" y="163.9" x="129"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="3.2" y="139" x="129"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="3.2" y="102" x="129"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="7.2" y="69" x="129"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="3.2" y="26" x="129"></rect>
+                                    <rect fill="#5E5D61" height="1.4" width="3.2" x="129"></rect>
+                                    
+                                    <circle cx="90" cy="180" r="38" stroke="#5E5D61" stroke-width="1.4" fill="none" clip-path="url(#bottomHalf)"/>
+                                    
+                                    <text id="label14s" class="time-label" x="36" y="46" text-anchor="end" fill="rgba(255, 93, 31, 1)">14s</text>
+                                    <text id="label23s" class="time-label" x="144" y="73" text-anchor="start" fill="rgba(255, 93, 31, 1)">23s</text>
+                                    <text id="label39s" class="time-label" x="36" y="122" text-anchor="end" fill="rgba(255, 93, 31, 1)">39s</text>
+                                    
+                                    <rect id="sweepingLine" fill="#FF5D1F" height="2" width="115" y="0" x="32"></rect>
+                                </svg>
+                            </div>
+
+                            <!-- Hour Clock -->
+                            <div class="hour-clock-container">
+                                <svg width="290" height="290" viewBox="0 0 290 290" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="145" cy="145" r="72" stroke="#000000" stroke-width="1.8"/>
+                                    
+                                    <g id="numberContainer"></g>
+                                    
+                                    <g id="pointerGroup" class="pointer-group">
+                                        <path d="M145.64 82.77L150.46 89.34C150.83 89.89 150.44 90.64 149.78 90.65L140.86 90.83C140.18 90.84 139.77 90.08 140.15 89.51L145.15 82.74C145.49 82.24 146.24 82.25 146.64 82.77Z" 
+                                              fill="#000000"/>
+                                    </g>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="clock-bottom-label">
+                            <span class="rams-brand">TIME</span>
+                            <span class="rams-label">golden ratio 1</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bento Grid Section -->
+            <section class="bento-section">
+                <div class="section-header">
+                    <span class="section-title">MODULES</span>
+                    <div class="section-line"></div>
+                    <span class="section-counter">6 items</span>
+                </div>
+
+                <div class="bento-grid">
+                    <!-- Philosophy Device - 2x1 -->
+                    <div class="bento-item bento-item--2x1">
+                        <div class="philosophy-container">
+                            <div class="philosophy-header">
+                                <span class="rams-brand" style="font-size: 12px;">PHILOSOPHY</span>
+                                <div class="section-line"></div>
+                                <span class="rams-label" id="philosophy-counter">01/05</span>
+                            </div>
+
+                            <div class="philosophy-content">
+                                <div class="philosophy-screen">
+                                    <span class="philosophy-title" id="philosophy-title">Focus</span>
+                                    <p class="philosophy-text" id="philosophy-text">
+                                        Deciding what not to do is as important as deciding what to do.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="philosophy-nav">
+                                <div class="nav-controls">
+                                    <button class="rams-control-btn" onclick="previousPhilosophy()">
+                                        <svg viewBox="0 0 24 24">
+                                            <polyline points="15,18 9,12 15,6"></polyline>
+                                        </svg>
+                                    </button>
+                                    <button class="rams-control-btn" onclick="nextPhilosophy()">
+                                        <svg viewBox="0 0 24 24">
+                                            <polyline points="9,18 15,12 9,6"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <div class="progress-indicators">
+                                    <button class="progress-dot progress-dot--active" onclick="selectPhilosophy(0)" data-index="0"></button>
+                                    <button class="progress-dot progress-dot--inactive" onclick="selectPhilosophy(1)" data-index="1"></button>
+                                    <button class="progress-dot progress-dot--inactive" onclick="selectPhilosophy(2)" data-index="2"></button>
+                                    <button class="progress-dot progress-dot--inactive" onclick="selectPhilosophy(3)" data-index="3"></button>
+                                    <button class="progress-dot progress-dot--inactive" onclick="selectPhilosophy(4)" data-index="4"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Camera Device - 1x2 -->
+                    <div class="bento-item bento-item--1x2">
+                        <div class="camera-container">
+                            <div class="camera-top">
+                                <button class="rams-btn-physical rams-btn-physical--sm" onclick="handleShutterClick(event)">
+                                </button>
+                                <div class="viewfinder"></div>
+                            </div>
+
+                            <div class="lens-container">
+                                <div class="lens-outer"></div>
+                                <div class="lens-middle"></div>
+                                <div class="lens-inner">
+                                    <div class="lens-reflection"></div>
+                                    <div class="lens-center"></div>
+                                </div>
+                            </div>
+
+                            <div class="camera-bottom">
+                                <span class="rams-brand">VISION</span>
+                                <span class="rams-label">perspective 1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Device -->
+                    <div class="bento-item">
+                        <div class="contact-container">
+                            <div class="contact-side-switch"></div>
+                            
+                            <div class="contact-content">
+                                <h3 class="rams-brand" style="font-size: 14px;">Contact</h3>
+                                
+                                <div class="contact-buttons">
+                                    <a href="mailto:seven@sparklab.co" class="rams-btn-physical rams-btn-physical--sm rams-btn-physical--gray">
+                                        <svg class="contact-btn-icon" viewBox="0 0 24 24">
+                                            <path d="m4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2h-16c-1.1 0-2-.9-2-2v-12c0-1.1.9-2 2-2z"></path>
+                                            <polyline points="22,6 12,13 2,6"></polyline>
+                                        </svg>
+                                    </a>
+                                    
+                                    <a href="https://github.com/sevendu" target="_blank" rel="noopener noreferrer" class="rams-btn-physical rams-btn-physical--sm rams-btn-physical--gray">
+                                        <svg class="contact-btn-icon" viewBox="0 0 24 24">
+                                            <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path>
+                                            <path d="M9 18c-4.51 2-5-2-7-2"></path>
+                                        </svg>
+                                    </a>
+                                    
+                                    <a href="https://twitter.com/sevendu" target="_blank" rel="noopener noreferrer" class="rams-btn-physical rams-btn-physical--sm rams-btn-physical--gray">
+                                        <svg class="contact-btn-icon" viewBox="0 0 24 24">
+                                            <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="device-label">
+                                <span class="rams-brand" style="font-size: 11px;">CONNECT</span>
+                                <span class="rams-label">link 1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Works Device - 2x2 -->
+                    <div class="bento-item bento-item--2x2">
+                        <div class="works-container">
+                            <div class="works-header">
+                                <span class="rams-brand" style="font-size: 12px;">WORKS</span>
+                                <div class="section-line"></div>
+                                <span class="rams-label">6 entries</span>
+                            </div>
+
+                            <div class="works-content">
+                                <div class="timeline-controls">
+                                    <button class="rams-control-btn" onclick="navigateWorkUp()">
+                                        <svg viewBox="0 0 24 24">
+                                            <polyline points="18,15 12,9 6,15"></polyline>
+                                        </svg>
+                                    </button>
+                                    
+                                    <div class="timeline-list">
+                                        <button class="timeline-btn timeline-btn--active" data-index="0" onclick="selectWork(0)">2024</button>
+                                        <button class="timeline-btn timeline-btn--inactive" data-index="1" onclick="selectWork(1)">2023</button>
+                                        <button class="timeline-btn timeline-btn--inactive" data-index="2" onclick="selectWork(2)">2022</button>
+                                        <button class="timeline-btn timeline-btn--inactive" data-index="3" onclick="selectWork(3)">2021</button>
+                                        <button class="timeline-btn timeline-btn--inactive" data-index="4" onclick="selectWork(4)">2020</button>
+                                        <button class="timeline-btn timeline-btn--inactive" data-index="5" onclick="selectWork(5)">2019</button>
+                                    </div>
+
+                                    <button class="rams-control-btn" onclick="navigateWorkDown()">
+                                        <svg viewBox="0 0 24 24">
+                                            <polyline points="6,9 12,15 18,9"></polyline>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="detail-panel">
+                                    <div>
+                                        <div class="detail-header">
+                                            <span class="detail-year" id="work-year">2024</span>
+                                            <span style="font-family: var(--font-mono); font-size: 12px; color: hsl(var(--rams-lcd-segment) / 0.6);">—</span>
+                                        </div>
+                                        <span class="detail-title" id="work-title">Spark Lab</span>
+                                        <p class="detail-description" id="work-description">
+                                            Building the next generation of young founders. Co-builders first, investors second.
+                                        </p>
+                                    </div>
+
+                                    <div class="detail-actions">
+                                        <button class="rams-btn-physical rams-btn-physical--sm" onclick="openWork()">
+                                            <svg style="width: 14px; height: 14px; fill: none; stroke: white; stroke-width: 2;" viewBox="0 0 24 24">
+                                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                                <polyline points="15,3 21,3 21,9"></polyline>
+                                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Speaker Grille -->
+                    <div class="bento-item">
+                        <div class="grille-container">
+                            <div class="grille-area" id="grille-area">
+                                <!-- Generated by JS -->
+                            </div>
+                            <div class="device-label">
+                                <span class="rams-brand" style="font-size: 11px;">SIGNAL</span>
+                                <span class="rams-label">speaker 1</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer -->
+            <footer class="footer-section">
+                <p class="footer-text">© 2024 Seven Du — Built with precision</p>
+                <p class="footer-quote">"Weniger, aber besser" — Less, but better.</p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // GREETING BASED ON TIME
+        // ============================================
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const greetingEl = document.getElementById('greeting-text');
+            
+            if (hour >= 5 && hour < 12) {
+                greetingEl.textContent = 'Morning,';
+            } else if (hour >= 12 && hour < 17) {
+                greetingEl.textContent = 'Afternoon,';
+            } else if (hour >= 17 && hour < 21) {
+                greetingEl.textContent = 'Evening,';
+            } else {
+                greetingEl.textContent = 'Night,';
+            }
+        }
+        updateGreeting();
+
+        // ============================================
+        // NAVIGATION KNOB - Rotates with scroll
+        // ============================================
+        const navKnob = document.getElementById('nav-knob');
+        
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = scrollTop / docHeight;
+            const rotation = scrollPercent * 360;
+            
+            navKnob.style.transform = `rotate(${rotation}deg)`;
+        });
+
+        // ============================================
+        // SWEEPING LINE CLOCK
+        // ============================================
+        const sweepingLine = document.getElementById('sweepingLine');
+        const lowerFillRect = document.getElementById('lowerFillRect');
+        const label14s = document.getElementById('label14s');
+        const label23s = document.getElementById('label23s');
+        const label39s = document.getElementById('label39s');
+        
+        // Mini timer
+        const miniSweepingLine = document.getElementById('miniSweepingLine');
+        const miniLowerFillRect = document.getElementById('miniLowerFillRect');
+
+        function updateSweepingLine() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            
+            // Main clock
+            const yPosition = (seconds / 60) * 180;
+            sweepingLine.setAttribute('y', yPosition);
+            
+            const fillHeight = 218 - yPosition;
+            lowerFillRect.setAttribute('y', yPosition);
+            lowerFillRect.setAttribute('height', fillHeight);
+            
+            label14s.setAttribute('fill', seconds >= 14 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+            label23s.setAttribute('fill', seconds >= 23 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+            label39s.setAttribute('fill', seconds >= 39 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+            
+            // Mini timer
+            miniSweepingLine.setAttribute('y', yPosition);
+            miniLowerFillRect.setAttribute('y', yPosition);
+            miniLowerFillRect.setAttribute('height', fillHeight);
+        }
+
+        // ============================================
+        // HOUR CLOCK
+        // ============================================
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const numberContainer = document.getElementById('numberContainer');
+        const pointerGroup = document.getElementById('pointerGroup');
+        
+        const centerX = 145;
+        const centerY = 145;
+        const radius = 81;
+        
+        function createNumber(hour, angle, opacity, showH = false) {
+            const radian = (angle - 90) * Math.PI / 180;
+            const x = centerX + radius * Math.cos(radian);
+            const y = centerY + radius * Math.sin(radian);
+            
+            const text = document.createElementNS(SVG_NS, 'text');
+            text.setAttribute('class', 'hour-number');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y);
+            text.setAttribute('fill', `rgba(255, 93, 31, ${opacity})`);
+            text.setAttribute('dominant-baseline', 'alphabetic');
+            
+            const numberSpan = document.createElementNS(SVG_NS, 'tspan');
+            numberSpan.textContent = String(hour).padStart(2, '0');
+            numberSpan.setAttribute('font-size', '14');
+            
+            text.appendChild(numberSpan);
+            
+            if (showH) {
+                const hSpan = document.createElementNS(SVG_NS, 'tspan');
+                hSpan.textContent = 'h';
+                hSpan.setAttribute('font-size', '11');
+                text.appendChild(hSpan);
+            }
+            
+            let rotationAngle = angle;
+            if (angle > 90 && angle < 270) {
+                rotationAngle = angle + 180;
+            }
+            
+            text.setAttribute('transform', `rotate(${rotationAngle} ${x} ${y})`);
+            return text;
+        }
+        
+        function updateHourClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            const currentHourAngle = ((hours % 12) + minutes / 60) * 30;
+            const currentHour12 = hours % 12;
+            const nextHour12 = (currentHour12 + 1) % 12;
+            
+            numberContainer.innerHTML = '';
+            
+            if (minutes === 0) {
+                const angle = currentHour12 * 30;
+                const number = createNumber(hours, angle, 1, false);
+                numberContainer.appendChild(number);
+            } else {
+                const currentAngle = currentHour12 * 30;
+                const nextAngle = nextHour12 * 30;
+                
+                const currentNumber = createNumber(hours, currentAngle, 1, false);
+                numberContainer.appendChild(currentNumber);
+                
+                const nextHourValue = (hours + 1) % 24;
+                const nextNumber = createNumber(nextHourValue, nextAngle, 0.4, true);
+                numberContainer.appendChild(nextNumber);
+            }
+            
+            pointerGroup.style.transform = `rotate(${currentHourAngle}deg)`;
+        }
+
+        // Initialize clocks
+        updateSweepingLine();
+        updateHourClock();
+        setInterval(() => {
+            updateSweepingLine();
+            updateHourClock();
+        }, 1000);
+
+        // ============================================
+        // PHILOSOPHY DEVICE
+        // ============================================
+        const philosophies = [
+            {
+                id: '01',
+                title: 'Focus',
+                text: 'Deciding what not to do is as important as deciding what to do.',
+            },
+            {
+                id: '02', 
+                title: 'Simplicity',
+                text: 'Simple can be harder than complex. You have to work hard to get your thinking clean.',
+            },
+            {
+                id: '03',
+                title: 'Design',
+                text: 'Design is not just what it looks like. Design is how it works.',
+            },
+            {
+                id: '04',
+                title: 'Quality',
+                text: 'Be a yardstick of quality. Some people aren\'t used to excellence.',
+            },
+            {
+                id: '05',
+                title: 'Connection',
+                text: 'Creativity is just connecting things. The broader one\'s understanding, the better.',
+            },
+        ];
+
+        let philosophyIndex = 0;
+
+        function updatePhilosophyDisplay() {
+            const philosophy = philosophies[philosophyIndex];
+            
+            document.getElementById('philosophy-title').textContent = philosophy.title;
+            document.getElementById('philosophy-text').textContent = philosophy.text;
+            document.getElementById('philosophy-counter').textContent = `${philosophy.id}/${philosophies.length.toString().padStart(2, '0')}`;
+
+            const dots = document.querySelectorAll('.progress-dot');
+            dots.forEach((dot, index) => {
+                dot.className = index === philosophyIndex ? 'progress-dot progress-dot--active' : 'progress-dot progress-dot--inactive';
+            });
+        }
+
+        function selectPhilosophy(index) {
+            philosophyIndex = index;
+            updatePhilosophyDisplay();
+        }
+
+        function previousPhilosophy() {
+            philosophyIndex = (philosophyIndex - 1 + philosophies.length) % philosophies.length;
+            updatePhilosophyDisplay();
+        }
+
+        function nextPhilosophy() {
+            philosophyIndex = (philosophyIndex + 1) % philosophies.length;
+            updatePhilosophyDisplay();
+        }
+
+        // ============================================
+        // WORKS DEVICE
+        // ============================================
+        const works = [
+            {
+                year: '2024',
+                title: 'Spark Lab',
+                description: 'Building the next generation of young founders. Co-builders first, investors second.',
+                link: '#',
+            },
+            {
+                year: '2023',
+                title: 'AI Research',
+                description: 'Exploring transformer architectures for financial prediction and complex systems modeling.',
+                link: '#',
+            },
+            {
+                year: '2022',
+                title: 'Quant Systems',
+                description: 'Developing algorithmic trading strategies with machine learning and technical analysis.',
+                link: '#',
+            },
+            {
+                year: '2021',
+                title: 'Hardware Projects',
+                description: 'Arduino and ESP32 experiments bridging physical computing with digital interfaces.',
+                link: '#',
+            },
+            {
+                year: '2020',
+                title: 'Web Development',
+                description: 'Building interactive experiences with modern frontend technologies and animation.',
+                link: '#',
+            },
+            {
+                year: '2019',
+                title: 'Early Explorations',
+                description: 'First steps into programming, design systems, and computational thinking.',
+                link: '#',
+            },
+        ];
+
+        let workIndex = 0;
+
+        function updateWorkDisplay() {
+            const work = works[workIndex];
+            
+            document.getElementById('work-year').textContent = work.year;
+            document.getElementById('work-title').textContent = work.title;
+            document.getElementById('work-description').textContent = work.description;
+
+            const buttons = document.querySelectorAll('.timeline-btn');
+            buttons.forEach((btn, index) => {
+                btn.className = index === workIndex ? 'timeline-btn timeline-btn--active' : 'timeline-btn timeline-btn--inactive';
+            });
+        }
+
+        function selectWork(index) {
+            workIndex = index;
+            updateWorkDisplay();
+        }
+
+        function navigateWorkUp() {
+            if (workIndex > 0) {
+                workIndex--;
+                updateWorkDisplay();
+            }
+        }
+
+        function navigateWorkDown() {
+            if (workIndex < works.length - 1) {
+                workIndex++;
+                updateWorkDisplay();
+            }
+        }
+
+        function openWork() {
+            console.log(`Opening work: ${works[workIndex].title}`);
+        }
+
+        // ============================================
+        // CAMERA DEVICE
+        // ============================================
+        function handleShutterClick(event) {
+            const button = event.target.closest('.rams-btn-physical');
+            const lensCenter = document.querySelector('.lens-center');
+            
+            button.style.transform = 'translateY(2px)';
+            button.style.boxShadow = 'var(--shadow-button-pressed)';
+            
+            lensCenter.style.background = 'hsl(var(--rams-orange))';
+            lensCenter.style.boxShadow = '0 0 20px hsl(var(--rams-orange-glow))';
+            
+            setTimeout(() => {
+                button.style.transform = '';
+                button.style.boxShadow = '';
+                lensCenter.style.background = '';
+                lensCenter.style.boxShadow = '';
+            }, 150);
+            
+            console.log('📸 Camera shutter clicked');
+        }
+
+        // ============================================
+        // SPEAKER GRILLE
+        // ============================================
+        function generateGrille() {
+            const container = document.getElementById('grille-area');
+            const holes = 12 * 8;
+            
+            for (let i = 0; i < holes; i++) {
+                const hole = document.createElement('div');
+                hole.className = 'grille-hole';
+                container.appendChild(hole);
+            }
+        }
+        generateGrille();
+
+        // ============================================
+        // KEYBOARD NAVIGATION
+        // ============================================
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    previousPhilosophy();
+                    break;
+                case 'ArrowRight':
+                    nextPhilosophy();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    navigateWorkUp();
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    navigateWorkDown();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
