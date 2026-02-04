@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>版本3: 紧凑对称 - 秒·分·时</title>
+    <link href="https://fonts.googleapis.com/css2?family=Iceberg&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fafafa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Iceberg', sans-serif;
+            overflow: hidden;
+        }
+
+        .time-system-container {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 紧凑统一尺寸 280x280 */
+        .pendulum-wrapper,
+        .indicator-container,
+        .clock-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            flex-shrink: 0;
+        }
+
+        /* ========== 单摆 ========== */
+        .pendulum-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 280px;
+            height: 280px;
+        }
+
+        .trajectory-arc {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            width: 679px;
+            height: 353px;
+            border: 2px dashed #FF5D1F;
+            border-top: none;
+            border-radius: 0 0 353px 353px;
+            opacity: 0.6;
+            transform: translateX(-50%);
+            transition: opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .trajectory-arc:hover { opacity: 1.0; }
+
+        .fixed-support {
+            position: absolute;
+            top: 6%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        .pendulum-swing-system {
+            position: absolute;
+            top: 6%;
+            left: 50%;
+            width: 280px;
+            height: 630px;
+            transform-origin: 140px 108px;
+            transform: translateX(-50%);
+            z-index: 5;
+            animation: pendulum-physics 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+        }
+
+        @keyframes pendulum-physics {
+            0% { transform: translateX(-50%) rotate(-25deg); }
+            50% { transform: translateX(-50%) rotate(25deg); }
+            100% { transform: translateX(-50%) rotate(-25deg); }
+        }
+
+        .pendulum-shadow {
+            position: absolute;
+            bottom: 8%;
+            left: 50%;
+            width: 168px;
+            height: 20px;
+            background: 
+                radial-gradient(ellipse, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.18) 40%, transparent 70%),
+                radial-gradient(ellipse, rgba(0,0,0,0.22) 0%, transparent 60%);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            animation: shadowFollowBall 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+            z-index: 1;
+            filter: blur(1.4px);
+        }
+
+        @keyframes shadowFollowBall {
+            0% { transform: translateX(-50%) translateX(148px) scaleX(1.5); opacity: 0.35; }
+            25% { transform: translateX(-50%) translateX(0px) scaleX(0.7); opacity: 0.85; }
+            50% { transform: translateX(-50%) translateX(-148px) scaleX(1.5); opacity: 0.35; }
+            75% { transform: translateX(-50%) translateX(0px) scaleX(0.7); opacity: 0.85; }
+            100% { transform: translateX(-50%) translateX(148px) scaleX(1.5); opacity: 0.35; }
+        }
+
+        /* ========== Sweeping Clock ========== */
+        .indicator-container svg,
+        .clock-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .sweeping-line {
+            transition: transform 1s linear;
+        }
+
+        .time-label {
+            font-family: 'Iceberg', cursive;
+            font-size: 16px;
+        }
+
+        /* ========== Hour Clock ========== */
+        .pointer-group {
+            transform-origin: 140px 140px;
+            transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .hour-number {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 17px;
+            font-weight: 400;
+            font-style: normal;
+            text-anchor: middle;
+        }
+
+        @media (max-width: 1100px) {
+            .time-system-container {
+                gap: 30px;
+                transform: scale(0.85);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .time-system-container {
+                flex-direction: column;
+                gap: 25px;
+                transform: scale(0.75);
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; }
+            .trajectory-arc { border-color: #ff7b45; opacity: 0.7; }
+            .trajectory-arc:hover { opacity: 1.0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="time-system-container">
+        <!-- 单摆 280px -->
+        <div class="pendulum-wrapper">
+            <div class="pendulum-container">
+                <div class="pendulum-shadow"></div>
+                <div class="trajectory-arc"></div>
+                
+                <svg class="fixed-support" viewBox="0 0 280 175" width="280" height="175">
+                    <circle cx="140" cy="108" r="52.5" fill="#eeeeee"/>
+                    <circle cx="140" cy="108" r="13" fill="#FF5D1F"/>
+                </svg>
+                
+                <svg class="pendulum-swing-system" viewBox="0 0 280 630">
+                    <defs>
+                        <radialGradient id="ballGradient" cx="35%" cy="35%">
+                            <stop offset="0%" style="stop-color:#f0f0f0;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#d0d0d0;stop-opacity:1" />
+                        </radialGradient>
+                        <radialGradient id="highlight" cx="50%" cy="50%">
+                            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
+                            <stop offset="70%" style="stop-color:#ffffff;stop-opacity:0" />
+                        </radialGradient>
+                    </defs>
+                    <path d="M 115.5 126 L 164.5 126 L 164.5 154 L 165.9 238 Q 176.4 315, 176.75 350 L 103.25 350 Q 103.6 315, 114.1 238 L 115.5 154 Z" fill="#eeeeee"/>
+                    <circle cx="140" cy="448" r="105" fill="url(#ballGradient)" style="filter: drop-shadow(0px 1.4px 2.8px rgba(0,0,0,0.04)) drop-shadow(0px 2.8px 8.4px rgba(0,0,0,0.08))" />
+                    <ellipse cx="112" cy="420" rx="31.5" ry="31.5" fill="url(#highlight)" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Sweeping Clock 280px -->
+        <div class="indicator-container">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 -70 280 420">
+                <defs>
+                    <clipPath id="topHalf">
+                        <rect x="0" y="-70" width="280" height="70"/>
+                    </clipPath>
+                    <clipPath id="bottomHalf">
+                        <rect x="0" y="280" width="280" height="70"/>
+                    </clipPath>
+                    <clipPath id="containerClip">
+                        <rect x="79.28" y="0" width="121.44" height="280"/>
+                        <circle cx="139.6" cy="280" r="59.64"/>
+                    </clipPath>
+                </defs>
+                
+                <rect id="lowerFillRect" fill="#FF5D1F" x="79.28" y="0" width="121.44" height="339.64" clip-path="url(#containerClip)"/>
+                <circle cx="139.6" cy="0" r="59.64" stroke="#5E5D61" stroke-width="2" fill="none" clip-path="url(#topHalf)"/>
+                
+                <rect fill="#5E5D61" height="280" width="2" x="79.28"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="10.05" x="74.28"></rect>
+                <rect fill="#5E5D61" height="2" width="11.2" y="65.34" x="68.08"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="100.45" x="74.28"></rect>
+                <rect fill="#5E5D61" height="2" width="11.2" y="182" x="68.08"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="200.9" x="74.28"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="277.49" x="74.28"></rect>
+                
+                <rect fill="#5E5D61" height="280" width="2" x="198.72"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="254.89" x="200.72"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="215.96" x="200.72"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="158.21" x="200.72"></rect>
+                <rect fill="#5E5D61" height="2" width="11.2" y="107.34" x="200.72"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="40.18" x="200.72"></rect>
+                <rect fill="#5E5D61" height="2" width="5" x="200.72"></rect>
+                
+                <circle cx="139.6" cy="280" r="59.64" stroke="#5E5D61" stroke-width="2" fill="none" clip-path="url(#bottomHalf)"/>
+                
+                <text id="label14s" class="time-label" x="56" y="71.45" text-anchor="end">14s</text>
+                <text id="label23s" class="time-label" x="224" y="113.34" text-anchor="start">23s</text>
+                <text id="label39s" class="time-label" x="56" y="189" text-anchor="end">39s</text>
+                
+                <rect id="sweepingLine" class="sweeping-line" fill="#FF5D1F" height="2.8" width="179.55" y="0" x="49.8"></rect>
+            </svg>
+        </div>
+
+        <!-- Hour Clock 280px -->
+        <div class="clock-container">
+            <svg width="280" height="280" viewBox="0 0 280 280" fill="none">
+                <circle cx="140" cy="140" r="69.25" stroke="#5E5D61" stroke-width="2"/>
+                <g id="numberContainer"></g>
+                <g id="pointerGroup" class="pointer-group">
+                    <path d="M140.6 79.75L143.35 84.36C143.66 84.87 143.31 85.53 142.72 85.54L135.19 85.68C134.58 85.69 134.21 85.01 134.54 84.49L137.38 79.74C137.68 79.27 138.42 79.28 140.6 79.75Z" fill="#5E5D61"/>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <script>
+        // Sweeping Line Clock
+        const sweepingLine = document.getElementById('sweepingLine');
+        const lowerFillRect = document.getElementById('lowerFillRect');
+        const label14s = document.getElementById('label14s');
+        const label23s = document.getElementById('label23s');
+        const label39s = document.getElementById('label39s');
+
+        function updateSweepingLine() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const yPosition = (seconds / 60) * 280;
+            sweepingLine.setAttribute('y', yPosition);
+            const fillHeight = 339.64 - yPosition;
+            lowerFillRect.setAttribute('y', yPosition);
+            lowerFillRect.setAttribute('height', fillHeight);
+            label14s.setAttribute('fill', seconds >= 14 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+            label23s.setAttribute('fill', seconds >= 23 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+            label39s.setAttribute('fill', seconds >= 39 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+        }
+
+        // Hour Clock
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const numberContainer = document.getElementById('numberContainer');
+        const pointerGroup = document.getElementById('pointerGroup');
+        const centerX = 140, centerY = 140, radius = 78.4;
+        
+        function createNumber(hour, angle, opacity, showH = false) {
+            const radian = (angle - 90) * Math.PI / 180;
+            const x = centerX + radius * Math.cos(radian);
+            const y = centerY + radius * Math.sin(radian);
+            const text = document.createElementNS(SVG_NS, 'text');
+            text.setAttribute('class', 'hour-number');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y);
+            text.setAttribute('fill', `rgba(255, 93, 31, ${opacity})`);
+            text.setAttribute('dominant-baseline', 'alphabetic');
+            const numberSpan = document.createElementNS(SVG_NS, 'tspan');
+            numberSpan.textContent = String(hour).padStart(2, '0');
+            numberSpan.setAttribute('font-size', '17');
+            text.appendChild(numberSpan);
+            if (showH) {
+                const hSpan = document.createElementNS(SVG_NS, 'tspan');
+                hSpan.textContent = 'h';
+                hSpan.setAttribute('font-size', '13');
+                hSpan.setAttribute('baseline-shift', '0');
+                text.appendChild(hSpan);
+            }
+            let rotationAngle = angle;
+            if (angle > 90 && angle < 270) rotationAngle = angle + 180;
+            text.setAttribute('transform', `rotate(${rotationAngle} ${x} ${y})`);
+            return text;
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const currentHourAngle = ((hours % 12) + minutes / 60) * 30;
+            const currentHour12 = hours % 12;
+            const nextHour12 = (currentHour12 + 1) % 12;
+            numberContainer.innerHTML = '';
+            if (minutes === 0) {
+                const angle = currentHour12 * 30;
+                numberContainer.appendChild(createNumber(hours, angle, 1, false));
+            } else {
+                const currentAngle = currentHour12 * 30;
+                const nextAngle = nextHour12 * 30;
+                numberContainer.appendChild(createNumber(hours, currentAngle, 1, false));
+                const nextHourValue = (hours + 1) % 24;
+                numberContainer.appendChild(createNumber(nextHourValue, nextAngle, 0.4, true));
+            }
+            pointerGroup.style.transform = `rotate(${currentHourAngle}deg)`;
+        }
+
+        updateSweepingLine();
+        updateClock();
+        setInterval(() => { updateSweepingLine(); updateClock(); }, 1000);
+    </script>
+</body>
+</html>

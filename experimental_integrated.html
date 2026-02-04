@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验性整合 - 垂直时间系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Iceberg&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fafafa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Iceberg', sans-serif;
+            overflow: hidden;
+        }
+
+        .integrated-container {
+            position: relative;
+            width: 280px;
+            height: 600px;
+        }
+
+        .integrated-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 扫描线动画 */
+        .sweeping-line {
+            transition: transform 1s linear;
+        }
+
+        /* Hour Clock 指针旋转 */
+        .hour-pointer-group {
+            transform-origin: 140px 60px; /* 圆心位置 */
+            transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        /* 单摆动画 */
+        .pendulum-group {
+            transform-origin: 140px 300px; /* 下半圆圆心 */
+            animation: pendulum-swing 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+        }
+
+        @keyframes pendulum-swing {
+            0% { transform: rotate(-25deg); }
+            50% { transform: rotate(25deg); }
+            100% { transform: rotate(-25deg); }
+        }
+
+        /* 单摆阴影 */
+        .pendulum-shadow {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            width: 140px;
+            height: 18px;
+            background: 
+                radial-gradient(ellipse, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.18) 40%, transparent 70%),
+                radial-gradient(ellipse, rgba(0,0,0,0.22) 0%, transparent 60%);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            animation: shadow-follow 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+            z-index: 1;
+            filter: blur(1.2px);
+        }
+
+        @keyframes shadow-follow {
+            0% { transform: translateX(-50%) translateX(105px) scaleX(1.5); opacity: 0.35; }
+            25% { transform: translateX(-50%) translateX(0px) scaleX(0.7); opacity: 0.85; }
+            50% { transform: translateX(-50%) translateX(-105px) scaleX(1.5); opacity: 0.35; }
+            75% { transform: translateX(-50%) translateX(0px) scaleX(0.7); opacity: 0.85; }
+            100% { transform: translateX(-50%) translateX(105px) scaleX(1.5); opacity: 0.35; }
+        }
+
+        .time-label {
+            font-family: 'Iceberg', cursive;
+            font-size: 16px;
+        }
+
+        .hour-number {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 17px;
+            font-weight: 400;
+            font-style: normal;
+            text-anchor: middle;
+        }
+
+        @media (max-width: 768px) {
+            .integrated-container {
+                transform: scale(0.85);
+            }
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #1a1a1a; }
+        }
+    </style>
+</head>
+<body>
+    <div class="integrated-container">
+        <!-- 单摆阴影（最底层）-->
+        <div class="pendulum-shadow"></div>
+        
+        <svg viewBox="0 -120 280 720" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <!-- 顶部圆的裁剪（不需要，因为是完整圆）-->
+                
+                <!-- 底部半圆的裁剪 -->
+                <clipPath id="bottomHalfClip">
+                    <rect x="0" y="300" width="280" height="60"/>
+                </clipPath>
+                
+                <!-- 扫描区域裁剪 -->
+                <clipPath id="scanAreaClip">
+                    <rect x="74.65" y="60" width="130.7" height="240"/>
+                    <circle cx="140" cy="300" r="65.35"/>
+                </clipPath>
+                
+                <!-- 单摆球体渐变 -->
+                <radialGradient id="ballGradient" cx="35%" cy="35%">
+                    <stop offset="0%" style="stop-color:#f0f0f0;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#d0d0d0;stop-opacity:1" />
+                </radialGradient>
+                
+                <radialGradient id="ballHighlight" cx="50%" cy="50%">
+                    <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
+                    <stop offset="70%" style="stop-color:#ffffff;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+            
+            <!-- ========== 层次1: 单摆主体（最底层）========== -->
+            <g id="pendulumGroup" class="pendulum-group">
+                <!-- 单摆支点装饰（小圆点）-->
+                <circle cx="140" cy="300" r="8" fill="#5E5D61"/>
+                
+                <!-- 单摆杆 -->
+                <path d="M 126 315
+                         L 154 315
+                         L 154 330
+                         L 154.8 385
+                         Q 162 430, 162.2 455
+                         L 117.8 455
+                         Q 118 430, 126 385
+                         L 126 330
+                         Z" 
+                      fill="#eeeeee"/>
+                
+                <!-- 单摆球 -->
+                <circle cx="140" cy="520" r="75" 
+                        fill="url(#ballGradient)" 
+                        style="filter: drop-shadow(0px 1.2px 2.4px rgba(0,0,0,0.04)) drop-shadow(0px 2.4px 7.2px rgba(0,0,0,0.08))" />
+                
+                <!-- 高光 -->
+                <ellipse cx="120" cy="500" rx="22.5" ry="22.5" fill="url(#ballHighlight)" />
+            </g>
+            
+            <!-- ========== 层次2: 扫描区域填充 ========== -->
+            <g id="scanningArea" style="isolation: isolate;">
+                <!-- 橙色填充区域 -->
+                <rect id="lowerFillRect" fill="#FF5D1F" x="74.65" y="60" width="130.7" height="305.35" clip-path="url(#scanAreaClip)"/>
+                
+                <!-- 左侧垂直线 -->
+                <rect fill="#5E5D61" height="240" width="2" x="74.65" y="60"></rect>
+                
+                <!-- 左侧刻度 -->
+                <rect fill="#5E5D61" height="2" width="5" y="69.34" x="69.65"></rect>
+                <rect fill="#5E5D61" height="2" width="11.2" y="121.34" x="63.45"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="153.8" x="69.65"></rect>
+                <rect fill="#5E5D61" height="2" width="11.2" y="238" x="63.45"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="256.6" x="69.65"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="297.49" x="69.65"></rect>
+                
+                <!-- 右侧垂直线 -->
+                <rect fill="#5E5D61" height="240" width="2" x="203.35" y="60"></rect>
+                
+                <!-- 右侧刻度 -->
+                <rect fill="#5E5D61" height="2" width="5" y="274.89" x="205.35"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="232.96" x="205.35"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="174.21" x="205.35"></rect>
+                <rect fill="#5E5D61" height="2" width="11.2" y="139.34" x="205.35"></rect>
+                <rect fill="#5E5D61" height="2" width="5" y="77.18" x="205.35"></rect>
+                <rect fill="#5E5D61" height="2" width="5" x="205.35" y="60"></rect>
+                
+                <!-- 时间标签 -->
+                <text id="label14s" class="time-label" x="56" y="127.45" text-anchor="end">14s</text>
+                <text id="label23s" class="time-label" x="224" y="145.34" text-anchor="start">23s</text>
+                <text id="label39s" class="time-label" x="56" y="245" text-anchor="end">39s</text>
+                
+                <!-- 扫描线 -->
+                <rect id="sweepingLine" class="sweeping-line" fill="#FF5D1F" height="2.8" width="179.55" y="60" x="50.25"></rect>
+            </g>
+            
+            <!-- ========== 层次3: 下部虚线半圆 ========== -->
+            <circle cx="140" cy="300" r="65.35" 
+                    stroke="#5E5D61" 
+                    stroke-width="2" 
+                    stroke-dasharray="4 4"
+                    fill="none" 
+                    clip-path="url(#bottomHalfClip)"/>
+            
+            <!-- ========== 层次4: 上部完整圆 Hour Clock（最上层）========== -->
+            <g id="hourClockArea" style="isolation: isolate;">
+                <!-- 白色背景圆（确保Hour Clock独立显示）-->
+                <circle id="hourClockBg" cx="140" cy="60" r="65.35" fill="#fafafa"/>
+                
+                <!-- 主圆圈（加粗黑色实线）-->
+                <circle cx="140" cy="60" r="65.35" 
+                        stroke="#5E5D61" 
+                        stroke-width="2.5"
+                        fill="none"/>
+                
+                <!-- 数字容器 -->
+                <g id="numberContainer"></g>
+                
+                <!-- 旋转指针 -->
+                <g id="hourPointerGroup" class="hour-pointer-group">
+                    <path d="M140.45 20.5L143.2 25.6C143.52 26.15 143.18 26.85 142.57 26.86L135.43 27C134.8 27.01 134.44 26.28 134.78 25.71L137.55 20.48C137.86 19.96 138.65 19.97 140.45 20.5Z" 
+                          fill="#5E5D61"/>
+                </g>
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        // ========== Sweeping Line Clock Logic ==========
+        const sweepingLine = document.getElementById('sweepingLine');
+        const lowerFillRect = document.getElementById('lowerFillRect');
+        const label14s = document.getElementById('label14s');
+        const label23s = document.getElementById('label23s');
+        const label39s = document.getElementById('label39s');
+
+        function updateSweepingLine() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            
+            // 扫描线从 y=60 到 y=300，共240px范围
+            const yPosition = 60 + (seconds / 60) * 240;
+            sweepingLine.setAttribute('y', yPosition);
+            
+            // 填充从扫描线位置到底部
+            const fillHeight = 305.35 - (yPosition - 60);
+            lowerFillRect.setAttribute('y', yPosition);
+            lowerFillRect.setAttribute('height', fillHeight);
+            
+            // 标签透明度
+            label14s.setAttribute('fill', seconds >= 14 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+            label23s.setAttribute('fill', seconds >= 23 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+            label39s.setAttribute('fill', seconds >= 39 ? 'rgba(255, 93, 31, 0.4)' : 'rgba(255, 93, 31, 1)');
+        }
+
+        // ========== Hour Clock Logic ==========
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const numberContainer = document.getElementById('numberContainer');
+        const hourPointerGroup = document.getElementById('hourPointerGroup');
+        
+        const centerX = 140;
+        const centerY = 60;
+        const radius = 73; // 数字显示半径
+        
+        function createNumber(hour, angle, opacity, showH = false) {
+            const radian = (angle - 90) * Math.PI / 180;
+            const x = centerX + radius * Math.cos(radian);
+            const y = centerY + radius * Math.sin(radian);
+            
+            const text = document.createElementNS(SVG_NS, 'text');
+            text.setAttribute('class', 'hour-number');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y);
+            text.setAttribute('fill', `rgba(255, 93, 31, ${opacity})`);
+            text.setAttribute('dominant-baseline', 'alphabetic');
+            
+            const numberSpan = document.createElementNS(SVG_NS, 'tspan');
+            numberSpan.textContent = String(hour).padStart(2, '0');
+            numberSpan.setAttribute('font-size', '17');
+            text.appendChild(numberSpan);
+            
+            if (showH) {
+                const hSpan = document.createElementNS(SVG_NS, 'tspan');
+                hSpan.textContent = 'h';
+                hSpan.setAttribute('font-size', '13');
+                hSpan.setAttribute('baseline-shift', '0');
+                text.appendChild(hSpan);
+            }
+            
+            let rotationAngle = angle;
+            if (angle > 90 && angle < 270) {
+                rotationAngle = angle + 180;
+            }
+            
+            text.setAttribute('transform', `rotate(${rotationAngle} ${x} ${y})`);
+            return text;
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            const currentHourAngle = ((hours % 12) + minutes / 60) * 30;
+            const currentHour12 = hours % 12;
+            const nextHour12 = (currentHour12 + 1) % 12;
+            
+            numberContainer.innerHTML = '';
+            
+            if (minutes === 0) {
+                const angle = currentHour12 * 30;
+                numberContainer.appendChild(createNumber(hours, angle, 1, false));
+            } else {
+                const currentAngle = currentHour12 * 30;
+                const nextAngle = nextHour12 * 30;
+                
+                numberContainer.appendChild(createNumber(hours, currentAngle, 1, false));
+                
+                const nextHourValue = (hours + 1) % 24;
+                numberContainer.appendChild(createNumber(nextHourValue, nextAngle, 0.4, true));
+            }
+            
+            hourPointerGroup.style.transform = `rotate(${currentHourAngle}deg)`;
+        }
+
+        // ========== 暗黑模式支持 ==========
+        const hourClockBg = document.getElementById('hourClockBg');
+        
+        function updateTheme() {
+            const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            hourClockBg.setAttribute('fill', isDark ? '#1a1a1a' : '#fafafa');
+        }
+        
+        // 监听主题变化
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+        updateTheme();
+
+        // ========== 初始化并定时更新 ==========
+        updateSweepingLine();
+        updateClock();
+
+        setInterval(() => {
+            updateSweepingLine();
+            updateClock();
+        }, 1000);
+    </script>
+</body>
+</html>

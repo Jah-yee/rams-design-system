@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seven Du — Builder & Researcher</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ============================================
+           DESIGN SYSTEM - Braun/Rams Hyper-Realistic
+           ============================================ */
+        
+        :root {
+            /* Shell Colors - Warm Grays */
+            --shell-light: #E8E4DF;
+            --shell-base: #E2DED9;
+            --shell-dark: #D8D4CF;
+            --shell-shadow: #C5C1BC;
+            
+            /* Surface Colors */
+            --surface-inset: #D5D1CC;
+            --surface-screen: #CDCCC4;
+            
+            /* LCD Screen */
+            --lcd-bg: #C5CDB8;
+            --lcd-bg-light: #D0D8C3;
+            --lcd-segment: #2C3528;
+            --lcd-segment-dim: rgba(44, 53, 40, 0.08);
+            
+            /* Accent - Braun Orange */
+            --accent: #E8552E;
+            --accent-dark: #D14A26;
+            --accent-light: #F06842;
+            --accent-shadow: rgba(232, 85, 46, 0.3);
+            
+            /* Text */
+            --text-primary: #3A3A3A;
+            --text-secondary: #6B6B6B;
+            --text-muted: #9A9A9A;
+            
+            /* Background */
+            --page-bg: #F5F3F0;
+            
+            /* Shadows */
+            --shadow-device: 
+                0 1px 1px rgba(0,0,0,0.02),
+                0 2px 4px rgba(0,0,0,0.03),
+                0 4px 8px rgba(0,0,0,0.04),
+                0 8px 16px rgba(0,0,0,0.05),
+                0 16px 32px rgba(0,0,0,0.04);
+            
+            --shadow-device-hover:
+                0 2px 2px rgba(0,0,0,0.02),
+                0 4px 8px rgba(0,0,0,0.04),
+                0 8px 16px rgba(0,0,0,0.05),
+                0 16px 32px rgba(0,0,0,0.06),
+                0 24px 48px rgba(0,0,0,0.05);
+            
+            --shadow-inset: inset 0 2px 4px rgba(0,0,0,0.08);
+            --shadow-inset-deep: inset 0 3px 6px rgba(0,0,0,0.12);
+            
+            /* Dimensions */
+            --radius-device: 24px;
+            --radius-screen: 12px;
+            --radius-button: 50%;
+            
+            /* Spacing */
+            --gap: 32px;
+        }
+        
+        /* ============================================
+           BASE STYLES
+           ============================================ */
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--page-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        /* ============================================
+           LAYOUT
+           ============================================ */
+        
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+        
+        .device-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: var(--gap);
+            align-items: start;
+        }
+        
+        /* ============================================
+           DEVICE BASE - The Hardware Shell
+           ============================================ */
+        
+        .device {
+            background: linear-gradient(
+                165deg,
+                var(--shell-light) 0%,
+                var(--shell-base) 50%,
+                var(--shell-dark) 100%
+            );
+            border-radius: var(--radius-device);
+            position: relative;
+            box-shadow: var(--shadow-device);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            
+            /* Subtle edge highlight */
+            border: 1px solid rgba(255,255,255,0.6);
+            border-bottom-color: rgba(0,0,0,0.05);
+            border-right-color: rgba(0,0,0,0.03);
+        }
+        
+        .device:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-device-hover);
+        }
+        
+        /* Side Switch - Orange accent */
+        .device-switch {
+            position: absolute;
+            left: -4px;
+            width: 8px;
+            height: 36px;
+            background: linear-gradient(
+                90deg,
+                var(--accent-dark) 0%,
+                var(--accent) 50%,
+                var(--accent-light) 100%
+            );
+            border-radius: 2px 0 0 2px;
+            box-shadow: 
+                inset 1px 0 2px rgba(255,255,255,0.3),
+                -2px 0 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Device Label */
+        .device-label {
+            position: absolute;
+            bottom: 20px;
+            right: 24px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+        
+        /* BRAUn Logo Style */
+        .device-logo {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        .device-logo span {
+            text-transform: lowercase;
+        }
+        
+        /* ============================================
+           SCREEN COMPONENTS
+           ============================================ */
+        
+        .screen {
+            background: var(--surface-screen);
+            border-radius: var(--radius-screen);
+            box-shadow: var(--shadow-inset);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .screen-lcd {
+            background: linear-gradient(
+                180deg,
+                var(--lcd-bg-light) 0%,
+                var(--lcd-bg) 100%
+            );
+            position: relative;
+        }
+        
+        /* LCD Scanline Effect */
+        .screen-lcd::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 2px,
+                rgba(0,0,0,0.02) 2px,
+                rgba(0,0,0,0.02) 4px
+            );
+            pointer-events: none;
+        }
+        
+        /* ============================================
+           BUTTON COMPONENTS
+           ============================================ */
+        
+        .btn-round {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(
+                145deg,
+                var(--accent-light) 0%,
+                var(--accent) 50%,
+                var(--accent-dark) 100%
+            );
+            border: none;
+            cursor: pointer;
+            position: relative;
+            box-shadow:
+                0 2px 4px rgba(0,0,0,0.15),
+                0 4px 8px var(--accent-shadow),
+                inset 0 1px 2px rgba(255,255,255,0.3);
+            transition: all 0.15s ease;
+        }
+        
+        .btn-round:hover {
+            transform: scale(1.05);
+            box-shadow:
+                0 3px 6px rgba(0,0,0,0.2),
+                0 6px 12px var(--accent-shadow),
+                inset 0 1px 2px rgba(255,255,255,0.3);
+        }
+        
+        .btn-round:active {
+            transform: scale(0.98);
+            box-shadow:
+                0 1px 2px rgba(0,0,0,0.15),
+                0 2px 4px var(--accent-shadow),
+                inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .btn-round-small {
+            width: 32px;
+            height: 32px;
+        }
+        
+        /* Power indicator on button */
+        .btn-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 12px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 1px;
+        }
+        
+        /* Knob Control */
+        .knob {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(
+                145deg,
+                var(--accent-light) 0%,
+                var(--accent) 50%,
+                var(--accent-dark) 100%
+            );
+            position: relative;
+            cursor: grab;
+            box-shadow:
+                0 2px 4px rgba(0,0,0,0.1),
+                0 4px 8px var(--accent-shadow),
+                inset 0 2px 4px rgba(255,255,255,0.2);
+        }
+        
+        .knob::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 14px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 1px;
+        }
+        
+        /* ============================================
+           GRID PATTERN (Speaker/Vent)
+           ============================================ */
+        
+        .grid-pattern {
+            display: grid;
+            gap: 4px;
+            padding: 4px;
+        }
+        
+        .grid-hole {
+            background: #1a1a1a;
+            border-radius: 2px;
+            aspect-ratio: 1.5;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        /* ============================================
+           DEVICE 1: CLOCK - Time Display
+           ============================================ */
+        
+        .device-clock {
+            grid-column: span 6;
+            padding: 32px;
+            min-height: 320px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .device-clock .device-switch {
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .clock-screen {
+            flex: 1;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .clock-time {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 72px;
+            font-weight: 400;
+            color: var(--lcd-segment);
+            letter-spacing: 4px;
+            line-height: 1;
+            text-align: right;
+        }
+        
+        .clock-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            color: var(--lcd-segment);
+            opacity: 0.7;
+            text-align: right;
+            margin-top: 8px;
+        }
+        
+        .clock-greeting {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--lcd-segment);
+            opacity: 0.5;
+            text-align: left;
+            margin-bottom: 16px;
+        }
+        
+        .clock-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 24px;
+            padding-top: 16px;
+        }
+        
+        .clock-icons {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .clock-icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.4;
+        }
+        
+        /* ============================================
+           DEVICE 2: TUNER - Navigation
+           ============================================ */
+        
+        .device-tuner {
+            grid-column: span 6;
+            padding: 32px;
+            min-height: 320px;
+        }
+        
+        .device-tuner .device-switch {
+            top: 40%;
+        }
+        
+        .tuner-screen {
+            padding: 16px 20px;
+            margin-bottom: 24px;
+        }
+        
+        .tuner-display {
+            display: flex;
+            align-items: baseline;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+        
+        .tuner-freq {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 48px;
+            font-weight: 400;
+            color: var(--lcd-segment);
+        }
+        
+        .tuner-freq-dim {
+            opacity: 0.15;
+        }
+        
+        .tuner-unit {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--lcd-segment);
+            opacity: 0.7;
+        }
+        
+        .tuner-controls {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .tuner-knob-wrapper {
+            flex: 0 0 auto;
+        }
+        
+        .tuner-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .tuner-btn-row {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .tuner-btn {
+            padding: 8px 16px;
+            background: var(--shell-light);
+            border: 1px solid var(--shell-shadow);
+            border-radius: 6px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 
+                0 1px 2px rgba(0,0,0,0.05),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        
+        .tuner-btn:hover {
+            background: var(--shell-base);
+        }
+        
+        .tuner-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent-dark);
+        }
+        
+        .tuner-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+        }
+        
+        /* ============================================
+           DEVICE 3: SPEAKER - About Me
+           ============================================ */
+        
+        .device-speaker {
+            grid-column: span 5;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .device-speaker .device-switch {
+            top: 70%;
+        }
+        
+        .speaker-grille {
+            background: var(--surface-inset);
+            border-radius: 50%;
+            aspect-ratio: 1;
+            padding: 12px;
+            box-shadow: var(--shadow-inset-deep);
+            margin-bottom: 20px;
+        }
+        
+        .speaker-grid-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: repeat(12, 1fr);
+            gap: 3px;
+            padding: 8px;
+        }
+        
+        .speaker-hole {
+            background: #252525;
+            border-radius: 2px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.6);
+        }
+        
+        /* Hide corners to make circular */
+        .speaker-hole.hide {
+            visibility: hidden;
+        }
+        
+        .speaker-info {
+            padding: 0 8px;
+        }
+        
+        .speaker-name {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .speaker-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        
+        .speaker-bio {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+        
+        .speaker-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 20px;
+        }
+        
+        /* ============================================
+           DEVICE 4: CAMERA - Works/Projects
+           ============================================ */
+        
+        .device-camera {
+            grid-column: span 7;
+            padding: 32px;
+            min-height: 400px;
+        }
+        
+        .device-camera .device-switch {
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%) rotate(90deg);
+            width: 36px;
+            height: 8px;
+            border-radius: 0 0 2px 2px;
+        }
+        
+        .camera-viewfinder {
+            width: 48px;
+            height: 32px;
+            background: var(--surface-inset);
+            border-radius: 4px;
+            margin: 0 auto 24px;
+            box-shadow: var(--shadow-inset);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .camera-viewfinder-inner {
+            width: 16px;
+            height: 12px;
+            background: var(--shell-light);
+            border-radius: 2px;
+        }
+        
+        .camera-lens-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        
+        .camera-lens {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(
+                145deg,
+                var(--shell-light) 0%,
+                var(--shell-dark) 100%
+            );
+            padding: 16px;
+            box-shadow:
+                0 4px 8px rgba(0,0,0,0.1),
+                inset 0 2px 4px rgba(255,255,255,0.5);
+        }
+        
+        .camera-lens-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(
+                145deg,
+                #2a2a2a 0%,
+                #1a1a1a 50%,
+                #0a0a0a 100%
+            );
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                inset 0 4px 16px rgba(0,0,0,0.8),
+                0 2px 4px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .camera-lens-inner::before {
+            content: '';
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+        
+        .camera-lens-reflection {
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background: radial-gradient(
+                ellipse at center,
+                rgba(255,255,255,0.15) 0%,
+                transparent 70%
+            );
+            top: 20%;
+            left: 20%;
+        }
+        
+        .camera-project-display {
+            background: var(--lcd-bg);
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: var(--shadow-inset);
+            position: relative;
+        }
+        
+        .camera-project-display::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                transparent 2px,
+                rgba(0,0,0,0.015) 2px,
+                rgba(0,0,0,0.015) 4px
+            );
+            pointer-events: none;
+            border-radius: 8px;
+        }
+        
+        .project-current {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .project-info h3 {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--lcd-segment);
+            margin-bottom: 4px;
+        }
+        
+        .project-info p {
+            font-size: 12px;
+            color: var(--lcd-segment);
+            opacity: 0.6;
+        }
+        
+        .project-year {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 24px;
+            color: var(--lcd-segment);
+            opacity: 0.3;
+        }
+        
+        .camera-nav {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .camera-nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--shell-shadow);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .camera-nav-dot.active {
+            background: var(--accent);
+            transform: scale(1.2);
+        }
+        
+        .camera-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 24px;
+        }
+        
+        /* ============================================
+           DEVICE 5: CALCULATOR - Contact
+           ============================================ */
+        
+        .device-calculator {
+            grid-column: span 5;
+            padding: 24px;
+        }
+        
+        .device-calculator .device-switch {
+            top: 30%;
+        }
+        
+        .calc-screen {
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: right;
+        }
+        
+        .calc-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--lcd-segment);
+            opacity: 0.5;
+            margin-bottom: 4px;
+        }
+        
+        .calc-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 28px;
+            color: var(--lcd-segment);
+        }
+        
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        
+        .calc-btn {
+            aspect-ratio: 1;
+            background: var(--shell-light);
+            border: 1px solid var(--shell-shadow);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow:
+                0 1px 2px rgba(0,0,0,0.05),
+                inset 0 1px 0 rgba(255,255,255,0.5);
+        }
+        
+        .calc-btn:hover {
+            background: var(--shell-base);
+            transform: translateY(-1px);
+        }
+        
+        .calc-btn:active {
+            transform: translateY(1px);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .calc-btn svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-secondary);
+        }
+        
+        .calc-btn.accent {
+            background: linear-gradient(
+                145deg,
+                var(--accent-light) 0%,
+                var(--accent) 100%
+            );
+            border-color: var(--accent-dark);
+        }
+        
+        .calc-btn.accent svg {
+            color: white;
+        }
+        
+        .calc-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        /* ============================================
+           DEVICE 6: VENTILATOR - Skills
+           ============================================ */
+        
+        .device-ventilator {
+            grid-column: span 7;
+            padding: 24px;
+        }
+        
+        .device-ventilator .device-switch {
+            top: 60%;
+        }
+        
+        .vent-grille {
+            background: var(--surface-inset);
+            border-radius: 50%;
+            aspect-ratio: 1;
+            padding: 16px;
+            box-shadow: var(--shadow-inset-deep);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .vent-grid {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(14, 1fr);
+            gap: 4px;
+            padding: 8px;
+        }
+        
+        .vent-hole {
+            background: #1f1f1f;
+            border-radius: 2px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .vent-hole.active {
+            background: var(--accent);
+            box-shadow: 
+                inset 0 1px 2px rgba(0,0,0,0.2),
+                0 0 8px var(--accent-shadow);
+        }
+        
+        .vent-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40%;
+            height: 40%;
+            background: var(--shell-base);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.15),
+                inset 0 2px 4px rgba(255,255,255,0.3);
+        }
+        
+        .vent-center-inner {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        
+        .vent-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .vent-skill {
+            padding: 6px 12px;
+            background: var(--shell-light);
+            border: 1px solid var(--shell-shadow);
+            border-radius: 16px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .vent-skill:hover {
+            background: var(--shell-base);
+        }
+        
+        .vent-skill.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent-dark);
+        }
+        
+        .vent-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* ============================================
+           DEVICE 7: MP3 PLAYER - Timeline
+           ============================================ */
+        
+        .device-player {
+            grid-column: span 6;
+            padding: 24px;
+        }
+        
+        .device-player .device-switch {
+            top: 45%;
+        }
+        
+        .player-screen {
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .player-track {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .player-track-info {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .player-track-num {
+            font-size: 12px;
+            color: var(--lcd-segment);
+            opacity: 0.5;
+        }
+        
+        .player-track-name {
+            font-size: 14px;
+            color: var(--lcd-segment);
+            margin-top: 2px;
+        }
+        
+        .player-year {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--lcd-segment);
+            opacity: 0.4;
+        }
+        
+        .player-progress {
+            height: 4px;
+            background: var(--lcd-segment);
+            opacity: 0.2;
+            border-radius: 2px;
+            position: relative;
+        }
+        
+        .player-progress-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--lcd-segment);
+            border-radius: 2px;
+            width: 65%;
+        }
+        
+        .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        
+        .player-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--shell-light);
+            border: 1px solid var(--shell-shadow);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        
+        .player-btn:hover {
+            background: var(--shell-base);
+        }
+        
+        .player-btn svg {
+            width: 16px;
+            height: 16px;
+            color: var(--text-secondary);
+        }
+        
+        .player-btn-main {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(
+                145deg,
+                var(--accent-light),
+                var(--accent)
+            );
+            border: none;
+            border-radius: 50%;
+        }
+        
+        .player-btn-main svg {
+            color: white;
+            width: 20px;
+            height: 20px;
+        }
+        
+        .player-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        /* ============================================
+           DEVICE 8: RADIO - Philosophy
+           ============================================ */
+        
+        .device-radio {
+            grid-column: span 6;
+            padding: 24px;
+        }
+        
+        .device-radio .device-switch {
+            top: 55%;
+        }
+        
+        .radio-grille {
+            background: var(--surface-inset);
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: var(--shadow-inset);
+            margin-bottom: 20px;
+        }
+        
+        .radio-grid {
+            display: grid;
+            grid-template-columns: repeat(16, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 4px;
+        }
+        
+        .radio-hole {
+            background: #1a1a1a;
+            border-radius: 1px;
+            aspect-ratio: 1.2;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,0.5);
+        }
+        
+        .radio-content {
+            padding: 0 8px;
+        }
+        
+        .radio-quote {
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+        
+        .radio-author {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .radio-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+        }
+        
+        .radio-dots {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .radio-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--shell-shadow);
+            cursor: pointer;
+        }
+        
+        .radio-dot.active {
+            background: var(--accent);
+        }
+        
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        
+        @media (max-width: 1100px) {
+            .device-clock,
+            .device-tuner {
+                grid-column: span 6;
+            }
+            
+            .device-speaker {
+                grid-column: span 6;
+            }
+            
+            .device-camera {
+                grid-column: span 6;
+            }
+            
+            .device-calculator {
+                grid-column: span 6;
+            }
+            
+            .device-ventilator {
+                grid-column: span 6;
+            }
+            
+            .device-player,
+            .device-radio {
+                grid-column: span 6;
+            }
+        }
+        
+        @media (max-width: 800px) {
+            .page-container {
+                padding: 40px 24px;
+            }
+            
+            .device-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            
+            .device-clock,
+            .device-tuner,
+            .device-speaker,
+            .device-camera,
+            .device-calculator,
+            .device-ventilator,
+            .device-player,
+            .device-radio {
+                grid-column: span 1;
+            }
+            
+            .clock-time {
+                font-size: 48px;
+            }
+            
+            .tuner-freq {
+                font-size: 36px;
+            }
+            
+            .knob {
+                width: 64px;
+                height: 64px;
+            }
+        }
+        
+        @media (max-width: 500px) {
+            .page-container {
+                padding: 24px 16px;
+            }
+            
+            .clock-time {
+                font-size: 36px;
+            }
+            
+            .tuner-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="device-grid">
+            
+            <!-- DEVICE 1: CLOCK -->
+            <div class="device device-clock">
+                <div class="device-switch"></div>
+                <div class="screen screen-lcd clock-screen">
+                    <div class="clock-greeting" id="greeting">Good morning</div>
+                    <div class="clock-time" id="clock-time">10:00</div>
+                    <div class="clock-date" id="clock-date">Wednesday, Feb 4</div>
+                </div>
+                <div class="clock-footer">
+                    <div class="device-logo">sev<span>e</span>n</div>
+                    <div class="clock-icons">
+                        <svg class="clock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12,6 12,12 16,14"/>
+                        </svg>
+                        <svg class="clock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="device-label">clock 1</div>
+            </div>
+            
+            <!-- DEVICE 2: TUNER - Navigation -->
+            <div class="device device-tuner">
+                <div class="device-switch"></div>
+                <div class="screen screen-lcd tuner-screen">
+                    <div class="tuner-display">
+                        <span class="tuner-freq tuner-freq-dim">8.8.8</span>
+                        <span class="tuner-freq" id="tuner-value">1.0</span>
+                        <span class="tuner-unit">section</span>
+                    </div>
+                </div>
+                <div class="tuner-controls">
+                    <div class="tuner-knob-wrapper">
+                        <div class="knob" id="nav-knob"></div>
+                    </div>
+                    <div class="tuner-buttons">
+                        <div class="tuner-btn-row">
+                            <button class="tuner-btn active" data-section="1">About</button>
+                            <button class="tuner-btn" data-section="2">Works</button>
+                        </div>
+                        <div class="tuner-btn-row">
+                            <button class="tuner-btn" data-section="3">Skills</button>
+                            <button class="tuner-btn" data-section="4">Contact</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="tuner-footer">
+                    <div class="device-logo">sev<span>e</span>n</div>
+                </div>
+                <div class="device-label">tuner 1</div>
+            </div>
+            
+            <!-- DEVICE 3: SPEAKER - About -->
+            <div class="device device-speaker">
+                <div class="device-switch"></div>
+                <div class="speaker-grille">
+                    <div class="speaker-grid-container" id="speaker-grid">
+                        <!-- Grid holes generated by JS -->
+                    </div>
+                </div>
+                <div class="speaker-info">
+                    <h2 class="speaker-name">Jiayi (Seven) Du</h2>
+                    <p class="speaker-title">Builder · Researcher · Originator</p>
+                    <p class="speaker-bio">
+                        Exploring complex systems, scientific discovery, and technological innovation. 
+                        Currently building at Spark Lab, a Shanghai-based startup accelerator.
+                    </p>
+                </div>
+                <div class="speaker-footer">
+                    <div class="device-logo">sev<span>e</span>n</div>
+                    <button class="btn-round btn-round-small">
+                        <span class="btn-indicator"></span>
+                    </button>
+                </div>
+                <div class="device-label">speaker 1</div>
+            </div>
+            
+            <!-- DEVICE 4: CAMERA - Works -->
+            <div class="device device-camera">
+                <div class="device-switch"></div>
+                <div class="camera-viewfinder">
+                    <div class="camera-viewfinder-inner"></div>
+                </div>
+                <div class="camera-lens-wrapper">
+                    <div class="camera-lens">
+                        <div class="camera-lens-inner">
+                            <div class="camera-lens-reflection"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="camera-project-display">
+                    <div class="project-current">
+                        <div class="project-info">
+                            <h3 id="project-title">Spark Lab</h3>
+                            <p id="project-desc">Startup accelerator & community</p>
+                        </div>
+                        <div class="project-year" id="project-year">2024</div>
+                    </div>
+                </div>
+                <div class="camera-nav" id="camera-nav">
+                    <div class="camera-nav-dot active" data-index="0"></div>
+                    <div class="camera-nav-dot" data-index="1"></div>
+                    <div class="camera-nav-dot" data-index="2"></div>
+                    <div class="camera-nav-dot" data-index="3"></div>
+                    <div class="camera-nav-dot" data-index="4"></div>
+                </div>
+                <div class="camera-footer">
+                    <div class="device-logo">sev<span>e</span>n</div>
+                    <button class="btn-round" id="shutter-btn">
+                        <span class="btn-indicator"></span>
+                    </button>
+                </div>
+                <div class="device-label">photo 1</div>
+            </div>
+            
+            <!-- DEVICE 5: CALCULATOR - Contact -->
+            <div class="device device-calculator">
+                <div class="device-switch"></div>
+                <div class="screen screen-lcd calc-screen">
+                    <div class="calc-display">CONTACT</div>
+                    <div class="calc-value">Let's Talk</div>
+                </div>
+                <div class="calc-buttons">
+                    <a href="mailto:hello@seven.du" class="calc-btn" title="Email">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="4" width="20" height="16" rx="2"/>
+                            <path d="m22 7-10 7L2 7"/>
+                        </svg>
+                    </a>
+                    <a href="https://github.com" class="calc-btn" title="GitHub">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                    </a>
+                    <a href="https://twitter.com" class="calc-btn" title="Twitter">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                    </a>
+                    <a href="https://linkedin.com" class="calc-btn accent" title="LinkedIn">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                    </a>
+                </div>
+                <div class="calc-footer">
+                    <div class="device-logo">sev<span>e</span>n</div>
+                </div>
+                <div class="device-label">contact 1</div>
+            </div>
+            
+            <!-- DEVICE 6: VENTILATOR - Skills -->
+            <div class="device device-ventilator">
+                <div class="device-switch"></div>
+                <div class="vent-grille">
+                    <div class="vent-grid" id="vent-grid">
+                        <!-- Grid generated by JS -->
+                    </div>
+                    <div class="vent-center">
+                        <div class="vent-center-inner">
+                            <span id="skill-count">12</span><br>
+                            <span style="font-size: 10px; opacity: 0.7;">skills</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="vent-skills">
+                    <span class="vent-skill active">JavaScript</span>
+                    <span class="vent-skill">Python</span>
+                    <span class="vent-skill">React</span>
+                    <span class="vent-skill">Node.js</span>
+                    <span class="vent-skill">Trading</span>
+                    <span class="vent-skill">Hardware</span>
+                    <span class="vent-skill">Design</span>
+                    <span class="vent-skill">Research</span>
+                </div>
+                <div class="vent-footer">
+                    <div class="device-logo">sev<span>e</span>n</div>
+                    <button class="btn-round btn-round-small">
+                        <span class="btn-indicator"></span>
+                    </button>
+                </div>
+                <div class="device-label">ventilator 1</div>
+            </div>
+            
+            <!-- DEVICE 7: MP3 PLAYER - Timeline -->
+            <div class="device device-player">
+                <div class="device-switch"></div>
+                <div class="screen screen-lcd player-screen">
+                    <div class="player-track">
+                        <div class="player-track-info">
+                            <div class="player-track-num">TRACK 04 / 06</div>
+                            <div class="player-track-name" id="track-name">Quantitative Research</div>
+                        </div>
+                        <div class="player-year" id="track-year">2023</div>
+                    </div>
+                    <div class="player-progress">
+                        <div class="player-progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="player-controls">
+                    <button class="player-btn" id="prev-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="19 20 9 12 19 4 19 20"/>
+                            <line x1="5" y1="19" x2="5" y2="5"/>
+                        </svg>
+                    </button>
+                    <button class="player-btn player-btn-main" id="play-btn">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"/>
+                        </svg>
+                    </button>
+                    <button class="player-btn" id="next-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="5 4 15 12 5 20 5 4"/>
+                            <line x1="19" y1="5" x2="19" y2="19"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="player-footer">
+                    <div class="device-logo">sev<span>e</span>n</div>
+                </div>
+                <div class="device-label">player 1</div>
+            </div>
+            
+            <!-- DEVICE 8: RADIO - Philosophy -->
+            <div class="device device-radio">
+                <div class="device-switch"></div>
+                <div class="radio-grille">
+                    <div class="radio-grid" id="radio-grid">
+                        <!-- Grid generated by JS -->
+                    </div>
+                </div>
+                <div class="radio-content">
+                    <p class="radio-quote" id="quote-text">"Less, but better."</p>
+                    <p class="radio-author" id="quote-author">— Dieter Rams</p>
+                </div>
+                <div class="radio-footer">
+                    <div class="device-logo">sev<span>e</span>n</div>
+                    <div class="radio-dots">
+                        <div class="radio-dot active" data-quote="0"></div>
+                        <div class="radio-dot" data-quote="1"></div>
+                        <div class="radio-dot" data-quote="2"></div>
+                        <div class="radio-dot" data-quote="3"></div>
+                    </div>
+                </div>
+                <div class="device-label">radio 1</div>
+            </div>
+            
+        </div>
+    </div>
+    
+    <script>
+        // ============================================
+        // CLOCK DEVICE
+        // ============================================
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const timeStr = `${hours}:${mins}`;
+            
+            document.getElementById('clock-time').textContent = timeStr;
+            
+            const options = { weekday: 'long', month: 'short', day: 'numeric' };
+            document.getElementById('clock-date').textContent = now.toLocaleDateString('en-US', options);
+            
+            let greeting = 'Good evening';
+            if (hours < 6) greeting = 'Good night';
+            else if (hours < 12) greeting = 'Good morning';
+            else if (hours < 18) greeting = 'Good afternoon';
+            
+            document.getElementById('greeting').textContent = greeting;
+        }
+        
+        updateClock();
+        setInterval(updateClock, 1000);
+        
+        // ============================================
+        // TUNER - Navigation
+        // ============================================
+        const tunerBtns = document.querySelectorAll('.tuner-btn');
+        const tunerValue = document.getElementById('tuner-value');
+        const navKnob = document.getElementById('nav-knob');
+        
+        tunerBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tunerBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const section = btn.dataset.section;
+                tunerValue.textContent = section + '.0';
+                navKnob.style.transform = `rotate(${(section - 1) * 90}deg)`;
+            });
+        });
+        
+        // ============================================
+        // SPEAKER - Grid Generation
+        // ============================================
+        function generateSpeakerGrid() {
+            const container = document.getElementById('speaker-grid');
+            const rows = 12;
+            const cols = 12;
+            
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const hole = document.createElement('div');
+                    hole.className = 'speaker-hole';
+                    
+                    // Hide corners to create circular effect
+                    const centerR = (rows - 1) / 2;
+                    const centerC = (cols - 1) / 2;
+                    const distance = Math.sqrt(Math.pow(r - centerR, 2) + Math.pow(c - centerC, 2));
+                    
+                    if (distance > 5.5) {
+                        hole.classList.add('hide');
+                    }
+                    
+                    container.appendChild(hole);
+                }
+            }
+        }
+        
+        generateSpeakerGrid();
+        
+        // ============================================
+        // CAMERA - Projects
+        // ============================================
+        const projects = [
+            { title: 'Spark Lab', desc: 'Startup accelerator & community', year: '2024' },
+            { title: 'Quant Trading', desc: 'AI-powered stock prediction', year: '2023' },
+            { title: 'Hardware Lab', desc: 'Arduino & ESP32 projects', year: '2022' },
+            { title: 'Web Systems', desc: 'Full-stack development', year: '2021' },
+            { title: 'Design Studio', desc: 'Visual identity systems', year: '2020' }
+        ];
+        
+        let currentProject = 0;
+        const projectTitle = document.getElementById('project-title');
+        const projectDesc = document.getElementById('project-desc');
+        const projectYear = document.getElementById('project-year');
+        const cameraDots = document.querySelectorAll('.camera-nav-dot');
+        
+        function updateProject(index) {
+            currentProject = index;
+            const project = projects[index];
+            projectTitle.textContent = project.title;
+            projectDesc.textContent = project.desc;
+            projectYear.textContent = project.year;
+            
+            cameraDots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+        
+        cameraDots.forEach((dot, i) => {
+            dot.addEventListener('click', () => updateProject(i));
+        });
+        
+        document.getElementById('shutter-btn').addEventListener('click', () => {
+            currentProject = (currentProject + 1) % projects.length;
+            updateProject(currentProject);
+        });
+        
+        // ============================================
+        // VENTILATOR - Skills Grid
+        // ============================================
+        function generateVentGrid() {
+            const container = document.getElementById('vent-grid');
+            const size = 14;
+            
+            for (let i = 0; i < size * size; i++) {
+                const hole = document.createElement('div');
+                hole.className = 'vent-hole';
+                
+                // Random active state for visual interest
+                if (Math.random() > 0.85) {
+                    hole.classList.add('active');
+                }
+                
+                container.appendChild(hole);
+            }
+        }
+        
+        generateVentGrid();
+        
+        // Skill toggle
+        document.querySelectorAll('.vent-skill').forEach(skill => {
+            skill.addEventListener('click', () => {
+                skill.classList.toggle('active');
+                
+                // Update count
+                const activeCount = document.querySelectorAll('.vent-skill.active').length;
+                document.getElementById('skill-count').textContent = activeCount || '—';
+                
+                // Animate grid
+                const holes = document.querySelectorAll('.vent-hole');
+                holes.forEach(hole => {
+                    hole.classList.remove('active');
+                    if (Math.random() > 0.8) {
+                        setTimeout(() => hole.classList.add('active'), Math.random() * 300);
+                    }
+                });
+            });
+        });
+        
+        // ============================================
+        // PLAYER - Timeline
+        // ============================================
+        const tracks = [
+            { name: 'Origins', year: '2019' },
+            { name: 'Design Systems', year: '2020' },
+            { name: 'Web Development', year: '2021' },
+            { name: 'Hardware Projects', year: '2022' },
+            { name: 'Quantitative Research', year: '2023' },
+            { name: 'Spark Lab', year: '2024' }
+        ];
+        
+        let currentTrack = 3;
+        
+        function updateTrack() {
+            const track = tracks[currentTrack];
+            document.getElementById('track-name').textContent = track.name;
+            document.getElementById('track-year').textContent = track.year;
+            document.querySelector('.player-track-num').textContent = 
+                `TRACK ${String(currentTrack + 1).padStart(2, '0')} / ${String(tracks.length).padStart(2, '0')}`;
+            
+            const progress = ((currentTrack + 1) / tracks.length) * 100;
+            document.getElementById('progress-fill').style.width = progress + '%';
+        }
+        
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            currentTrack = Math.max(0, currentTrack - 1);
+            updateTrack();
+        });
+        
+        document.getElementById('next-btn').addEventListener('click', () => {
+            currentTrack = Math.min(tracks.length - 1, currentTrack + 1);
+            updateTrack();
+        });
+        
+        updateTrack();
+        
+        // ============================================
+        // RADIO - Philosophy Quotes
+        // ============================================
+        const quotes = [
+            { text: '"Less, but better."', author: '— Dieter Rams' },
+            { text: '"Good design is as little design as possible."', author: '— Dieter Rams' },
+            { text: '"Design is not just what it looks like. Design is how it works."', author: '— Steve Jobs' },
+            { text: '"Simplicity is the ultimate sophistication."', author: '— Leonardo da Vinci' }
+        ];
+        
+        let currentQuote = 0;
+        
+        function generateRadioGrid() {
+            const container = document.getElementById('radio-grid');
+            for (let i = 0; i < 160; i++) {
+                const hole = document.createElement('div');
+                hole.className = 'radio-hole';
+                container.appendChild(hole);
+            }
+        }
+        
+        generateRadioGrid();
+        
+        document.querySelectorAll('.radio-dot').forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                currentQuote = i;
+                document.querySelectorAll('.radio-dot').forEach((d, j) => {
+                    d.classList.toggle('active', j === i);
+                });
+                document.getElementById('quote-text').textContent = quotes[i].text;
+                document.getElementById('quote-author').textContent = quotes[i].author;
+            });
+        });
+        
+        // ============================================
+        // SCROLL-BASED KNOB ROTATION
+        // ============================================
+        window.addEventListener('scroll', () => {
+            const scrollPercent = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+            const rotation = scrollPercent * 360;
+            navKnob.style.transform = `rotate(${rotation}deg)`;
+            
+            // Update section indicator
+            const section = Math.min(4, Math.floor(scrollPercent * 4) + 1);
+            tunerValue.textContent = section + '.0';
+        });
+    </script>
+</body>
+</html>

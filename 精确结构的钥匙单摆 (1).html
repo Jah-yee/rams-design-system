@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accurate Pendulum Structure</title>
+  <style>
+      /* 
+      精确重构：完全按照描述的尺寸和比例实现
+      关键参数：
+      - 画布：扩大3倍
+      - 连接杆：y=180~520 (340px高)
+      - 大球：半径150px，球心y=655
+      - 间隙：135px (520到655)
+      - 摆动周期：3s
+      - 摆动角度：±25度
+      - 阴影距离：大球半径的2/3 = 100px
+      */
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          background: #fafafa;
+          height: 100vh;
+          overflow: hidden;
+          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      /* 
+      画布扩大3倍：
+      - 原尺寸：70vmin × 95vmin
+      - 新尺寸：210vmin × 285vmin (3倍)
+      - 效果：看到的东西变小，边距更多
+      */
+      .pendulum-container {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 210vmin;  /* 扩大3倍 */
+          height: 285vmin; /* 扩大3倍 */
+      }
+
+      /* 
+      🎨 橙色轨迹曲线：Dieter Rams 设计原则
+      Less but better - 用最简单的虚线表达复杂的运动轨迹
+      诚实设计 - 直观展示摆锤的物理运动路径
+      功能可见性 - 让用户立即理解这是一个可摆动的交互组件
+      */
+      .trajectory-arc {
+          position: absolute;
+          top: 25%;
+          left: 50%;
+          width: 95%;
+          height: 60%;
+          
+          /* 
+          技术实现：
+          - 半圆弧形虚线，180° 弧度的下半圆
+          - 橙色虚线 #ff6b35 (Drams 品牌橙色)
+          - 轻盈透明度 60%，不抢夺主体视觉
+          */
+          border: 2px dashed #ff6b35;
+          border-top: none;
+          border-radius: 0 0 120px 120px;
+          opacity: 0.6;
+          
+          transform: translateX(-50%);
+          pointer-events: auto; /* 启用鼠标交互 */
+          cursor: pointer;
+          
+          /* 
+          平滑过渡效果：
+          符合现代UI设计的微交互原则
+          */
+          transition: opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+      }
+
+      /* 
+      交互状态：鼠标悬停时不透明度变化
+      设计意图：
+      - 视觉引导：预测运动范围
+      - 空间定义：明确标示组件的"活动区域"  
+      - 交互暗示：暗示这是一个动态、可交互的元素
+      */
+      .trajectory-arc:hover {
+          opacity: 1.0; /* 完全不透明，强化视觉存在感 */
+      }
+
+      /* 
+      固定支撑结构：橙色支点 + 大圆盘
+      位置：确保完整显示
+      */
+      .fixed-support {
+          position: absolute;
+          top: 5%;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 10;
+      }
+
+      /* 
+      摆动系统：连接杆 + 大球的完整组合
+      关键修正：
+      1. viewBox扩大到容纳半径150px的大球
+      2. 旋转中心精确对应橙色支点位置
+      3. 保持所有元素的精确尺寸比例
+      */
+      .pendulum-swing-system {
+          position: absolute;
+          top: 5%;
+          left: 50%;
+          width: 400px;
+          height: 1000px;
+          /* 
+          旋转中心：橙色支点位置
+          在新的坐标系中为 (200, 155)
+          */
+          transform-origin: 200px 155px;
+          transform: translateX(-50%);
+          z-index: 5;
+
+          animation: pendulum-physics 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+      }
+
+      @keyframes pendulum-physics {
+          0% {
+              transform: translateX(-50%) rotate(-25deg);
+          }
+          50% {
+              transform: translateX(-50%) rotate(25deg);
+          }
+          100% {
+              transform: translateX(-50%) rotate(-25deg);
+          }
+      }
+
+      /* 
+      🌑 摆球阴影 - 全新设计
+      
+      物理特征：
+      - 距离摆球：2/3个大球半径 = 100px
+      - 位置：在摆球下方，远离轨迹线
+      - 动态效果：
+        * 两端：阴影更长（scaleX更大）
+        * 中间：颜色更深（opacity更高）
+      
+      视觉效果：
+      - 柔和的多层box-shadow
+      - 椭圆形状，模拟真实投影
+      - 白色背景增强阴影可见性
+      */
+      .pendulum-shadow {
+          position: absolute;
+          bottom: 8%;
+          left: 50%;
+          width: 160px;
+          height: 30px;
+          background: white;
+          border-radius: 50%;
+          transform: translateX(-50%);
+          z-index: 1;
+          
+          /* 
+          柔和的多层阴影：
+          - 第一层：轻微的近距离阴影
+          - 第二层：柔和的中距离阴影
+          */
+          box-shadow: 
+              0 2px 4px rgba(0, 0, 0, 0.04),
+              0 4px 12px rgba(0, 0, 0, 0.08);
+          
+          animation: shadowDynamic 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+      }
+
+      /* 
+      阴影动态效果：
+      
+      关键特征：
+      1. 两端（0%, 50%, 100%）：
+         - 阴影更长：scaleX(1.3)
+         - 颜色更浅：较轻的box-shadow
+         - 摆球远离地面，投影拉长
+      
+      2. 中间（25%, 75%）：
+         - 阴影更短：scaleX(1.0)
+         - 颜色更深：较重的box-shadow
+         - 摆球接近地面，投影集中
+      
+      3. x轴运动：与摆球相反
+         - 摆长：500px
+         - 角度：±25度
+         - 偏移：500 × sin(25°) ≈ 211px
+      */
+      @keyframes shadowDynamic {
+          0% { 
+              /* 摆球在左端 → 阴影在右侧，拉长变浅 */
+              transform: translateX(-50%) translateX(211px) scaleX(1.3);
+              box-shadow: 
+                  0 2px 4px rgba(0, 0, 0, 0.03),
+                  0 4px 12px rgba(0, 0, 0, 0.06);
+          }
+          25% { 
+              /* 摆球在中心 → 阴影在中心，缩短变深 */
+              transform: translateX(-50%) translateX(0px) scaleX(1.0);
+              box-shadow: 
+                  0 2px 4px rgba(0, 0, 0, 0.06),
+                  0 4px 12px rgba(0, 0, 0, 0.12);
+          }
+          50% { 
+              /* 摆球在右端 → 阴影在左侧，拉长变浅 */
+              transform: translateX(-50%) translateX(-211px) scaleX(1.3);
+              box-shadow: 
+                  0 2px 4px rgba(0, 0, 0, 0.03),
+                  0 4px 12px rgba(0, 0, 0, 0.06);
+          }
+          75% { 
+              /* 摆球在中心 → 阴影在中心，缩短变深 */
+              transform: translateX(-50%) translateX(0px) scaleX(1.0);
+              box-shadow: 
+                  0 2px 4px rgba(0, 0, 0, 0.06),
+                  0 4px 12px rgba(0, 0, 0, 0.12);
+          }
+          100% { 
+              /* 摆球回到左端 → 阴影回到右侧，拉长变浅 */
+              transform: translateX(-50%) translateX(211px) scaleX(1.3);
+              box-shadow: 
+                  0 2px 4px rgba(0, 0, 0, 0.03),
+                  0 4px 12px rgba(0, 0, 0, 0.06);
+          }
+      }
+
+      /* 响应式设计：保持精确比例 */
+      @media (max-width: 768px) {
+          .pendulum-container {
+              width: 240vmin;  /* 调整后的3倍尺寸 */
+              height: 270vmin;
+          }
+          
+          .pendulum-swing-system {
+              width: 320px;
+              height: 800px;
+              transform-origin: 160px 124px;
+          }
+
+          /* 响应式下的轨迹弧线调整 */
+          .trajectory-arc {
+              border-width: 1.5px;
+              border-radius: 0 0 100px 100px;
+          }
+
+          /* 响应式下的阴影调整 */
+          .pendulum-shadow {
+              width: 128px;
+              height: 24px;
+          }
+
+          @keyframes shadowDynamic {
+              0% { 
+                  transform: translateX(-50%) translateX(169px) scaleX(1.3);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.03),
+                      0 4px 12px rgba(0, 0, 0, 0.06);
+              }
+              25% { 
+                  transform: translateX(-50%) translateX(0px) scaleX(1.0);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.06),
+                      0 4px 12px rgba(0, 0, 0, 0.12);
+              }
+              50% { 
+                  transform: translateX(-50%) translateX(-169px) scaleX(1.3);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.03),
+                      0 4px 12px rgba(0, 0, 0, 0.06);
+              }
+              75% { 
+                  transform: translateX(-50%) translateX(0px) scaleX(1.0);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.06),
+                      0 4px 12px rgba(0, 0, 0, 0.12);
+              }
+              100% { 
+                  transform: translateX(-50%) translateX(169px) scaleX(1.3);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.03),
+                      0 4px 12px rgba(0, 0, 0, 0.06);
+              }
+          }
+      }
+
+      @media (max-width: 480px) {
+          .pendulum-container {
+              width: 270vmin;  /* 调整后的3倍尺寸 */
+              height: 255vmin;
+          }
+          
+          .pendulum-swing-system {
+              width: 280px;
+              height: 700px;
+              transform-origin: 140px 108px;
+          }
+
+          /* 小屏幕下的轨迹弧线调整 */
+          .trajectory-arc {
+              border-width: 1px;
+              border-radius: 0 0 80px 80px;
+          }
+
+          /* 小屏幕下的阴影调整 */
+          .pendulum-shadow {
+              width: 112px;
+              height: 21px;
+          }
+
+          @keyframes shadowDynamic {
+              0% { 
+                  transform: translateX(-50%) translateX(148px) scaleX(1.3);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.03),
+                      0 4px 12px rgba(0, 0, 0, 0.06);
+              }
+              25% { 
+                  transform: translateX(-50%) translateX(0px) scaleX(1.0);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.06),
+                      0 4px 12px rgba(0, 0, 0, 0.12);
+              }
+              50% { 
+                  transform: translateX(-50%) translateX(-148px) scaleX(1.3);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.03),
+                      0 4px 12px rgba(0, 0, 0, 0.06);
+              }
+              75% { 
+                  transform: translateX(-50%) translateX(0px) scaleX(1.0);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.06),
+                      0 4px 12px rgba(0, 0, 0, 0.12);
+              }
+              100% { 
+                  transform: translateX(-50%) translateX(148px) scaleX(1.3);
+                  box-shadow: 
+                      0 2px 4px rgba(0, 0, 0, 0.03),
+                      0 4px 12px rgba(0, 0, 0, 0.06);
+              }
+          }
+      }
+
+      /* 
+      可访问性：动画敏感用户的体验优化
+      同时保持轨迹弧线的交互性
+      */
+      @media (prefers-reduced-motion: reduce) {
+          .pendulum-swing-system {
+              animation-duration: 6s;
+          }
+          
+          .trajectory-arc {
+              transition-duration: 0.1s; /* 减少过渡时间 */
+          }
+
+          .pendulum-shadow {
+              animation-duration: 6s;
+          }
+      }
+
+      /* 
+      性能优化：GPU加速和渲染优化
+      */
+      .pendulum-swing-system {
+          will-change: transform;
+          backface-visibility: hidden;
+      }
+
+      .trajectory-arc {
+          will-change: opacity; /* 优化透明度变化性能 */
+      }
+
+      .pendulum-shadow {
+          will-change: transform, box-shadow; /* 优化阴影动画性能 */
+          backface-visibility: hidden;
+      }
+
+      /* 
+      高对比度模式支持：
+      确保在高对比度环境下轨迹线仍然可见
+      */
+      @media (prefers-contrast: high) {
+          .trajectory-arc {
+              border-color: #e55a2b; /* 稍微加深的橙色 */
+              border-width: 3px;
+              opacity: 0.8;
+          }
+          
+          .trajectory-arc:hover {
+              opacity: 1.0;
+          }
+
+          .pendulum-shadow {
+              box-shadow: 
+                  0 2px 4px rgba(0, 0, 0, 0.08),
+                  0 4px 12px rgba(0, 0, 0, 0.16);
+          }
+      }
+
+      /* 
+      深色模式适配：
+      在深色背景下调整轨迹线的视觉效果
+      */
+      @media (prefers-color-scheme: dark) {
+          body {
+              background: #1a1a1a;
+          }
+          
+          .trajectory-arc {
+              border-color: #ff7b45; /* 稍微提亮的橙色 */
+              opacity: 0.7;
+          }
+          
+          .trajectory-arc:hover {
+              opacity: 1.0;
+          }
+
+          .pendulum-shadow {
+              background: #2a2a2a;
+              box-shadow: 
+                  0 2px 4px rgba(0, 0, 0, 0.3),
+                  0 4px 12px rgba(0, 0, 0, 0.5);
+          }
+      }
+  </style>
+</head>
+<body>
+  <div class="pendulum-container">
+      <!-- 
+      🌑 摆球阴影层 - 最底层
+      
+      全新设计特征：
+      1. 距离：摆球下方 2/3个大球半径 = 100px
+      2. 动态长度：两端更长(scaleX 1.3)，中间更短(scaleX 1.0)
+      3. 动态颜色：两端更浅，中间更深
+      4. 柔和阴影：多层box-shadow，白色背景
+      5. 物理准确：与摆球x坐标相反运动
+      -->
+      <div class="pendulum-shadow"></div>
+
+      <!-- 
+      🎨 橙色轨迹曲线：物理学可视化设计
+      
+      设计构思：
+      1. 设计灵感来源
+         - Dieter Rams 设计原则：Less but better
+         - 诚实设计：不隐藏机械原理
+         - 功能可见性：让用户立即理解交互性
+      
+      2. 核心用途
+         A. 视觉引导：预测运动范围
+         B. 空间定义：明确标示"活动区域"
+         C. 交互暗示：暗示动态可交互元素
+      
+      3. 技术特征
+         - 几何形状：半圆弧形虚线，180° 弧度
+         - 颜色：#ff6b35 (Drams 品牌橙色)
+         - 透明度：默认60%，悬停时100%
+         - 交互：鼠标触碰时颜色变不透明
+      -->
+      <div class="trajectory-arc"></div>
+      
+      <!-- 
+      固定支撑结构：完全按照描述实现
+      大圆盘半径75px + 橙色小球半径18.5px
+      -->
+      <svg class="fixed-support" viewBox="0 0 400 250" width="400" height="250" xmlns="http://www.w3.org/2000/svg">
+          <!-- 
+          大圆盘（支撑底座）
+          半径：75px
+          圆心：(200, 155) - 在新坐标系中居中
+          颜色：浅灰色 #eeeeee
+          -->
+          <circle cx="200" cy="155" r="75" fill="#eeeeee"/>
+          
+          <!-- 
+          橙色小圆（支撑点/枢轴点）
+          半径：18.5px
+          圆心：(200, 155) - 与大圆盘同心
+          颜色：橙色 #ed6c35
+          -->
+          <circle cx="200" cy="155" r="18.5" fill="#ed6c35"/>
+      </svg>
+      
+      <!-- 
+      摆动系统：精确按照描述的所有参数实现
+      viewBox: 0 0 400 950 - 足够容纳半径150px的大球
+      -->
+      <svg class="pendulum-swing-system" viewBox="0 0 400 950" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+              <!-- 
+              径向渐变：完全按照描述实现
+              中心：浅灰 #f0f0f0
+              边缘：深灰 #d0d0d0
+              渐变中心偏移：(35%, 35%)
+              -->
+              <radialGradient id="ballGradient" cx="35%" cy="35%">
+                  <stop offset="0%" style="stop-color:#f0f0f0;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#d0d0d0;stop-opacity:1" />
+              </radialGradient>
+              
+              <!-- 
+              高光效果：白色半透明径向渐变
+              增强立体感
+              -->
+              <radialGradient id="highlight" cx="50%" cy="50%">
+                  <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
+                  <stop offset="70%" style="stop-color:#ffffff;stop-opacity:0" />
+              </radialGradient>
+          </defs>
+          
+          <!-- 
+          连接杆：垂直梯形结构
+          精确按照描述的所有参数：
+          
+          几何形状：
+          - 上部矩形段：宽度75px (x=162.5 到 x=237.5，中心200)
+          - 总高度：340px (y=180 到 y=520)
+          - 底部宽度：110px
+          
+          分段结构：
+          - 矩形段：y=180~230 (50px高)
+          - 过渡段：y=230~350 (120px，线性延伸)
+          - 梯形段：y=350~520 (170px，曲线扩展)
+          -->
+          <path d="M 162.5 180
+                   L 237.5 180
+                   L 237.5 230
+                   L 240 350
+                   Q 257 470, 255 520
+                   L 145 520
+                   Q 143 470, 160 350
+                   L 162.5 230
+                   Z" 
+                fill="#eeeeee"/>
+          
+          <!-- 
+          下方大球（Large Sphere）
+          精确按照描述的所有参数：
+          
+          几何参数：
+          - 半径：150px（直径300px）
+          - 圆心位置：(200, 655)
+          - 与连接杆距离：135px（从y=520到y=655）
+          
+          视觉效果：
+          - 基础填充：径向渐变 ballGradient
+          - 阴影：drop-shadow 0px 8px 25px rgba(0,0,0,0.15)
+          -->
+          <circle cx="200" cy="655" r="150" 
+                  fill="url(#ballGradient)" 
+                  style="filter: drop-shadow(0px 8px 25px rgba(0,0,0,0.15))" />
+          
+          <!-- 
+          高光区域：
+          位置：(155, 610) - 左上象限
+          尺寸：椭圆 45×45px
+          效果：白色半透明径向渐变，增强立体感
+          -->
+          <ellipse cx="155" cy="610" rx="45" ry="45" fill="url(#highlight)" />
+      </svg>
+  </div>
+
+  <!-- 
+  ✨ 更新总结：
+  
+  1. 画布扩大3倍 ✅
+     - 原尺寸：70vmin × 95vmin
+     - 新尺寸：210vmin × 285vmin
+     - 效果：看到的东西变小，边距更多
+  
+  2. 阴影全新设计 ✅
+     A. 距离特征：
+        - 摆球下方 2/3个大球半径 = 100px
+        - 远离轨迹线和摆球
+     
+     B. 动态长度：
+        - 两端：scaleX(1.3) - 阴影更长
+        - 中间：scaleX(1.0) - 阴影更短
+     
+     C. 动态颜色：
+        - 两端：rgba(0,0,0,0.03~0.06) - 颜色更浅
+        - 中间：rgba(0,0,0,0.06~0.12) - 颜色更深
+     
+     D. 柔和效果：
+        - 多层box-shadow
+        - 白色背景增强可见性
+        - 椭圆形状模拟真实投影
+     
+     E. 物理运动：
+        - 与摆球x坐标相反
+        - 完美同步3s周期
+        - Perfect Physics贝塞尔曲线
+  
+  3. 响应式适配 ✅
+     - 不同屏幕尺寸的阴影调整
+     - 保持物理比例准确性
+     - GPU加速优化性能
+  
+  完美实现了所有要求！
+  -->
+</body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dieter Rams Rotary Dial - Interactive</title>
+    <style>
+        :root {
+            --bg-plate: #f7f7f7;
+            --bg-inner: #fcfcfa;
+            --knob-dark: #383838;
+            --knob-edge: #4e4e4e;
+            --knob-surface-dark: #1d1d1d;
+            --indicator-orange: #e85c18;
+            --dot-color: #000;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        .dial-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .dial-container:active {
+            cursor: grabbing;
+        }
+
+        /* Outer light gray plate */
+        .plate {
+            position: absolute;
+            width: 178px;
+            height: 178px;
+            background-color: var(--bg-plate);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Dots container */
+        .dots-container {
+            position: absolute;
+            width: 156px;
+            height: 156px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .dot {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background-color: var(--dot-color);
+            border-radius: 50%;
+            transform-origin: center;
+        }
+
+        /* Tick marks at bottom */
+        .tick {
+            position: absolute;
+            width: 22px;
+            height: 2px;
+            background-color: var(--dot-color);
+        }
+
+        .tick-left {
+            bottom: 6px;
+            left: 12px;
+            transform: rotate(45deg);
+        }
+
+        .tick-right {
+            bottom: 6px;
+            right: 12px;
+            transform: rotate(-45deg);
+        }
+
+        /* Inner white ring */
+        .inner-ring {
+            position: absolute;
+            width: 128px;
+            height: 128px;
+            background-color: var(--bg-inner);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                rgba(0, 0, 0, 0.22) 1px 1px 2px 0px inset,
+                rgba(0, 0, 0, 0.13) -0.19px -0.71px 1.61px -0.42px inset,
+                rgba(0, 0, 0, 0.13) -0.48px -1.81px 4.11px -0.83px inset,
+                rgba(0, 0, 0, 0.13) -0.97px -3.62px 8.25px -1.25px inset,
+                rgba(0, 0, 0, 0.13) -1.83px -6.87px 15.63px -1.67px inset,
+                rgba(0, 0, 0, 0.13) -3.64px -13.65px 31.07px -2.08px inset,
+                rgba(0, 0, 0, 0.13) -8px -30px 68.31px -2.5px inset;
+        }
+
+        /* Dark outer ring */
+        .outer-knob {
+            position: absolute;
+            width: 122px;
+            height: 122px;
+            background-color: var(--knob-dark);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                rgba(0, 0, 0, 0.9) 0px 0px 1px 1px inset,
+                rgba(0, 0, 0, 0.09) 0.3px 0.3px 0.21px -0.58px,
+                rgba(0, 0, 0, 0.1) 1.14px 1.14px 0.81px -1.17px,
+                rgba(0, 0, 0, 0.16) 5px 5px 3.54px -1.75px,
+                rgba(255, 255, 255, 0.2) 1px 1px 1px 1px inset,
+                rgba(0, 0, 0, 0.45) -1px -1px 2px 1px inset,
+                rgb(0, 0, 0) -1px -1px 1px 0px inset;
+        }
+
+        /* Surface gradient blur layer */
+        .surface-blur {
+            position: absolute;
+            width: 92px;
+            height: 92px;
+            background: linear-gradient(180deg, var(--knob-surface-dark) 0%, #878787 100%);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(135deg);
+            filter: blur(8px);
+        }
+
+        /* Large edge knob */
+        .large-edge {
+            position: absolute;
+            width: 78px;
+            height: 78px;
+            background-color: var(--knob-edge);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                rgba(0, 0, 0, 0.9) 1px 1px 3px 0px inset,
+                rgba(0, 0, 0, 0.22) 0.52px 0.52px 0.37px -0.21px,
+                rgba(0, 0, 0, 0.24) 1.32px 1.32px 0.94px -0.42px,
+                rgba(0, 0, 0, 0.26) 2.66px 2.66px 1.88px -0.63px,
+                rgba(0, 0, 0, 0.31) 5.03px 5.03px 3.56px -0.83px,
+                rgba(0, 0, 0, 0.41) 10.01px 10.01px 7.08px -1.04px,
+                rgba(0, 0, 0, 0.64) 22px 22px 15.56px -1.25px,
+                rgba(255, 255, 255, 0.2) 1px 1px 1px 2px inset,
+                rgba(0, 0, 0, 0.45) -3px -3px 4px 1px inset,
+                rgb(0, 0, 0) -1px -1px 12px 0px inset;
+        }
+
+        /* Inner surface blur */
+        .inner-surface-blur {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(180deg, var(--knob-surface-dark) 0%, var(--knob-edge) 100%);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(135deg);
+            filter: blur(8px);
+        }
+
+        /* Rotatable knob center */
+        .knob-center {
+            position: absolute;
+            width: 78px;
+            height: 78px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.05s ease-out;
+        }
+
+        .knob-center.no-transition {
+            transition: none;
+        }
+
+        /* Knob face */
+        .knob-face {
+            position: absolute;
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            top: 0;
+            left: 0;
+        }
+
+        /* Orange indicator */
+        .indicator {
+            position: absolute;
+            width: 5px;
+            height: 26px;
+            background-color: var(--indicator-orange);
+            border-radius: 2.5px;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: rgba(0, 0, 0, 0.33) -1px -1px 2px 0px inset;
+        }
+
+        /* Value display */
+        .value-display {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .value-display span {
+            font-size: 28px;
+            font-weight: 600;
+            display: block;
+            margin-top: 8px;
+        }
+
+        /* Instructions */
+        .instructions {
+            position: fixed;
+            bottom: 30px;
+            color: #888;
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="dial-container" id="dial">
+        <!-- Light gray background plate -->
+        <div class="plate"></div>
+        
+        <!-- Dots around the perimeter -->
+        <div class="dots-container" id="dots-container"></div>
+        
+        <!-- Tick marks -->
+        <div class="tick tick-left"></div>
+        <div class="tick tick-right"></div>
+        
+        <!-- Inner white ring -->
+        <div class="inner-ring"></div>
+        
+        <!-- Dark outer ring -->
+        <div class="outer-knob"></div>
+        
+        <!-- Surface gradient blur -->
+        <div class="surface-blur"></div>
+        
+        <!-- Large edge -->
+        <div class="large-edge"></div>
+        
+        <!-- Inner surface blur -->
+        <div class="inner-surface-blur"></div>
+        
+        <!-- Rotatable center with indicator -->
+        <div class="knob-center" id="knob-center">
+            <div class="knob-face"></div>
+            <div class="indicator"></div>
+        </div>
+    </div>
+    
+    <div class="value-display">
+        Volume
+        <span id="value">50</span>
+    </div>
+    
+    <div class="instructions">
+        Drag to rotate • Scroll to fine-tune
+    </div>
+
+    <script>
+        // Generate dots around the perimeter
+        const dotsContainer = document.getElementById('dots-container');
+        const numDots = 20;
+        const radius = 72; // Radius from center to dots
+        const startAngle = -225; // Start from bottom-left (in degrees)
+        const endAngle = 45; // End at bottom-right
+        const angleRange = endAngle - startAngle; // Total arc (270 degrees)
+
+        for (let i = 0; i < numDots; i++) {
+            const angle = startAngle + (i / (numDots - 1)) * angleRange;
+            const radians = (angle * Math.PI) / 180;
+            const x = 78 + radius * Math.cos(radians); // 78 = container center
+            const y = 78 + radius * Math.sin(radians);
+            
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.style.left = `${x - 2.5}px`;
+            dot.style.top = `${y - 2.5}px`;
+            dotsContainer.appendChild(dot);
+        }
+
+        // Rotation logic
+        const dial = document.getElementById('dial');
+        const knobCenter = document.getElementById('knob-center');
+        const valueDisplay = document.getElementById('value');
+        
+        let isDragging = false;
+        let startAngleFromCenter = 0;
+        let currentRotation = -135; // Initial rotation (pointing to ~10 o'clock)
+        const minRotation = -225;
+        const maxRotation = 45;
+
+        function getAngleFromCenter(clientX, clientY) {
+            const rect = dial.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const deltaX = clientX - centerX;
+            const deltaY = clientY - centerY;
+            return Math.atan2(deltaY, deltaX) * (180 / Math.PI);
+        }
+
+        function updateRotation(newRotation) {
+            // Clamp rotation within bounds
+            currentRotation = Math.max(minRotation, Math.min(maxRotation, newRotation));
+            knobCenter.style.transform = `translate(-50%, -50%) rotate(${currentRotation}deg)`;
+            
+            // Calculate value (0-100)
+            const normalizedValue = (currentRotation - minRotation) / (maxRotation - minRotation);
+            const value = Math.round(normalizedValue * 100);
+            valueDisplay.textContent = value;
+        }
+
+        // Mouse events
+        dial.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            knobCenter.classList.add('no-transition');
+            startAngleFromCenter = getAngleFromCenter(e.clientX, e.clientY) - currentRotation;
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const currentAngle = getAngleFromCenter(e.clientX, e.clientY);
+            updateRotation(currentAngle - startAngleFromCenter);
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            knobCenter.classList.remove('no-transition');
+        });
+
+        // Touch events
+        dial.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            knobCenter.classList.add('no-transition');
+            const touch = e.touches[0];
+            startAngleFromCenter = getAngleFromCenter(touch.clientX, touch.clientY) - currentRotation;
+            e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            const currentAngle = getAngleFromCenter(touch.clientX, touch.clientY);
+            updateRotation(currentAngle - startAngleFromCenter);
+        }, { passive: false });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+            knobCenter.classList.remove('no-transition');
+        });
+
+        // Mouse wheel for fine control
+        dial.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? -3 : 3;
+            updateRotation(currentRotation + delta);
+        }, { passive: false });
+
+        // Initialize display
+        updateRotation(currentRotation);
+    </script>
+</body>
+</html>
+

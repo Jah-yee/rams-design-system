@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=400">
+  <title>Minimal Pendulum Physics</title>
+  
+  <style>
+  * { box-sizing: border-box; }
+  body { 
+      margin: 0; 
+      padding: 0; 
+      background: #f8f8f8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+      padding: 60px 40px;
+      color: #333;
+  }
+  
+  .main-container {
+      max-width: 800px;
+      margin: 0 auto;
+  }
+  
+  .main-title {
+      font-size: 32px;
+      font-weight: 300;
+      color: #333;
+      margin-bottom: 60px;
+      text-align: center;
+      letter-spacing: -0.5px;
+  }
+  
+  /* 主要演示区域 */
+  .demo-section {
+      background: white;
+      border-radius: 24px;
+      padding: 60px 40px;
+      margin-bottom: 40px;
+      box-shadow: 0 2px 40px rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.06);
+  }
+  
+  /* 单摆容器 */
+  .pendulum-stage {
+      position: relative;
+      width: 400px;
+      height: 300px;
+      margin: 40px auto;
+      background: #fafafa;
+      border-radius: 20px;
+      border: 1px solid rgba(0,0,0,0.08);
+      overflow: visible;
+  }
+  
+  /* 轨迹路径 - 极简线条 */
+  .trajectory-line {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      width: 320px;
+      height: 240px;
+      border: 1px dashed rgba(255, 107, 53, 0.4);
+      border-top: none;
+      border-radius: 0 0 160px 160px;
+      transform: translateX(-50%);
+      pointer-events: none;
+  }
+  
+  /* 单摆本体 - 极简设计 */
+  .pendulum {
+      position: absolute;
+      top: 30px;
+      left: 50%;
+      transform-origin: 0 0;
+      width: 1px;
+      height: 240px;
+      background: #666;
+      transform: translateX(-0.5px);
+      z-index: 10;
+      animation: minimalSwing 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+  }
+  
+  /* 单摆球 - 橙色圆点 */
+  .pendulum::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      left: -7px;
+      width: 14px;
+      height: 14px;
+      background: #ff6b35;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(255, 107, 53, 0.3);
+  }
+  
+  @keyframes minimalSwing {
+      0% { transform: translateX(-0.5px) rotate(-30deg); }
+      50% { transform: translateX(-0.5px) rotate(30deg); }
+      100% { transform: translateX(-0.5px) rotate(-30deg); }
+  }
+  
+  /* 速度指示器 - 极简设计 */
+  .speed-indicator {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 2px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 1px;
+      overflow: hidden;
+  }
+  
+  .speed-dot {
+      width: 8px;
+      height: 8px;
+      background: #ff6b35;
+      border-radius: 50%;
+      position: absolute;
+      top: -3px;
+      animation: speedMove 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+  }
+  
+  @keyframes speedMove {
+      0% { left: 0%; }
+      50% { left: calc(100% - 8px); }
+      100% { left: 0%; }
+  }
+  
+  /* 控制面板 - 极简风格 */
+  .control-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 20px;
+      margin: 40px 0;
+  }
+  
+  .control-item {
+      background: white;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-align: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+  }
+  
+  .control-item:hover {
+      border-color: #ff6b35;
+      box-shadow: 0 2px 12px rgba(255, 107, 53, 0.1);
+  }
+  
+  .control-item.active {
+      border-color: #ff6b35;
+      background: rgba(255, 107, 53, 0.02);
+  }
+  
+  .control-item .icon {
+      font-size: 20px;
+      margin-bottom: 8px;
+      display: block;
+  }
+  
+  .control-item .label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 4px;
+  }
+  
+  .control-item .desc {
+      font-size: 11px;
+      color: #999;
+      font-weight: 400;
+  }
+  
+  /* 贝塞尔曲线展示 */
+  .bezier-showcase {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin: 60px 0;
+  }
+  
+  .bezier-card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      border: 1px solid rgba(0,0,0,0.06);
+      transition: all 0.2s ease;
+  }
+  
+  .bezier-card:hover {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  
+  .bezier-card.featured {
+      border-color: #ff6b35;
+      position: relative;
+  }
+  
+  .bezier-card.featured::before {
+      content: 'RECOMMENDED';
+      position: absolute;
+      top: -8px;
+      right: 20px;
+      background: #ff6b35;
+      color: white;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 12px;
+      letter-spacing: 0.5px;
+  }
+  
+  .bezier-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 16px;
+  }
+  
+  .bezier-demo {
+      position: relative;
+      width: 100%;
+      height: 120px;
+      background: #fafafa;
+      border-radius: 12px;
+      margin: 20px 0;
+      border: 1px solid rgba(0,0,0,0.06);
+      overflow: visible;
+  }
+  
+  .mini-pendulum {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform-origin: 0 0;
+      width: 1px;
+      height: 90px;
+      background: #666;
+      transform: translateX(-0.5px);
+      z-index: 10;
+  }
+  
+  .mini-pendulum::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: -3px;
+      width: 6px;
+      height: 6px;
+      background: #ff6b35;
+      border-radius: 50%;
+  }
+  
+  .mini-trajectory {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      width: 160px;
+      height: 90px;
+      border: 1px dashed rgba(255, 107, 53, 0.3);
+      border-top: none;
+      border-radius: 0 0 80px 80px;
+      transform: translateX(-50%);
+  }
+  
+  /* 不同的贝塞尔曲线动画 */
+  .physics-perfect {
+      animation: perfectSwing 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+  }
+  
+  .physics-smooth {
+      animation: smoothSwing 3s cubic-bezier(0.44, 0.01, 0.56, 0.99) infinite;
+  }
+  
+  .physics-precise {
+      animation: preciseSwing 3s cubic-bezier(0.47, 0.03, 0.53, 0.97) infinite;
+  }
+  
+  .physics-gentle {
+      animation: gentleSwing 3s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  }
+  
+  @keyframes perfectSwing {
+      0% { transform: translateX(-0.5px) rotate(-25deg); }
+      50% { transform: translateX(-0.5px) rotate(25deg); }
+      100% { transform: translateX(-0.5px) rotate(-25deg); }
+  }
+  
+  @keyframes smoothSwing {
+      0% { transform: translateX(-0.5px) rotate(-25deg); }
+      50% { transform: translateX(-0.5px) rotate(25deg); }
+      100% { transform: translateX(-0.5px) rotate(-25deg); }
+  }
+  
+  @keyframes preciseSwing {
+      0% { transform: translateX(-0.5px) rotate(-25deg); }
+      50% { transform: translateX(-0.5px) rotate(25deg); }
+      100% { transform: translateX(-0.5px) rotate(-25deg); }
+  }
+  
+  @keyframes gentleSwing {
+      0% { transform: translateX(-0.5px) rotate(-25deg); }
+      50% { transform: translateX(-0.5px) rotate(25deg); }
+      100% { transform: translateX(-0.5px) rotate(-25deg); }
+  }
+  
+  .bezier-code {
+      background: #f8f8f8;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 8px;
+      padding: 12px;
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      color: #666;
+      margin: 16px 0;
+  }
+  
+  .bezier-note {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+  }
+  
+  /* 速度控制滑块 */
+  .speed-control {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      margin: 40px 0;
+      border: 1px solid rgba(0,0,0,0.06);
+  }
+  
+  .speed-control h3 {
+      font-size: 18px;
+      font-weight: 500;
+      color: #333;
+      margin: 0 0 20px 0;
+      text-align: center;
+  }
+  
+  .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin: 20px 0;
+  }
+  
+  .speed-slider {
+      flex: 1;
+      height: 2px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 1px;
+      outline: none;
+      -webkit-appearance: none;
+  }
+  
+  .speed-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #ff6b35;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(255, 107, 53, 0.3);
+  }
+  
+  .speed-slider::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: #ff6b35;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 1px 3px rgba(255, 107, 53, 0.3);
+  }
+  
+  .speed-value {
+      min-width: 60px;
+      text-align: center;
+      font-weight: 500;
+      color: #ff6b35;
+      font-size: 14px;
+  }
+  
+  /* 响应式设计 */
+  @media (max-width: 768px) {
+      body {
+          padding: 40px 20px;
+      }
+      
+      .demo-section {
+          padding: 40px 20px;
+      }
+      
+      .pendulum-stage {
+          width: 300px;
+          height: 240px;
+      }
+      
+      .trajectory-line {
+          width: 240px;
+          height: 180px;
+          border-radius: 0 0 120px 120px;
+      }
+      
+      .pendulum {
+          height: 180px;
+      }
+      
+      .control-panel {
+          grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .bezier-showcase {
+          grid-template-columns: 1fr;
+      }
+  }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+      <h1 class="main-title">Pendulum Physics</h1>
+      
+      <!-- 主演示区域 -->
+      <div class="demo-section">
+          <div class="pendulum-stage">
+              <div class="trajectory-line"></div>
+              <div class="pendulum" id="mainPendulum"></div>
+              <div class="speed-indicator">
+                  <div class="speed-dot" id="speedDot"></div>
+              </div>
+          </div>
+          
+          <!-- 速度控制 -->
+          <div class="speed-control">
+              <h3>Speed Control</h3>
+              <div class="slider-container">
+                  <span style="font-size: 12px; color: #999;">Slow</span>
+                  <input type="range" class="speed-slider" id="speedSlider" 
+                         min="0.2" max="3" step="0.1" value="1" 
+                         oninput="adjustSpeed(this.value)">
+                  <span style="font-size: 12px; color: #999;">Fast</span>
+                  <div class="speed-value" id="speedValue">1.0x</div>
+              </div>
+          </div>
+      </div>
+      
+      <!-- 控制面板 -->
+      <div class="control-panel">
+          <div class="control-item active" onclick="setControlMode('play')">
+              <span class="icon">▶️</span>
+              <div class="label">Play</div>
+              <div class="desc">Normal speed</div>
+          </div>
+          <div class="control-item" onclick="setControlMode('pause')">
+              <span class="icon">⏸️</span>
+              <div class="label">Pause</div>
+              <div class="desc">Stop motion</div>
+          </div>
+          <div class="control-item" onclick="setControlMode('slow')">
+              <span class="icon">🐌</span>
+              <div class="label">Slow</div>
+              <div class="desc">0.5x speed</div>
+          </div>
+          <div class="control-item" onclick="setControlMode('reset')">
+              <span class="icon">🔄</span>
+              <div class="label">Reset</div>
+              <div class="desc">Restart</div>
+          </div>
+      </div>
+      
+      <!-- 贝塞尔曲线展示 -->
+      <div class="bezier-showcase">
+          <div class="bezier-card featured">
+              <div class="bezier-title">Perfect Physics</div>
+              <div class="bezier-demo">
+                  <div class="mini-trajectory"></div>
+                  <div class="mini-pendulum physics-perfect"></div>
+              </div>
+              <div class="bezier-code">cubic-bezier(0.42, 0.0, 0.58, 1.0)</div>
+              <div class="bezier-note">
+                  Ideal pendulum motion with zero velocity at endpoints and maximum velocity at center.
+              </div>
+          </div>
+          
+          <div class="bezier-card">
+              <div class="bezier-title">Smooth Motion</div>
+              <div class="bezier-demo">
+                  <div class="mini-trajectory"></div>
+                  <div class="mini-pendulum physics-smooth"></div>
+              </div>
+              <div class="bezier-code">cubic-bezier(0.44, 0.01, 0.56, 0.99)</div>
+              <div class="bezier-note">
+                  Balanced approach between physical accuracy and visual smoothness.
+              </div>
+          </div>
+          
+          <div class="bezier-card">
+              <div class="bezier-title">Precise Physics</div>
+              <div class="bezier-demo">
+                  <div class="mini-trajectory"></div>
+                  <div class="mini-pendulum physics-precise"></div>
+              </div>
+              <div class="bezier-code">cubic-bezier(0.47, 0.03, 0.53, 0.97)</div>
+              <div class="bezier-note">
+                  High precision simulation closest to real pendulum behavior.
+              </div>
+          </div>
+          
+          <div class="bezier-card">
+              <div class="bezier-title">Gentle Motion</div>
+              <div class="bezier-demo">
+                  <div class="mini-trajectory"></div>
+                  <div class="mini-pendulum physics-gentle"></div>
+              </div>
+              <div class="bezier-code">cubic-bezier(0.45, 0.05, 0.55, 0.95)</div>
+              <div class="bezier-note">
+                  Softer transitions with slight easing at start and end points.
+              </div>
+          </div>
+      </div>
+  </div>
+  
+  <script>
+      let currentSpeed = 1;
+      const baseDuration = 3;
+      
+      function adjustSpeed(value) {
+          currentSpeed = parseFloat(value);
+          const duration = baseDuration / currentSpeed;
+          
+          // 更新主单摆
+          const mainPendulum = document.getElementById('mainPendulum');
+          const speedDot = document.getElementById('speedDot');
+          
+          mainPendulum.style.animationDuration = duration + 's';
+          speedDot.style.animationDuration = duration + 's';
+          
+          // 更新显示
+          document.getElementById('speedValue').textContent = currentSpeed.toFixed(1) + 'x';
+      }
+      
+      function setControlMode(mode) {
+          const mainPendulum = document.getElementById('mainPendulum');
+          const speedDot = document.getElementById('speedDot');
+          const controlItems = document.querySelectorAll('.control-item');
+          
+          // 清除所有激活状态
+          controlItems.forEach(item => item.classList.remove('active'));
+          
+          switch(mode) {
+              case 'play':
+                  mainPendulum.style.animationPlayState = 'running';
+                  speedDot.style.animationPlayState = 'running';
+                  controlItems[0].classList.add('active');
+                  break;
+              case 'pause':
+                  mainPendulum.style.animationPlayState = 'paused';
+                  speedDot.style.animationPlayState = 'paused';
+                  controlItems[1].classList.add('active');
+                  break;
+              case 'slow':
+                  adjustSpeed(0.5);
+                  document.getElementById('speedSlider').value = 0.5;
+                  mainPendulum.style.animationPlayState = 'running';
+                  speedDot.style.animationPlayState = 'running';
+                  controlItems[2].classList.add('active');
+                  break;
+              case 'reset':
+                  mainPendulum.style.animation = 'none';
+                  speedDot.style.animation = 'none';
+                  setTimeout(() => {
+                      mainPendulum.style.animation = '';
+                      speedDot.style.animation = '';
+                      adjustSpeed(currentSpeed);
+                  }, 10);
+                  controlItems[0].classList.add('active');
+                  break;
+          }
+      }
+  </script>
+</body>
+</html>

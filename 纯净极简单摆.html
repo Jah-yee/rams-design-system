@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pure Pendulum Physics</title>
+  <style>
+      /* 
+      设计理念：极简主义 - 只保留最核心的视觉元素
+      遵循Dieter Rams的设计原则：Less but better
+      */
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          /* 
+          背景色选择：使用极浅的灰色而非纯白
+          原理：减少视觉疲劳，提供微妙的对比度
+          */
+          background: #fafafa;
+          height: 100vh;
+          overflow: hidden;
+          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+
+      /* 
+      单摆容器：作为整个物理系统的边界
+      技术思路：使用viewport单位确保在所有设备上都能完美居中
+      */
+      .pendulum-container {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 80vmin;  /* vmin确保在横屏和竖屏都有良好表现 */
+          height: 80vmin;
+      }
+
+      /* 
+      轨迹路径：虚线弧形，表示单摆的运动轨迹
+      物理原理：单摆在小角度下的运动轨迹近似为圆弧
+      视觉设计：使用极淡的橙色，不干扰主要元素但提供必要的参考
+      */
+      .trajectory-arc {
+          position: absolute;
+          top: 15%;
+          left: 50%;
+          width: 70%;
+          height: 70%;
+          border: 1px dashed rgba(255, 107, 53, 0.25);
+          border-top: none;           /* 移除上半部分，只显示下弧 */
+          border-radius: 0 0 50% 50%; /* 创建下半圆弧 */
+          transform: translateX(-50%);
+          pointer-events: none;       /* 确保不干扰任何交互 */
+      }
+
+      /* 
+      单摆摆线：连接支点和摆球的线
+      技术实现：使用transform-origin设置旋转中心点在顶端
+      物理模拟：线的长度决定了摆动周期 T = 2π√(L/g)
+      */
+      .pendulum-rod {
+          position: absolute;
+          top: 15%;                   /* 支点位置 */
+          left: 50%;
+          width: 1px;                 /* 极细的线条，模拟理想摆线 */
+          height: 35%;                /* 摆线长度，影响摆动周期 */
+          background: #333;
+          transform-origin: top center; /* 关键：设置旋转中心在顶端 */
+          transform: translateX(-50%);
+          z-index: 2;
+
+          /* 
+          动画核心：Perfect Physics贝塞尔曲线
+          cubic-bezier(0.42, 0.0, 0.58, 1.0) 的物理意义：
+          - 0.42, 0.0: 起始控制点，模拟从静止开始的缓慢启动
+          - 0.58, 1.0: 结束控制点，模拟到达端点时的缓慢停止
+          - 中间部分斜率最大，对应单摆通过最低点时的最大速度
+          
+          这个曲线完美符合能量守恒：
+          - 最高点：势能最大，动能为0（速度为0）
+          - 最低点：势能最小，动能最大（速度最大）
+          */
+          animation: physics-swing 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+      }
+
+      /* 
+      单摆球：质量集中点，承载所有的动能和势能转换
+      设计细节：
+      - 使用橙色作为唯一的色彩强调，符合极简设计原则
+      - 大小适中，既要可见又不能过于突出
+      - 位置在摆线底端，通过伪元素实现避免额外HTML元素
+      */
+      .pendulum-rod::after {
+          content: '';
+          position: absolute;
+          bottom: -8px;               /* 位于摆线底端 */
+          left: 50%;
+          width: 16px;
+          height: 16px;
+          background: #ff6b35;        /* 橙色：唯一的色彩元素 */
+          border-radius: 50%;         /* 完美圆形 */
+          transform: translateX(-50%);
+          
+          /* 
+          微妙的阴影效果：
+          - 提供深度感，让球体看起来悬浮在空间中
+          - 阴影颜色与球体颜色一致，保持色彩统一性
+          */
+          box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+      }
+
+      /* 
+      关键帧动画定义：物理摆动
+      角度选择：±25度是小角度近似的理想范围
+      - 小于30度时，sin(θ) ≈ θ，简谐运动近似成立
+      - 这个角度范围内，周期与振幅无关（等时性）
+      
+      技术细节：
+      - 使用rotate()而非位置变化，性能更优
+      - GPU加速，确保60fps流畅动画
+      - 对称设计，体现物理系统的对称性
+      */
+      @keyframes physics-swing {
+          0% {
+              transform: translateX(-50%) rotate(-25deg);
+          }
+          50% {
+              transform: translateX(-50%) rotate(25deg);
+          }
+          100% {
+              transform: translateX(-50%) rotate(-25deg);
+          }
+      }
+
+      /* 
+      响应式设计：确保在不同设备上都有最佳体验
+      移动设备优化：
+      - 减小容器尺寸，适应小屏幕
+      - 保持比例关系，确保物理感不变
+      */
+      @media (max-width: 768px) {
+          .pendulum-container {
+              width: 90vmin;
+              height: 90vmin;
+          }
+          
+          .pendulum-rod {
+              height: 40%;            /* 移动端稍微增加摆线长度 */
+          }
+      }
+
+      /* 
+      可访问性考虑：
+      - 为动画敏感用户提供选项
+      - 尊重用户的系统偏好设置
+      */
+      @media (prefers-reduced-motion: reduce) {
+          .pendulum-rod {
+              animation-duration: 6s; /* 减慢动画速度 */
+          }
+      }
+
+      /* 
+      高刷新率显示器优化：
+      - 确保在120Hz/144Hz显示器上也能流畅显示
+      - 使用will-change提示浏览器进行优化
+      */
+      .pendulum-rod {
+          will-change: transform;     /* 提示浏览器优化transform动画 */
+      }
+  </style>
+</head>
+<body>
+  <!-- 
+  HTML结构极简化：
+  - 只包含必要的语义元素
+  - 避免不必要的嵌套
+  - 每个元素都有明确的物理对应
+  -->
+  <div class="pendulum-container">
+      <!-- 轨迹弧线：提供视觉参考，帮助理解运动范围 -->
+      <div class="trajectory-arc"></div>
+      
+      <!-- 
+      单摆主体：包含摆线和摆球
+      技术选择：使用单一元素+伪元素，而非多个div
+      优势：DOM更简洁，性能更好，语义更清晰
+      -->
+      <div class="pendulum-rod"></div>
+  </div>
+
+  <!-- 
+  无JavaScript设计：
+  纯CSS实现所有功能，体现了"Less but better"的理念
+  - 减少依赖，提高可靠性
+  - 更好的性能表现
+  - 更容易维护和理解
+  
+  物理教育价值：
+  这个极简的实现让观察者能够专注于：
+  1. 单摆的基本运动规律
+  2. 能量在势能和动能之间的转换
+  3. 周期运动的对称美
+  4. 简谐运动的数学美感
+  -->
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html dir="ltr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=400">
+    <title>Orange Trajectory Shadow UI Elements</title>
+    
+    <!-- 橙色轨迹阴影UI样式 -->
+    <style>
+    * { box-sizing: border-box; }
+    body { 
+        margin: 0; 
+        padding: 0; 
+        background: #f3f5f0;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        padding: 40px 20px;
+    }
+    
+    /* 展示网格 */
+    .ui-showcase {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 40px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    /* 单个UI组件容器 */
+    .ui-component {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        text-align: center;
+    }
+    
+    .ui-title {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+    
+    /* 基础橙色轨迹曲线 */
+    .basic-trajectory {
+        position: relative;
+        width: 200px;
+        height: 100px;
+        margin: 20px auto;
+    }
+    
+    .basic-trajectory .curve {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed #ff6b35;
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%);
+    }
+    
+    /* 带阴影的轨迹曲线 */
+    .shadow-trajectory {
+        position: relative;
+        width: 200px;
+        height: 120px;
+        margin: 20px auto;
+    }
+    
+    .shadow-trajectory .curve-shadow {
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed rgba(255, 107, 53, 0.2);
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%) translateX(4px);
+        filter: blur(1px);
+    }
+    
+    .shadow-trajectory .curve-main {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed #ff6b35;
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%);
+    }
+    
+    /* 3D深度阴影轨迹 */
+    .depth-trajectory {
+        position: relative;
+        width: 220px;
+        height: 140px;
+        margin: 20px auto;
+    }
+    
+    .depth-trajectory .curve-depth3 {
+        position: absolute;
+        top: 12px;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed rgba(255, 107, 53, 0.1);
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%) translateX(8px);
+        filter: blur(2px);
+    }
+    
+    .depth-trajectory .curve-depth2 {
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed rgba(255, 107, 53, 0.15);
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%) translateX(6px);
+        filter: blur(1.5px);
+    }
+    
+    .depth-trajectory .curve-depth1 {
+        position: absolute;
+        top: 4px;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed rgba(255, 107, 53, 0.25);
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%) translateX(4px);
+        filter: blur(1px);
+    }
+    
+    .depth-trajectory .curve-main {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed #ff6b35;
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%);
+    }
+    
+    /* 发光效果轨迹 */
+    .glow-trajectory {
+        position: relative;
+        width: 200px;
+        height: 120px;
+        margin: 20px auto;
+    }
+    
+    .glow-trajectory .curve {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed #ff6b35;
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%);
+        filter: drop-shadow(0 0 8px rgba(255, 107, 53, 0.4)) 
+                drop-shadow(0 2px 4px rgba(255, 107, 53, 0.2));
+    }
+    
+    /* 渐变阴影轨迹 */
+    .gradient-trajectory {
+        position: relative;
+        width: 220px;
+        height: 140px;
+        margin: 20px auto;
+    }
+    
+    .gradient-trajectory::before {
+        content: '';
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        background: linear-gradient(to bottom, 
+            transparent 0%, 
+            rgba(255, 107, 53, 0.1) 50%, 
+            rgba(255, 107, 53, 0.05) 100%);
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%) translateX(4px);
+        filter: blur(3px);
+    }
+    
+    .gradient-trajectory .curve {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed #ff6b35;
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%);
+    }
+    
+    /* 动态阴影轨迹 */
+    .animated-trajectory {
+        position: relative;
+        width: 200px;
+        height: 120px;
+        margin: 20px auto;
+    }
+    
+    .animated-trajectory .curve-shadow {
+        position: absolute;
+        top: 6px;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed rgba(255, 107, 53, 0.3);
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%) translateX(3px);
+        filter: blur(1px);
+        animation: shadowPulse 2s ease-in-out infinite;
+    }
+    
+    .animated-trajectory .curve-main {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed #ff6b35;
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%);
+    }
+    
+    @keyframes shadowPulse {
+        0%, 100% { 
+            opacity: 0.3;
+            transform: translateX(-50%) translateX(3px) scale(1);
+        }
+        50% { 
+            opacity: 0.5;
+            transform: translateX(-50%) translateX(5px) scale(1.02);
+        }
+    }
+    
+    /* 多层阴影轨迹 */
+    .multilayer-trajectory {
+        position: relative;
+        width: 240px;
+        height: 160px;
+        margin: 20px auto;
+    }
+    
+    .multilayer-trajectory .shadow-layer {
+        position: absolute;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed;
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%);
+    }
+    
+    .multilayer-trajectory .shadow-layer:nth-child(1) {
+        top: 16px;
+        border-color: rgba(255, 107, 53, 0.08);
+        transform: translateX(-50%) translateX(12px);
+        filter: blur(3px);
+    }
+    
+    .multilayer-trajectory .shadow-layer:nth-child(2) {
+        top: 12px;
+        border-color: rgba(255, 107, 53, 0.12);
+        transform: translateX(-50%) translateX(9px);
+        filter: blur(2.5px);
+    }
+    
+    .multilayer-trajectory .shadow-layer:nth-child(3) {
+        top: 8px;
+        border-color: rgba(255, 107, 53, 0.16);
+        transform: translateX(-50%) translateX(6px);
+        filter: blur(2px);
+    }
+    
+    .multilayer-trajectory .shadow-layer:nth-child(4) {
+        top: 4px;
+        border-color: rgba(255, 107, 53, 0.2);
+        transform: translateX(-50%) translateX(3px);
+        filter: blur(1px);
+    }
+    
+    .multilayer-trajectory .shadow-layer:nth-child(5) {
+        top: 0px;
+        border-color: #ff6b35;
+        transform: translateX(-50%);
+        filter: none;
+    }
+    
+    /* 内发光轨迹 */
+    .inner-glow-trajectory {
+        position: relative;
+        width: 200px;
+        height: 120px;
+        margin: 20px auto;
+        background: radial-gradient(ellipse at center bottom, 
+            rgba(255, 107, 53, 0.05) 0%, 
+            transparent 70%);
+        border-radius: 0 0 90px 90px;
+    }
+    
+    .inner-glow-trajectory .curve {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 180px;
+        height: 90px;
+        border: 2px dashed #ff6b35;
+        border-top: none;
+        border-radius: 0 0 90px 90px;
+        transform: translateX(-50%);
+        box-shadow: inset 0 -10px 20px rgba(255, 107, 53, 0.1);
+    }
+    
+    /* 响应式 */
+    @media (max-width: 768px) {
+        .ui-showcase {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+        
+        .ui-component {
+            padding: 20px;
+        }
+    }
+    </style>
+</head>
+
+<body>
+    
+    <div class="ui-showcase">
+        
+        <!-- 基础轨迹 -->
+        <div class="ui-component">
+            <div class="ui-title">Basic Orange Trajectory</div>
+            <div class="basic-trajectory">
+                <div class="curve"></div>
+            </div>
+        </div>
+        
+        <!-- 简单阴影 -->
+        <div class="ui-component">
+            <div class="ui-title">Simple Shadow</div>
+            <div class="shadow-trajectory">
+                <div class="curve-shadow"></div>
+                <div class="curve-main"></div>
+            </div>
+        </div>
+        
+        <!-- 3D深度阴影 -->
+        <div class="ui-component">
+            <div class="ui-title">3D Depth Shadow</div>
+            <div class="depth-trajectory">
+                <div class="curve-depth3"></div>
+                <div class="curve-depth2"></div>
+                <div class="curve-depth1"></div>
+                <div class="curve-main"></div>
+            </div>
+        </div>
+        
+        <!-- 发光效果 -->
+        <div class="ui-component">
+            <div class="ui-title">Glow Effect</div>
+            <div class="glow-trajectory">
+                <div class="curve"></div>
+            </div>
+        </div>
+        
+        <!-- 渐变阴影 -->
+        <div class="ui-component">
+            <div class="ui-title">Gradient Shadow</div>
+            <div class="gradient-trajectory">
+                <div class="curve"></div>
+            </div>
+        </div>
+        
+        <!-- 动态阴影 -->
+        <div class="ui-component">
+            <div class="ui-title">Animated Shadow</div>
+            <div class="animated-trajectory">
+                <div class="curve-shadow"></div>
+                <div class="curve-main"></div>
+            </div>
+        </div>
+        
+        <!-- 多层阴影 -->
+        <div class="ui-component">
+            <div class="ui-title">Multi-layer Shadow</div>
+            <div class="multilayer-trajectory">
+                <div class="shadow-layer"></div>
+                <div class="shadow-layer"></div>
+                <div class="shadow-layer"></div>
+                <div class="shadow-layer"></div>
+                <div class="shadow-layer"></div>
+            </div>
+        </div>
+        
+        <!-- 内发光 -->
+        <div class="ui-component">
+            <div class="ui-title">Inner Glow</div>
+            <div class="inner-glow-trajectory">
+                <div class="curve"></div>
+            </div>
+        </div>
+        
+    </div>
+    
+</body>
+</html>
