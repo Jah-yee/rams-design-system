@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>像素电脑</title>
+  <style>
+      body {
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          background-color: #e8e8e8;
+      }
+      
+      .computer {
+          width: 320px;
+          height: 320px;
+          position: relative;
+          image-rendering: pixelated;
+      }
+      
+      /* 显示器顶部边框 */
+      .monitor-top {
+          width: 168px;
+          height: 12px;
+          background: #000;
+          position: absolute;
+          top: 64px;
+          left: 76px;
+      }
+      
+      /* 显示器左右边框 */
+      .monitor-left, .monitor-right {
+          width: 12px;
+          height: 108px;
+          background: #000;
+          position: absolute;
+          top: 76px;
+      }
+      
+      .monitor-left {
+          left: 76px;
+      }
+      
+      .monitor-right {
+          left: 232px;
+      }
+      
+      /* 显示器左右外角 */
+      .corner-left, .corner-right {
+          width: 12px;
+          height: 12px;
+          background: #000;
+          position: absolute;
+          top: 64px;
+      }
+      
+      .corner-left {
+          left: 52px;
+      }
+      
+      .corner-right {
+          left: 256px;
+      }
+      
+      /* 屏幕外框 */
+      .screen-border {
+          width: 144px;
+          height: 96px;
+          border: 8px solid #000;
+          background: #fff;
+          position: absolute;
+          top: 88px;
+          left: 88px;
+      }
+      
+      /* 眼睛 */
+      .eye {
+          width: 8px;
+          height: 8px;
+          background: #000;
+          position: absolute;
+          top: 16px;
+      }
+      
+      .eye.left {
+          left: 24px;
+      }
+      
+      .eye.right {
+          right: 24px;
+      }
+      
+      /* 鼻子 */
+      .nose {
+          width: 16px;
+          height: 8px;
+          background: #000;
+          position: absolute;
+          top: 32px;
+          left: 56px;
+      }
+      
+      .nose::after {
+          content: '';
+          width: 8px;
+          height: 8px;
+          background: #000;
+          position: absolute;
+          top: 8px;
+          left: -8px;
+      }
+      
+      /* 嘴巴 */
+      .mouth {
+          width: 48px;
+          height: 8px;
+          background: #000;
+          position: absolute;
+          bottom: 16px;
+          left: 48px;
+      }
+      
+      .mouth::before, .mouth::after {
+          content: '';
+          width: 8px;
+          height: 8px;
+          background: #000;
+          position: absolute;
+      }
+      
+      .mouth::before {
+          left: 0;
+          top: -8px;
+      }
+      
+      .mouth::after {
+          right: 0;
+          top: -8px;
+      }
+      
+      /* 显示器底部 */
+      .monitor-bottom {
+          width: 168px;
+          height: 12px;
+          background: #000;
+          position: absolute;
+          top: 184px;
+          left: 76px;
+      }
+      
+      /* 支架 */
+      .stand-left, .stand-right {
+          width: 24px;
+          height: 12px;
+          background: #000;
+          position: absolute;
+          top: 196px;
+      }
+      
+      .stand-left {
+          left: 100px;
+      }
+      
+      .stand-right {
+          left: 196px;
+      }
+      
+      /* 键盘顶部 */
+      .keyboard-top {
+          width: 228px;
+          height: 12px;
+          background: #000;
+          position: absolute;
+          top: 208px;
+          left: 52px;
+      }
+      
+      /* 键盘主体 */
+      .keyboard {
+          width: 240px;
+          height: 60px;
+          border-left: 12px solid #000;
+          border-right: 12px solid #000;
+          border-bottom: 12px solid #000;
+          background: #fff;
+          position: absolute;
+          top: 220px;
+          left: 40px;
+      }
+      
+      /* 键盘按键 */
+      .key-left {
+          width: 20px;
+          height: 20px;
+          background: #000;
+          position: absolute;
+          top: 16px;
+          left: 20px;
+      }
+      
+      .key-right-top {
+          width: 48px;
+          height: 8px;
+          background: #000;
+          position: absolute;
+          top: 16px;
+          right: 20px;
+      }
+      
+      .key-right-bottom {
+          width: 48px;
+          height: 8px;
+          background: #000;
+          position: absolute;
+          top: 28px;
+          right: 20px;
+      }
+  </style>
+</head>
+<body>
+  <div class="computer">
+      <!-- 显示器 -->
+      <div class="monitor-top"></div>
+      <div class="corner-left"></div>
+      <div class="corner-right"></div>
+      <div class="monitor-left"></div>
+      <div class="monitor-right"></div>
+      
+      <!-- 屏幕 -->
+      <div class="screen-border">
+          <div class="eye left"></div>
+          <div class="eye right"></div>
+          <div class="nose"></div>
+          <div class="mouth"></div>
+      </div>
+      
+      <div class="monitor-bottom"></div>
+      
+      <!-- 支架 -->
+      <div class="stand-left"></div>
+      <div class="stand-right"></div>
+      
+      <!-- 键盘 -->
+      <div class="keyboard-top"></div>
+      <div class="keyboard">
+          <div class="key-left"></div>
+          <div class="key-right-top"></div>
+          <div class="key-right-bottom"></div>
+      </div>
+  </div>
+</body>
+</html>

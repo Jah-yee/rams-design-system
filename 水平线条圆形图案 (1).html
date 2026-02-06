@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>水平线条圆形图案</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background-color: #f0f0f0;
+    }
+    
+    .container {
+      width: 280px;
+      height: 280px;
+      background-color: #C6BEAC;
+      border-radius: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    
+    .circle-pattern {
+      width: 200px;
+      height: 200px;
+      position: relative;
+    }
+    
+    .line-container {
+      position: absolute;
+      width: 100%;
+      left: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+    }
+    
+    .line-half {
+      height: 4px;
+      background-color: black;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="circle-pattern" id="pattern"></div>
+  </div>
+  
+  <script>
+    const pattern = document.getElementById('pattern');
+    
+    const radius = 97; // 圆的半径
+    const lineHeight = 4;
+    const spacing = 8;
+    const numLines = 25;
+    
+    // 计算起始位置，使图案垂直居中
+    const totalHeight = (numLines - 1) * spacing;
+    const startY = (200 - totalHeight) / 2;
+    
+    for (let i = 0; i < numLines; i++) {
+      const yPos = startY + (i * spacing);
+      
+      // 计算当前线条距离圆心的垂直距离
+      const centerY = 100; // 圆心Y坐标
+      const distanceFromCenter = Math.abs(yPos + lineHeight/2 - centerY);
+      
+      // 使用圆的方程计算该高度处的半径: x = sqrt(r^2 - y^2)
+      let halfWidth = 0;
+      if (distanceFromCenter <= radius) {
+        halfWidth = Math.sqrt(radius * radius - distanceFromCenter * distanceFromCenter);
+      }
+      
+      // 如果宽度太小，跳过这条线
+      if (halfWidth < 2) continue;
+      
+      // 创建线条容器
+      const lineContainer = document.createElement('div');
+      lineContainer.className = 'line-container';
+      lineContainer.style.top = `${yPos}px`;
+      
+      // 左半部分
+      const leftLine = document.createElement('div');
+      leftLine.className = 'line-half';
+      leftLine.style.width = `${halfWidth}px`;
+      leftLine.style.height = `${lineHeight}px`;
+      
+      // 右半部分
+      const rightLine = document.createElement('div');
+      rightLine.className = 'line-half';
+      rightLine.style.width = `${halfWidth}px`;
+      rightLine.style.height = `${lineHeight}px`;
+      
+      lineContainer.appendChild(leftLine);
+      lineContainer.appendChild(rightLine);
+      pattern.appendChild(lineContainer);
+    }
+  </script>
+</body>
+</html>

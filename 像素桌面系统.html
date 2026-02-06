@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PixelOS - 像素桌面系统</title>
+  <style>
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+          user-select: none;
+      }
+      
+      body {
+          font-family: 'Courier New', monospace;
+          overflow: hidden;
+          height: 100vh;
+          background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+          position: relative;
+      }
+      
+      /* 桌面壁纸 */
+      .desktop {
+          width: 100%;
+          height: calc(100vh - 48px);
+          position: relative;
+          background-image: 
+              repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255,255,255,0.03) 50px, rgba(255,255,255,0.03) 51px),
+              repeating-linear-gradient(90deg, transparent, transparent 50px, rgba(255,255,255,0.03) 50px, rgba(255,255,255,0.03) 51px);
+      }
+      
+      /* 桌面图标 */
+      .desktop-icons {
+          padding: 20px;
+          display: grid;
+          grid-template-columns: repeat(auto-fill, 100px);
+          gap: 20px;
+          height: 100%;
+          align-content: start;
+      }
+      
+      .desktop-icon {
+          width: 80px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          cursor: pointer;
+          padding: 8px;
+          border-radius: 8px;
+          transition: background 0.2s;
+      }
+      
+      .desktop-icon:hover {
+          background: rgba(255,255,255,0.1);
+      }
+      
+      .desktop-icon.selected {
+          background: rgba(255,255,255,0.2);
+      }
+      
+      .desktop-icon-image {
+          width: 48px;
+          height: 48px;
+          background: #f5f5f5;
+          border-radius: 8px;
+          position: relative;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      }
+      
+      .desktop-icon-label {
+          color: white;
+          font-size: 11px;
+          text-align: center;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+          word-break: break-word;
+      }
+      
+      /* 迷你图标样式 */
+      .mini-computer .monitor { width: 28px; height: 3px; background: #000; position: absolute; top: 8px; left: 10px; }
+      .mini-computer .screen { width: 24px; height: 16px; border: 2px solid #000; background: #fff; position: absolute; top: 11px; left: 12px; }
+      .mini-computer .keyboard { width: 32px; height: 8px; border: 2px solid #000; border-top: none; background: #fff; position: absolute; bottom: 8px; left: 8px; }
+      
+      .mini-folder .top { width: 16px; height: 2px; background: #000; position: absolute; top: 12px; left: 12px; }
+      .mini-folder .main { width: 32px; height: 20px; border: 2px solid #000; background: #fff; position: absolute; top: 16px; left: 8px; }
+      
+      .mini-document .main { width: 24px; height: 28px; border: 2px solid #000; background: #fff; position: absolute; top: 10px; left: 12px; }
+      .mini-document .corner { width: 0; height: 0; border-style: solid; border-width: 0 0 6px 6px; border-color: transparent transparent #000 transparent; position: absolute; top: 10px; right: 12px; }
+      
+      .mini-settings .gear { width: 20px; height: 20px; background: #000; border-radius: 50%; position: absolute; top: 14px; left: 14px; }
+      .mini-settings .hole { width: 8px; height: 8px; background: #f5f5f5; border-radius: 50%; position: absolute; top: 6px; left: 6px; }
+      .mini-settings .tooth { width: 4px; height: 8px; background: #000; position: absolute; }
+      .mini-settings .tooth:nth-child(3) { top: 8px; left: 22px; }
+      .mini-settings .tooth:nth-child(4) { top: 22px; left: 22px; }
+      
+      .mini-image .frame { width: 32px; height: 24px; border: 2px solid #000; background: #fff; position: absolute; top: 12px; left: 8px; }
+      .mini-image .sun { width: 4px; height: 4px; background: #000; border-radius: 50%; position: absolute; top: 4px; right: 4px; }
+      .mini-image .mountain { width: 0; height: 0; border-style: solid; border-width: 0 0 10px 10px; border-color: transparent transparent #000 transparent; position: absolute; bottom: 2px; left: 2px; }
+      
+      .mini-trash .body { width: 20px; height: 20px; border: 2px solid #000; border-top: none; background: #fff; position: absolute; top: 18px; left: 14px; }
+      .mini-trash .lid { width: 24px; height: 2px; background: #000; position: absolute; top: 16px; left: 12px; }
+      
+      /* 任务栏 */
+      .taskbar {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          height: 48px;
+          background: rgba(20, 20, 40, 0.95);
+          backdrop-filter: blur(10px);
+          border-top: 2px solid rgba(255,255,255,0.1);
+          display: flex;
+          align-items: center;
+          padding: 0 8px;
+          gap: 8px;
+          z-index: 1000;
+          box-shadow: 0 -2px 20px rgba(0,0,0,0.5);
+      }
+      
+      .start-button {
+          width: 48px;
+          height: 36px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          transition: all 0.2s;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      }
+      
+      .start-button:hover {
+          transform: scale(1.05);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      }
+      
+      .start-button:active {
+          transform: scale(0.95);
+      }
+      
+      .start-button.active {
+          background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      }
+      
+      .taskbar-apps {
+          display: flex;
+          gap: 4px;
+          flex: 1;
+      }
+      
+      .taskbar-app {
+          height: 36px;
+          padding: 0 16px;
+          background: rgba(255,255,255,0.1);
+          border: none;
+          border-radius: 8px;
+          color: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
+          transition: all 0.2s;
+          max-width: 200px;
+      }
+      
+      .taskbar-app:hover {
+          background: rgba(255,255,255,0.2);
+      }
+      
+      .taskbar-app.active {
+          background: rgba(255,255,255,0.25);
+          border-bottom: 2px solid #667eea;
+      }
+      
+      .taskbar-app-icon {
+          width: 20px;
+          height: 20px;
+          background: #f5f5f5;
+          border-radius: 4px;
+          flex-shrink: 0;
+      }
+      
+      .taskbar-app-title {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+      }
+      
+      .system-tray {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 0 8px;
+      }
+      
+      .system-icon {
+          width: 24px;
+          height: 24px;
+          color: white;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 4px;
+          transition: background 0.2s;
+      }
+      
+      .system-icon:hover {
+          background: rgba(255,255,255,0.1);
+      }
+      
+      .clock {
+          color: white;
+          font-size: 12px;
+          padding: 8px 12px;
+          background: rgba(255,255,255,0.1);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.2s;
+      }
+      
+      .clock:hover {
+          background: rgba(255,255,255,0.2);
+      }
+      
+      /* 开始菜单 */
+      .start-menu {
+          position: fixed;
+          bottom: 56px;
+          left: 8px;
+          width: 400px;
+          height: 500px;
+          background: rgba(30, 30, 50, 0.98);
+          backdrop-filter: blur(20px);
+          border-radius: 12px;
+          border: 2px solid rgba(255,255,255,0.1);
+          box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+          display: none;
+          flex-direction: column;
+          z-index: 999;
+          animation: slideUp 0.3s ease;
+      }
+      
+      .start-menu.show {
+          display: flex;
+      }
+      
+      @keyframes slideUp {
+          from {
+              opacity: 0;
+              transform: translateY(20px);
+          }
+          to {
+              opacity: 1;
+              transform: translateY(0);
+          }
+      }
+      
+      .start-menu-header {
+          padding: 20px;
+          border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+      
+      .start-menu-user {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+      }
+      
+      .start-menu-avatar {
+          width: 40px;
+          height: 40px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 18px;
+      }
+      
+      .start-menu-username {
+          color: white;
+          font-size: 14px;
+          font-weight: bold;
+      }
+      
+      .start-menu-apps {
+          flex: 1;
+          overflow-y: auto;
+          padding: 20px;
+      }
+      
+      .start-menu-section {
+          margin-bottom: 24px;
+      }
+      
+      .start-menu-section-title {
+          color: rgba(255,255,255,0.6);
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 12px;
+      }
+      
+      .start-menu-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+      }
+      
+      .start-menu-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          padding: 12px;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.2s;
+      }
+      
+      .start-menu-item:hover {
+          background: rgba(255,255,255,0.1);
+      }
+      
+      .start-menu-item-icon {
+          width: 40px;
+          height: 40px;
+          background: #f5f5f5;
+          border-radius: 8px;
+          position: relative;
+      }
+      
+      .start-menu-item-label {
+          color: white;
+          font-size: 10px;
+          text-align: center;
+      }
+      
+      .start-menu-footer {
+          padding: 12px 20px;
+          border-top: 1px solid rgba(255,255,255,0.1);
+          display: flex;
+          gap: 8px;
+      }
+      
+      .start-menu-footer-btn {
+          flex: 1;
+          padding: 10px;
+          background: rgba(255,255,255,0.1);
+          border: none;
+          border-radius: 8px;
+          color: white;
+          font-size: 11px;
+          cursor: pointer;
+          transition: background 0.2s;
+      }
+      
+      .start-menu-footer-btn:hover {
+          background: rgba(255,255,255,0.2);
+      }
+      
+      /* 窗口 */
+      .window {
+          position: absolute;
+          background: rgba(240, 240, 245, 0.98);
+          border-radius: 12px;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+          overflow: hidden;
+          display: none;
+          flex-direction: column;
+          z-index: 100;
+          border: 1px solid rgba(255,255,255,0.2);
+      }
+      
+      .window.show {
+          display: flex;
+      }
+      
+      .window.maximized {
+          top: 0 !important;
+          left: 0 !important;
+          width: 100% !important;
+          height: calc(100vh - 48px) !important;
+          border-radius: 0;
+      }
+      
+      .window-titlebar {
+          height: 40px;
+          background: rgba(255,255,255,0.95);
+          border-bottom: 1px solid rgba(0,0,0,0.1);
+          display: flex;
+          align-items: center;
+          padding: 0 12px;
+          cursor: move;
+      }
+      
+      .window-icon {
+          width: 20px;
+          height: 20px;
+          background: #f5f5f5;
+          border-radius: 4px;
+          margin-right: 8px;
+          position: relative;
+      }
+      
+      .window-title {
+          flex: 1;
+          font-size: 13px;
+          font-weight: bold;
+          color: #333;
+      }
+      
+      .window-controls {
+          display: flex;
+          gap: 8px;
+      }
+      
+      .window-control-btn {
+          width: 28px;
+          height: 28px;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          transition: background 0.2s;
+          background: transparent;
+      }
+      
+      .window-control-btn:hover {
+          background: rgba(0,0,0,0.1);
+      }
+      
+      .window-control-btn.close:hover {
+          background: #ff5f57;
+          color: white;
+      }
+      
+      .window-content {
+          flex: 1;
+          overflow: auto;
+          padding: 20px;
+          background: white;
+      }
+      
+      /* 右键菜单 */
+      .context-menu {
+          position: fixed;
+          background: rgba(30, 30, 50, 0.98);
+          backdrop-filter: blur(20px);
+          border-radius: 8px;
+          border: 1px solid rgba(255,255,255,0.1);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+          padding: 4px;
+          display: none;
+          z-index: 2000;
+          min-width: 200px;
+      }
+      
+      .context-menu.show {
+          display: block;
+      }
+      
+      .context-menu-item {
+          padding: 10px 16px;
+          color: white;
+          font-size: 12px;
+          cursor: pointer;
+          border-radius: 4px;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          transition: background 0.2s;
+      }
+      
+      .context-menu-item:hover {
+          background: rgba(255,255,255,0.1);
+      }
+      
+      .context-menu-item.disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+      }
+      
+      .context-menu-divider {
+          height: 1px;
+          background: rgba(255,255,255,0.1);
+          margin: 4px 0;
+      }
+      
+      /* 滚动条美化 */
+      ::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+      }
+      
+      ::-webkit-scrollbar-track {
+          background: rgba(0,0,0,0.1);
+          border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+          background: rgba(0,0,0,0.3);
+          border-radius: 4px;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+          background: rgba(0,0,0,0.5);
+      }
+      
+      /* 窗口内容样式 */
+      .app-content {
+          height: 100%;
+      }
+      
+      .app-content h2 {
+          margin-bottom: 16px;
+          color: #333;
+      }
+      
+      .app-content p {
+          line-height: 1.6;
+          color: #666;
+          margin-bottom: 12px;
+      }
+      
+      .icon-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+          gap: 16px;
+          margin-top: 20px;
+      }
+      
+      .icon-item {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 8px;
+          padding: 12px;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.2s;
+      }
+      
+      .icon-item:hover {
+          background: rgba(0,0,0,0.05);
+      }
+      
+      .icon-item-image {
+          width: 48px;
+          height: 48px;
+          background: #f5f5f5;
+          border-radius: 8px;
+          position: relative;
+      }
+      
+      .icon-item-label {
+          font-size: 11px;
+          color: #666;
+          text-align: center;
+      }
+  </style>
+</head>
+<body>
+  <!-- 桌面 -->
+  <div class="desktop" id="desktop">
+      <div class="desktop-icons">
+          <div class="desktop-icon" data-app="computer">
+              <div class="desktop-icon-image">
+                  <div class="mini-computer">
+                      <div class="monitor"></div>
+                      <div class="screen"></div>
+                      <div class="keyboard"></div>
+                  </div>
+              </div>
+              <div class="desktop-icon-label">我的电脑</div>
+          </div>
+          
+          <div class="desktop-icon" data-app="folder">
+              <div class="desktop-icon-image">
+                  <div class="mini-folder">
+                      <div class="top"></div>
+                      <div class="main"></div>
+                  </div>
+              </div>
+              <div class="desktop-icon-label">文档</div>
+          </div>
+          
+          <div class="desktop-icon" data-app="document">
+              <div class="desktop-icon-image">
+                  <div class="mini-document">
+                      <div class="main"></div>
+                      <div class="corner"></div>
+                  </div>
+              </div>
+              <div class="desktop-icon-label">记事本</div>
+          </div>
+          
+          <div class="desktop-icon" data-app="settings">
+              <div class="desktop-icon-image">
+                  <div class="mini-settings">
+                      <div class="gear">
+                          <div class="hole"></div>
+                      </div>
+                      <div class="tooth"></div>
+                      <div class="tooth"></div>
+                  </div>
+              </div>
+              <div class="desktop-icon-label">设置</div>
+          </div>
+          
+          <div class="desktop-icon" data-app="image">
+              <div class="desktop-icon-image">
+                  <div class="mini-image">
+                      <div class="frame">
+                          <div class="sun"></div>
+                          <div class="mountain"></div>
+                      </div>
+                  </div>
+              </div>
+              <div class="desktop-icon-label">图片</div>
+          </div>
+          
+          <div class="desktop-icon" data-app="trash">
+              <div class="desktop-icon-image">
+                  <div class="mini-trash">
+                      <div class="lid"></div>
+                      <div class="body"></div>
+                  </div>
+              </div>
+              <div class="desktop-icon-label">回收站</div>
+          </div>
+      </div>
+  </div>
+  
+  <!-- 任务栏 -->
+  <div class="taskbar">
+      <button class="start-button" id="startBtn">⊞</button>
+      <div class="taskbar-apps" id="taskbarApps"></div>
+      <div class="system-tray">
+          <div class="system-icon">🔊</div>
+          <div class="system-icon">📶</div>
+          <div class="clock" id="clock">00:00</div>
+      </div>
+  </div>
+  
+  <!-- 开始菜单 -->
+  <div class="start-menu" id="startMenu">
+      <div class="start-menu-header">
+          <div class="start-menu-user">
+              <div class="start-menu-avatar">👤</div>
+              <div class="start-menu-username">用户</div>
+          </div>
+      </div>
+      <div class="start-menu-apps">
+          <div class="start-menu-section">
+              <div class="start-menu-section-title">常用应用</div>
+              <div class="start-menu-grid">
+                  <div class="start-menu-item" data-app="computer">
+                      <div class="start-menu-item-icon">
+                          <div class="mini-computer">
+                              <div class="monitor"></div>
+                              <div class="screen"></div>
+                              <div class="keyboard"></div>
+                          </div>
+                      </div>
+                      <div class="start-menu-item-label">我的电脑</div>
+                  </div>
+                  <div class="start-menu-item" data-app="folder">
+                      <div class="start-menu-item-icon">
+                          <div class="mini-folder">
+                              <div class="top"></div>
+                              <div class="main"></div>
+                          </div>
+                      </div>
+                      <div class="start-menu-item-label">文档</div>
+                  </div>
+                  <div class="start-menu-item" data-app="document">
+                      <div class="start-menu-item-icon">
+                          <div class="mini-document">
+                              <div class="main"></div>
+                              <div class="corner"></div>
+                          </div>
+                      </div>
+                      <div class="start-menu-item-label">记事本</div>
+                  </div>
+                  <div class="start-menu-item" data-app="settings">
+                      <div class="start-menu-item-icon">
+                          <div class="mini-settings">
+                              <div class="gear">
+                                  <div class="hole"></div>
+                              </div>
+                              <div class="tooth"></div>
+                              <div class="tooth"></div>
+                          </div>
+                      </div>
+                      <div class="start-menu-item-label">设置</div>
+                  </div>
+                  <div class="start-menu-item" data-app="image">
+                      <div class="start-menu-item-icon">
+                          <div class="mini-image">
+                              <div class="frame">
+                                  <div class="sun"></div>
+                                  <div class="mountain"></div>
+                              </div>
+                          </div>
+                      </div>
+                      <div class="start-menu-item-label">图片</div>
+                  </div>
+                  <div class="start-menu-item" data-app="trash">
+                      <div class="start-menu-item-icon">
+                          <div class="mini-trash">
+                              <div class="lid"></div>
+                              <div class="body"></div>
+                          </div>
+                      </div>
+                      <div class="start-menu-item-label">回收站</div>
+                  </div>
+              </div>
+          </div>
+      </div>
+      <div class="start-menu-footer">
+          <button class="start-menu-footer-btn">⚙️ 设置</button>
+          <button class="start-menu-footer-btn">🔌 关机</button>
+      </div>
+  </div>
+  
+  <!-- 右键菜单 -->
+  <div class="context-menu" id="contextMenu">
+      <div class="context-menu-item">📋 刷新</div>
+      <div class="context-menu-divider"></div>
+      <div class="context-menu-item">🎨 个性化</div>
+      <div class="context-menu-item">⚙️ 显示设置</div>
+      <div class="context-menu-divider"></div>
+      <div class="context-menu-item">📁 新建文件夹</div>
+      <div class="context-menu-item">📄 新建文档</div>
+  </div>
+  
+  <!-- 窗口容器 -->
+  <div id="windowsContainer"></div>
+  
+  <script>
+      // 应用数据
+      const apps = {
+          computer: {
+              title: '我的电脑',
+              icon: 'mini-computer',
+              content: `
+                  <h2>💻 我的电脑</h2>
+                  <p>欢迎使用 PixelOS 像素桌面系统！</p>
+                  <p>这是一个完全使用 HTML/CSS/JavaScript 构建的桌面环境。</p>
+                  <div class="icon-grid">
+                      <div class="icon-item">
+                          <div class="icon-item-image"></div>
+                          <div class="icon-item-label">C盘</div>
+                      </div>
+                      <div class="icon-item">
+                          <div class="icon-item-image"></div>
+                          <div class="icon-item-label">D盘</div>
+                      </div>
+                      <div class="icon-item">
+                          <div class="icon-item-image"></div>
+                          <div class="icon-item-label">E盘</div>
+                      </div>
+                  </div>
+              `
+          },
+          folder: {
+              title: '文档',
+              icon: 'mini-folder',
+              content: `
+                  <h2>📁 文档</h2>
+                  <p>您的个人文档文件夹</p>
+                  <div class="icon-grid">
+                      <div class="icon-item">
+                          <div class="icon-item-image"></div>
+                          <div class="icon-item-label">工作文档</div>
+                      </div>
+                      <div class="icon-item">
+                          <div class="icon-item-image"></div>
+                          <div class="icon-item-label">个人文件</div>
+                      </div>
+                      <div class="icon-item">
+                          <div class="icon-item-image"></div>
+                          <div class="icon-item-label">下载</div>
+                      </div>
+                  </div>
+              `
+          },
+          document: {
+              title: '记事本',
+              icon: 'mini-document',
+              content: `
+                  <h2>📝 记事本</h2>
+                  <p>一个简单的文本编辑器</p>
+                  <textarea style="width: 100%; height: 300px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-family: 'Courier New', monospace; resize: vertical;" placeholder="在这里输入文本..."></textarea>
+              `
+          },
+          settings: {
+              title: '设置',
+              icon: 'mini-settings',
+              content: `
+                  <h2>⚙️ 系统设置</h2>
+                  <p><strong>系统信息</strong></p>
+                  <p>操作系统: PixelOS 1.0</p>
+                  <p>版本: 2024.02.06</p>
+                  <p>浏览器: ${navigator.userAgent.split(' ').slice(-2).join(' ')}</p>
+                  <p>屏幕分辨率: ${window.screen.width} × ${window.screen.height}</p>
+              `
+          },
+          image: {
+              title: '图片查看器',
+              icon: 'mini-image',
+              content: `
+                  <h2>🖼️ 图片</h2>
+                  <p>您的图片库</p>
+                  <div class="icon-grid">
+                      <div class="icon-item">
+                          <div class="icon-item-image" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                          <div class="icon-item-label">照片1.jpg</div>
+                      </div>
+                      <div class="icon-item">
+                          <div class="icon-item-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                          <div class="icon-item-label">照片2.jpg</div>
+                      </div>
+                      <div class="icon-item">
+                          <div class="icon-item-image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                          <div class="icon-item-label">照片3.jpg</div>
+                      </div>
+                  </div>
+              `
+          },
+          trash: {
+              title: '回收站',
+              icon: 'mini-trash',
+              content: `
+                  <h2>🗑️ 回收站</h2>
+                  <p>回收站是空的</p>
+              `
+          }
+      };
+      
+      // 窗口管理
+      let windows = [];
+      let zIndexCounter = 100;
+      let draggedWindow = null;
+      let dragOffset = { x: 0, y: 0 };
+      
+      // 创建窗口
+      function createWindow(appId) {
+          const app = apps[appId];
+          if (!app) return;
+          
+          const windowId = `window-${Date.now()}`;
+          const windowEl = document.createElement('div');
+          windowEl.className = 'window show';
+          windowEl.id = windowId;
+          windowEl.style.width = '600px';
+          windowEl.style.height = '400px';
+          windowEl.style.top = `${50 + windows.length * 30}px`;
+          windowEl.style.left = `${100 + windows.length * 30}px`;
+          windowEl.style.zIndex = ++zIndexCounter;
+          
+          windowEl.innerHTML = `
+              <div class="window-titlebar">
+                  <div class="window-icon">
+                      <div class="${app.icon}">
+                          ${app.icon === 'mini-computer' ? '<div class="monitor"></div><div class="screen"></div><div class="keyboard"></div>' : ''}
+                          ${app.icon === 'mini-folder' ? '<div class="top"></div><div class="main"></div>' : ''}
+                          ${app.icon === 'mini-document' ? '<div class="main"></div><div class="corner"></div>' : ''}
+                          ${app.icon === 'mini-settings' ? '<div class="gear"><div class="hole"></div></div><div class="tooth"></div><div class="tooth"></div>' : ''}
+                          ${app.icon === 'mini-image' ? '<div class="frame"><div class="sun"></div><div class="mountain"></div></div>' : ''}
+                          ${app.icon === 'mini-trash' ? '<div class="lid"></div><div class="body"></div>' : ''}
+                      </div>
+                  </div>
+                  <div class="window-title">${app.title}</div>
+                  <div class="window-controls">
+                      <button class="window-control-btn minimize">−</button>
+                      <button class="window-control-btn maximize">□</button>
+                      <button class="window-control-btn close">×</button>
+                  </div>
+              </div>
+              <div class="window-content">
+                  <div class="app-content">${app.content}</div>
+              </div>
+          `;
+          
+          document.getElementById('windowsContainer').appendChild(windowEl);
+          
+          // 添加到窗口列表
+          windows.push({
+              id: windowId,
+              appId: appId,
+              title: app.title,
+              element: windowEl
+          });
+          
+          // 添加到任务栏
+          addToTaskbar(windowId, app.title, app.icon);
+          
+          // 绑定事件
+          setupWindowEvents(windowEl, windowId);
+          
+          // 关闭开始菜单
+          document.getElementById('startMenu').classList.remove('show');
+          document.getElementById('startBtn').classList.remove('active');
+      }
+      
+      // 设置窗口事件
+      function setupWindowEvents(windowEl, windowId) {
+          const titlebar = windowEl.querySelector('.window-titlebar');
+          const minimizeBtn = windowEl.querySelector('.minimize');
+          const maximizeBtn = windowEl.querySelector('.maximize');
+          const closeBtn = windowEl.querySelector('.close');
+          
+          // 拖动
+          titlebar.addEventListener('mousedown', (e) => {
+              if (e.target.closest('.window-control-btn')) return;
+              draggedWindow = windowEl;
+              dragOffset.x = e.clientX - windowEl.offsetLeft;
+              dragOffset.y = e.clientY - windowEl.offsetTop;
+              windowEl.style.zIndex = ++zIndexCounter;
+          });
+          
+          // 最小化
+          minimizeBtn.addEventListener('click', () => {
+              windowEl.classList.remove('show');
+              updateTaskbarApp(windowId, false);
+          });
+          
+          // 最大化
+          maximizeBtn.addEventListener('click', () => {
+              windowEl.classList.toggle('maximized');
+          });
+          
+          // 关闭
+          closeBtn.addEventListener('click', () => {
+              windowEl.remove();
+              windows = windows.filter(w => w.id !== windowId);
+              removeFromTaskbar(windowId);
+          });
+          
+          // 点击窗口置顶
+          windowEl.addEventListener('mousedown', () => {
+              windowEl.style.zIndex = ++zIndexCounter;
+          });
+      }
+      
+      // 全局鼠标移动
+      document.addEventListener('mousemove', (e) => {
+          if (draggedWindow && !draggedWindow.classList.contains('maximized')) {
+              draggedWindow.style.left = `${e.clientX - dragOffset.x}px`;
+              draggedWindow.style.top = `${e.clientY - dragOffset.y}px`;
+          }
+      });
+      
+      document.addEventListener('mouseup', () => {
+          draggedWindow = null;
+      });
+      
+      // 任务栏管理
+      function addToTaskbar(windowId, title, icon) {
+          const taskbarApps = document.getElementById('taskbarApps');
+          const appBtn = document.createElement('button');
+          appBtn.className = 'taskbar-app active';
+          appBtn.id = `taskbar-${windowId}`;
+          appBtn.innerHTML = `
+              <div class="taskbar-app-icon">
+                  <div class="${icon}" style="transform: scale(0.5); transform-origin: top left;"></div>
+              </div>
+              <div class="taskbar-app-title">${title}</div>
+          `;
+          
+          appBtn.addEventListener('click', () => {
+              const window = windows.find(w => w.id === windowId);
+              if (window) {
+                  if (window.element.classList.contains('show')) {
+                      window.element.classList.remove('show');
+                      appBtn.classList.remove('active');
+                  } else {
+                      window.element.classList.add('show');
+                      window.element.style.zIndex = ++zIndexCounter;
+                      appBtn.classList.add('active');
+                  }
+              }
+          });
+          
+          taskbarApps.appendChild(appBtn);
+      }
+      
+      function updateTaskbarApp(windowId, active) {
+          const appBtn = document.getElementById(`taskbar-${windowId}`);
+          if (appBtn) {
+              if (active) {
+                  appBtn.classList.add('active');
+              } else {
+                  appBtn.classList.remove('active');
+              }
+          }
+      }
+      
+      function removeFromTaskbar(windowId) {
+          const appBtn = document.getElementById(`taskbar-${windowId}`);
+          if (appBtn) {
+              appBtn.remove();
+          }
+      }
+      
+      // 开始菜单
+      const startBtn = document.getElementById('startBtn');
+      const startMenu = document.getElementById('startMenu');
+      
+      startBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          startMenu.classList.toggle('show');
+          startBtn.classList.toggle('active');
+      });
+      
+      // 点击其他地方关闭开始菜单
+      document.addEventListener('click', (e) => {
+          if (!startMenu.contains(e.target) && e.target !== startBtn) {
+              startMenu.classList.remove('show');
+              startBtn.classList.remove('active');
+          }
+      });
+      
+      // 桌面图标双击
+      document.querySelectorAll('.desktop-icon').forEach(icon => {
+          icon.addEventListener('dblclick', () => {
+              const appId = icon.dataset.app;
+              createWindow(appId);
+          });
+          
+          icon.addEventListener('click', (e) => {
+              e.stopPropagation();
+              document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+              icon.classList.add('selected');
+          });
+      });
+      
+      // 开始菜单项点击
+      document.querySelectorAll('.start-menu-item').forEach(item => {
+          item.addEventListener('click', () => {
+              const appId = item.dataset.app;
+              createWindow(appId);
+          });
+      });
+      
+      // 点击桌面取消选择
+      document.getElementById('desktop').addEventListener('click', () => {
+          document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+      });
+      
+      // 右键菜单
+      const contextMenu = document.getElementById('contextMenu');
+      
+      document.getElementById('desktop').addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          contextMenu.style.left = `${e.clientX}px`;
+          contextMenu.style.top = `${e.clientY}px`;
+          contextMenu.classList.add('show');
+      });
+      
+      document.addEventListener('click', () => {
+          contextMenu.classList.remove('show');
+      });
+      
+      // 时钟
+      function updateClock() {
+          const now = new Date();
+          const hours = String(now.getHours()).padStart(2, '0');
+          const minutes = String(now.getMinutes()).padStart(2, '0');
+          document.getElementById('clock').textContent = `${hours}:${minutes}`;
+      }
+      
+      updateClock();
+      setInterval(updateClock, 1000);
+      
+      // 欢迎窗口
+      setTimeout(() => {
+          createWindow('computer');
+      }, 500);
+  </script>
+</body>
+</html>
