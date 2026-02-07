@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temporal Lab — Time as Medium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Iceberg&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #fafafa;
+            --bg-alt: #f0f0f0;
+            --text: #1a1a1a;
+            --text-muted: #5E5D61;
+            --accent: #FF5D1F;
+            --accent-fade: rgba(255, 93, 31, 0.15);
+            --border: #e0e0e0;
+        }
+
+        body.dark-mode {
+            --bg: #0a0a0a;
+            --bg-alt: #111111;
+            --text: #f0f0f0;
+            --text-muted: #a0a0a0;
+            --border: #222222;
+            --accent-fade: rgba(255, 93, 31, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 300;
+            line-height: 1.6;
+            transition: background 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        /* Ultra-thin margins */
+        .page-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 6px solid var(--bg);
+            pointer-events: none;
+            z-index: 9999;
+            transition: border-color 0.4s ease;
+        }
+
+        .page-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 1px solid var(--border);
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            height: 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 30px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            transition: background 0.4s ease, border-color 0.4s ease;
+        }
+
+        .logo {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 18px;
+            letter-spacing: 2px;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-mark {
+            width: 28px;
+            height: 28px;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            position: relative;
+            animation: logo-pulse 3s ease-in-out infinite;
+        }
+
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes logo-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            border-color: var(--accent);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            stroke: var(--accent);
+            transition: opacity 0.3s ease;
+            position: absolute;
+        }
+
+        .sun-icon { opacity: 1; }
+        .moon-icon { opacity: 0; }
+        body.dark-mode .sun-icon { opacity: 0; }
+        body.dark-mode .moon-icon { opacity: 1; }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 120px 60px 80px;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero-label {
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .hero-label::before {
+            content: '';
+            width: 40px;
+            height: 1px;
+            background: var(--accent);
+        }
+
+        .hero h1 {
+            font-family: 'Iceberg', sans-serif;
+            font-size: clamp(48px, 8vw, 100px);
+            font-weight: 400;
+            line-height: 1.05;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+        }
+
+        .hero h1 span {
+            color: var(--accent);
+        }
+
+        .hero-desc {
+            font-size: 18px;
+            color: var(--text-muted);
+            max-width: 500px;
+            margin-bottom: 50px;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: transparent;
+            border: 1px solid var(--text);
+            color: var(--text);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .hero-cta:hover {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .hero-cta svg {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .hero-cta:hover svg {
+            transform: translateX(4px);
+        }
+
+        /* Time Display */
+        .time-display {
+            position: absolute;
+            right: 60px;
+            bottom: 80px;
+            text-align: right;
+        }
+
+        .current-time {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 64px;
+            color: var(--accent);
+            line-height: 1;
+        }
+
+        .time-zone {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Manifesto Section */
+        .manifesto {
+            padding: 120px 60px;
+            border-top: 1px solid var(--border);
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 80px;
+            max-width: 1200px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            position: sticky;
+            top: 100px;
+        }
+
+        .section-label span {
+            display: block;
+            width: 30px;
+            height: 1px;
+            background: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .manifesto-content h2 {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 36px;
+            font-weight: 400;
+            margin-bottom: 40px;
+            max-width: 600px;
+        }
+
+        .manifesto-text {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .manifesto-text p {
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        /* Research Areas */
+        .research {
+            padding: 120px 60px;
+            background: var(--bg-alt);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .research-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 80px;
+        }
+
+        .research h2 {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 36px;
+            font-weight: 400;
+        }
+
+        .research-count {
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+        }
+
+        .research-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2px;
+            background: var(--border);
+        }
+
+        .research-card {
+            background: var(--bg);
+            padding: 50px 40px;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .research-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.4s ease;
+        }
+
+        .research-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .research-card:hover {
+            background: var(--bg-alt);
+        }
+
+        .card-number {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 48px;
+            color: var(--accent-fade);
+            margin-bottom: 30px;
+            transition: color 0.4s ease;
+        }
+
+        .research-card:hover .card-number {
+            color: var(--accent);
+        }
+
+        .card-title {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.7;
+        }
+
+        /* Principles */
+        .principles {
+            padding: 120px 60px;
+        }
+
+        .principles-list {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .principle-item {
+            display: grid;
+            grid-template-columns: 60px 1fr auto;
+            gap: 40px;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border);
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .principle-item:hover {
+            padding-left: 20px;
+        }
+
+        .principle-num {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 14px;
+            color: var(--accent);
+        }
+
+        .principle-text {
+            font-size: 24px;
+            font-weight: 400;
+        }
+
+        .principle-arrow {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .principle-item:hover .principle-arrow {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .principle-arrow svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-muted);
+            transition: stroke 0.3s ease;
+        }
+
+        .principle-item:hover .principle-arrow svg {
+            stroke: white;
+        }
+
+        /* Contact */
+        .contact {
+            padding: 120px 60px;
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        body.dark-mode .contact {
+            background: #151515;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            max-width: 1200px;
+        }
+
+        .contact h2 {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 48px;
+            font-weight: 400;
+            margin-bottom: 30px;
+        }
+
+        .contact p {
+            font-size: 16px;
+            opacity: 0.7;
+            max-width: 400px;
+            margin-bottom: 40px;
+        }
+
+        .contact-email {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 24px;
+            color: var(--accent);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: gap 0.3s ease;
+        }
+
+        .contact-email:hover {
+            gap: 20px;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .info-item {
+            padding: 25px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-label {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.5;
+            margin-bottom: 8px;
+        }
+
+        .info-value {
+            font-size: 15px;
+        }
+
+        /* Footer */
+        footer {
+            padding: 30px 60px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-left {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .footer-right {
+            display: flex;
+            gap: 30px;
+        }
+
+        .footer-right a {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-right a:hover {
+            color: var(--accent);
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: fixed;
+            left: 30px;
+            bottom: 30px;
+            writing-mode: vertical-rl;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .scroll-indicator::after {
+            content: '';
+            width: 1px;
+            height: 60px;
+            background: linear-gradient(to bottom, var(--accent), transparent);
+            animation: scroll-line 2s ease-in-out infinite;
+        }
+
+        @keyframes scroll-line {
+            0%, 100% { opacity: 0.3; height: 40px; }
+            50% { opacity: 1; height: 60px; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .section-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .section-label {
+                position: static;
+            }
+
+            .research-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .manifesto-text {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 0 20px;
+            }
+
+            .nav-links a:not(:last-child) {
+                display: none;
+            }
+
+            .hero {
+                padding: 120px 30px 80px;
+            }
+
+            .time-display {
+                position: static;
+                margin-top: 60px;
+                text-align: left;
+            }
+
+            .current-time {
+                font-size: 48px;
+            }
+
+            .manifesto, .research, .principles, .contact {
+                padding: 80px 30px;
+            }
+
+            .scroll-indicator {
+                display: none;
+            }
+
+            .principle-item {
+                grid-template-columns: 40px 1fr;
+            }
+
+            .principle-arrow {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-frame"></div>
+
+    <nav>
+        <a href="#" class="logo">
+            <div class="logo-mark"></div>
+            TEMPORAL LAB
+        </a>
+        <div class="nav-links">
+            <a href="#manifesto">Manifesto</a>
+            <a href="#research">Research</a>
+            <a href="#principles">Principles</a>
+            <a href="#contact">Contact</a>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/>
+                    <line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/>
+                    <line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+                <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-label">Independent Research Studio</div>
+            <h1>Time as<br><span>Medium</span></h1>
+            <p class="hero-desc">We explore the intersection of temporal perception, computational systems, and human experience. Time is not just measured—it is designed.</p>
+            <a href="#research" class="hero-cta">
+                Explore Research
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </a>
+        </div>
+        <div class="time-display">
+            <div class="current-time" id="currentTime">00:00:00</div>
+            <div class="time-zone" id="timeZone">UTC+0</div>
+        </div>
+    </section>
+
+    <section class="manifesto" id="manifesto">
+        <div class="section-grid">
+            <div class="section-label">
+                <span></span>
+                Manifesto
+            </div>
+            <div class="manifesto-content">
+                <h2>We believe time is the most intimate interface between humans and reality.</h2>
+                <div class="manifesto-text">
+                    <p>Every moment carries weight. Every second shapes perception. At Temporal Lab, we investigate how temporal structures influence cognition, behavior, and the fabric of lived experience.</p>
+                    <p>Our work spans chronobiology, interface design, and philosophical inquiry. We create tools and frameworks that help people develop a more intentional relationship with time—not as a resource to be optimized, but as a medium to be understood.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="research" id="research">
+        <div class="research-header">
+            <h2>Research Areas</h2>
+            <div class="research-count">03 Active Projects</div>
+        </div>
+        <div class="research-grid">
+            <div class="research-card">
+                <div class="card-number">01</div>
+                <h3 class="card-title">Temporal Interfaces</h3>
+                <p class="card-desc">Designing new paradigms for time visualization that align with human cognitive rhythms rather than arbitrary mechanical divisions.</p>
+            </div>
+            <div class="research-card">
+                <div class="card-number">02</div>
+                <h3 class="card-title">Chrono-Perception</h3>
+                <p class="card-desc">Investigating how environmental, emotional, and contextual factors alter subjective time experience across different states of consciousness.</p>
+            </div>
+            <div class="research-card">
+                <div class="card-number">03</div>
+                <h3 class="card-title">Rhythmic Systems</h3>
+                <p class="card-desc">Building computational frameworks that harmonize digital systems with natural biological cycles and circadian patterns.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="principles" id="principles">
+        <div class="section-grid">
+            <div class="section-label">
+                <span></span>
+                Principles
+            </div>
+            <div class="principles-list">
+                <div class="principle-item">
+                    <div class="principle-num">01</div>
+                    <div class="principle-text">Time is subjective. Design should acknowledge this.</div>
+                    <div class="principle-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="principle-item">
+                    <div class="principle-num">02</div>
+                    <div class="principle-text">Precision without meaning is noise.</div>
+                    <div class="principle-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="principle-item">
+                    <div class="principle-num">03</div>
+                    <div class="principle-text">The best interface disappears into experience.</div>
+                    <div class="principle-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="principle-item">
+                    <div class="principle-num">04</div>
+                    <div class="principle-text">Rhythm precedes measurement.</div>
+                    <div class="principle-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="principle-item">
+                    <div class="principle-num">05</div>
+                    <div class="principle-text">Every moment is an opportunity for presence.</div>
+                    <div class="principle-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact" id="contact">
+        <div class="contact-grid">
+            <div class="contact-main">
+                <h2>Let's explore<br>time together</h2>
+                <p>We collaborate with researchers, designers, and organizations interested in rethinking temporal experience.</p>
+                <a href="mailto:hello@temporallab.io" class="contact-email">
+                    hello@temporallab.io
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="contact-info">
+                <div class="info-item">
+                    <div class="info-label">Location</div>
+                    <div class="info-value">Distributed / Async</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Founded</div>
+                    <div class="info-value">2024</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Focus</div>
+                    <div class="info-value">Time, Perception, Interface</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-left">© 2024 Temporal Lab. All rights reserved.</div>
+        <div class="footer-right">
+            <a href="#">Twitter</a>
+            <a href="#">GitHub</a>
+            <a href="#">Are.na</a>
+        </div>
+    </footer>
+
+    <div class="scroll-indicator">Scroll</div>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            body.classList.add('dark-mode');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
+
+        // Live Time Display
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            document.getElementById('currentTime').textContent = `${hours}:${minutes}:${seconds}`;
+            
+            const offset = -now.getTimezoneOffset() / 60;
+            const sign = offset >= 0 ? '+' : '';
+            document.getElementById('timeZone').textContent = `UTC${sign}${offset} — Local Time`;
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Hide scroll indicator on scroll
+        const scrollIndicator = document.querySelector('.scroll-indicator');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                scrollIndicator.style.opacity = '0';
+            } else {
+                scrollIndicator.style.opacity = '1';
+            }
+        });
+    </script>
+</body>
+</html>

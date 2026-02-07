@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dieter — Design Engineer</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rams-white: #faf9f7;
+      --rams-cream: #f5f3ef;
+      --rams-shell: #e8e4dc;
+      --rams-shell-dark: #ddd8ce;
+      --rams-warm-gray: #c4bdb1;
+      --rams-mid-gray: #9a9389;
+      --rams-dark-gray: #5a5550;
+      --rams-charcoal: #3a3835;
+      --rams-black: #1a1917;
+      --rams-orange: #ff6b35;
+      --rams-orange-dark: #e55a2b;
+      --rams-orange-glow: rgba(255, 107, 53, 0.25);
+      --rams-lcd-bg: #c8d4a8;
+      --rams-lcd-text: #2a3a1a;
+      --font-display: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      --radius-device: 24px;
+      --radius-screen: 12px;
+      --radius-button: 50%;
+      --shadow-device: 
+        0 1px 1px rgba(26,25,23,0.02),
+        0 2px 4px rgba(26,25,23,0.03),
+        0 8px 16px rgba(26,25,23,0.04),
+        0 16px 32px rgba(26,25,23,0.05),
+        0 32px 64px rgba(26,25,23,0.06);
+      --shadow-button:
+        0 2px 4px rgba(26,25,23,0.12),
+        0 4px 8px rgba(26,25,23,0.08),
+        inset 0 1px 0 rgba(250,249,247,0.4);
+      --shadow-inset:
+        inset 0 2px 4px rgba(26,25,23,0.08),
+        inset 0 0 0 1px rgba(26,25,23,0.05);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-display);
+      background: var(--rams-cream);
+      color: var(--rams-black);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* 极窄边距框架 */
+    .page-frame {
+      position: fixed;
+      inset: 0;
+      border: 5px solid var(--rams-cream);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .page-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid var(--rams-shell-dark);
+    }
+
+    /* 主容器 */
+    .main-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 80px 40px 60px;
+    }
+
+    /* 顶部导航设备 */
+    .nav-device {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      background: linear-gradient(145deg, var(--rams-shell) 0%, var(--rams-shell-dark) 100%);
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: var(--shadow-device);
+      display: flex;
+      gap: 6px;
+    }
+
+    .nav-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-button);
+      border: none;
+      background: linear-gradient(145deg, var(--rams-white) 0%, var(--rams-shell) 100%);
+      box-shadow: var(--shadow-button);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      color: var(--rams-dark-gray);
+    }
+
+    .nav-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(26,25,23,0.15), 0 6px 12px rgba(26,25,23,0.1);
+    }
+
+    .nav-btn:active {
+      transform: translateY(1px);
+      box-shadow: inset 0 2px 4px rgba(26,25,23,0.1);
+    }
+
+    .nav-btn.active {
+      background: var(--rams-orange);
+      color: white;
+      box-shadow: 0 0 0 3px var(--rams-orange-glow), var(--shadow-button);
+    }
+
+    .nav-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* 状态指示灯 */
+    .status-light {
+      position: fixed;
+      top: 28px;
+      right: 200px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rams-orange);
+      box-shadow: 0 0 8px var(--rams-orange-glow), 0 0 16px var(--rams-orange-glow);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Hero 设备卡片 */
+    .hero-device {
+      background: linear-gradient(145deg, var(--rams-shell) 0%, var(--rams-shell-dark) 100%);
+      border-radius: var(--radius-device);
+      padding: 32px;
+      box-shadow: var(--shadow-device);
+      margin-bottom: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-device::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    }
+
+    /* 侧边开关 */
+    .side-switch {
+      position: absolute;
+      left: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 48px;
+      background: linear-gradient(180deg, var(--rams-warm-gray) 0%, var(--rams-mid-gray) 100%);
+      border-radius: 4px 0 0 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .side-switch:hover {
+      width: 10px;
+      left: -14px;
+      background: linear-gradient(180deg, var(--rams-orange) 0%, var(--rams-orange-dark) 100%);
+    }
+
+    .side-switch::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 2px;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 20px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 2px;
+    }
+
+    /* LCD 屏幕 */
+    .lcd-screen {
+      background: var(--rams-lcd-bg);
+      border-radius: var(--radius-screen);
+      padding: 24px 28px;
+      box-shadow: var(--shadow-inset);
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .lcd-screen::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: var(--radius-screen);
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .lcd-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--rams-lcd-text);
+      opacity: 0.6;
+      margin-bottom: 8px;
+    }
+
+    .lcd-title {
+      font-family: var(--font-mono);
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 500;
+      color: var(--rams-lcd-text);
+      line-height: 1.1;
+      letter-spacing: -1px;
+    }
+
+    .lcd-subtitle {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--rams-lcd-text);
+      opacity: 0.7;
+      margin-top: 12px;
+    }
+
+    /* 按钮组 */
+    .button-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .device-btn {
+      height: 44px;
+      padding: 0 24px;
+      border-radius: 22px;
+      border: none;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .device-btn.primary {
+      background: var(--rams-orange);
+      color: white;
+      box-shadow: 0 0 0 3px var(--rams-orange-glow), var(--shadow-button);
+    }
+
+    .device-btn.primary:hover {
+      background: var(--rams-orange-dark);
+      transform: translateY(-1px);
+    }
+
+    .device-btn.secondary {
+      background: linear-gradient(145deg, var(--rams-white) 0%, var(--rams-shell) 100%);
+      color: var(--rams-dark-gray);
+      box-shadow: var(--shadow-button);
+    }
+
+    .device-btn.secondary:hover {
+      transform: translateY(-1px);
+    }
+
+    .device-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* 圆形指示按钮 */
+    .indicator-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(145deg, var(--rams-white) 0%, var(--rams-shell) 100%);
+      box-shadow: var(--shadow-button);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      margin-left: auto;
+    }
+
+    .indicator-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .indicator-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--rams-mid-gray);
+      transition: all 0.3s ease;
+    }
+
+    .indicator-btn:hover .indicator-dot {
+      background: var(--rams-orange);
+      box-shadow: 0 0 8px var(--rams-orange-glow);
+    }
+
+    /* 网格布局 */
+    .device-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    /* About 设备 */
+    .about-device {
+      grid-column: span 5;
+      background: linear-gradient(145deg, var(--rams-shell) 0%, var(--rams-shell-dark) 100%);
+      border-radius: var(--radius-device);
+      padding: 28px;
+      box-shadow: var(--shadow-device);
+      position: relative;
+    }
+
+    .about-device::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    }
+
+    .device-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .device-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--rams-mid-gray);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .device-label::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--rams-orange);
+    }
+
+    .mini-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: none;
+      background: linear-gradient(145deg, var(--rams-white) 0%, var(--rams-shell) 100%);
+      box-shadow: var(--shadow-button);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .mini-btn:hover {
+      transform: scale(1.1);
+    }
+
+    .mini-btn svg {
+      width: 12px;
+      height: 12px;
+      color: var(--rams-dark-gray);
+    }
+
+    .about-content {
+      background: var(--rams-white);
+      border-radius: var(--radius-screen);
+      padding: 20px;
+      box-shadow: var(--shadow-inset);
+    }
+
+    .about-content p {
+      font-size: 14px;
+      color: var(--rams-dark-gray);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .about-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .highlight {
+      color: var(--rams-orange);
+      font-weight: 500;
+    }
+
+    /* Stats 设备 */
+    .stats-device {
+      grid-column: span 7;
+      background: linear-gradient(145deg, var(--rams-shell) 0%, var(--rams-shell-dark) 100%);
+      border-radius: var(--radius-device);
+      padding: 28px;
+      box-shadow: var(--shadow-device);
+      position: relative;
+    }
+
+    .stats-device::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .stat-cell {
+      background: var(--rams-lcd-bg);
+      border-radius: var(--radius-screen);
+      padding: 20px;
+      box-shadow: var(--shadow-inset);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-cell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .stat-value {
+      font-family: var(--font-mono);
+      font-size: 32px;
+      font-weight: 500;
+      color: var(--rams-lcd-text);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--rams-lcd-text);
+      opacity: 0.6;
+    }
+
+    /* Works 设备 */
+    .works-device {
+      grid-column: span 12;
+      background: linear-gradient(145deg, var(--rams-shell) 0%, var(--rams-shell-dark) 100%);
+      border-radius: var(--radius-device);
+      padding: 28px;
+      box-shadow: var(--shadow-device);
+      position: relative;
+    }
+
+    .works-device::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    }
+
+    .works-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .work-card {
+      background: var(--rams-white);
+      border-radius: var(--radius-screen);
+      overflow: hidden;
+      box-shadow: var(--shadow-inset);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .work-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(26,25,23,0.12);
+    }
+
+    .work-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--rams-orange);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .work-card:hover::after {
+      transform: scaleX(1);
+    }
+
+    .work-preview {
+      height: 140px;
+      background: var(--rams-lcd-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .work-preview::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+    }
+
+    .work-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--rams-white) 0%, var(--rams-shell) 100%);
+      box-shadow: var(--shadow-button);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--rams-dark-gray);
+      transition: all 0.3s ease;
+    }
+
+    .work-card:hover .work-icon {
+      background: var(--rams-orange);
+      color: white;
+      transform: scale(1.1);
+    }
+
+    .work-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .work-info {
+      padding: 20px;
+    }
+
+    .work-title {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--rams-black);
+      margin-bottom: 6px;
+    }
+
+    .work-desc {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--rams-mid-gray);
+      letter-spacing: 0.5px;
+    }
+
+    .work-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--rams-shell);
+    }
+
+    .work-year {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--rams-mid-gray);
+      letter-spacing: 1px;
+    }
+
+    .work-arrow {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--rams-shell);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .work-card:hover .work-arrow {
+      background: var(--rams-orange);
+    }
+
+    .work-arrow svg {
+      width: 12px;
+      height: 12px;
+      color: var(--rams-mid-gray);
+      transition: color 0.3s ease;
+    }
+
+    .work-card:hover .work-arrow svg {
+      color: white;
+    }
+
+    /* Philosophy 设备 */
+    .philosophy-device {
+      grid-column: span 8;
+      background: linear-gradient(145deg, var(--rams-shell) 0%, var(--rams-shell-dark) 100%);
+      border-radius: var(--radius-device);
+      padding: 28px;
+      box-shadow: var(--shadow-device);
+      position: relative;
+    }
+
+    .philosophy-device::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    }
+
+    .principle-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .principle-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      background: var(--rams-white);
+      border-radius: var(--radius-screen);
+      box-shadow: var(--shadow-inset);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .principle-item:hover {
+      padding-left: 28px;
+      background: var(--rams-cream);
+    }
+
+    .principle-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--rams-orange);
+      min-width: 24px;
+    }
+
+    .principle-text {
+      font-size: 14px;
+      color: var(--rams-dark-gray);
+      flex: 1;
+    }
+
+    .principle-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rams-shell-dark);
+      transition: all 0.3s ease;
+    }
+
+    .principle-item:hover .principle-dot {
+      background: var(--rams-orange);
+      box-shadow: 0 0 8px var(--rams-orange-glow);
+    }
+
+    /* Contact 设备 */
+    .contact-device {
+      grid-column: span 4;
+      background: linear-gradient(145deg, var(--rams-charcoal) 0%, var(--rams-black) 100%);
+      border-radius: var(--radius-device);
+      padding: 28px;
+      box-shadow: var(--shadow-device);
+      position: relative;
+    }
+
+    .contact-device::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    }
+
+    .contact-device .device-label {
+      color: var(--rams-warm-gray);
+    }
+
+    .contact-screen {
+      background: var(--rams-lcd-bg);
+      border-radius: var(--radius-screen);
+      padding: 20px;
+      box-shadow: var(--shadow-inset);
+      margin-bottom: 20px;
+    }
+
+    .contact-email {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--rams-lcd-text);
+      word-break: break-all;
+    }
+
+    .contact-links {
+      display: flex;
+      gap: 10px;
+    }
+
+    .contact-btn {
+      flex: 1;
+      height: 44px;
+      border-radius: 22px;
+      border: none;
+      background: linear-gradient(145deg, var(--rams-dark-gray) 0%, var(--rams-charcoal) 100%);
+      color: var(--rams-warm-gray);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .contact-btn:hover {
+      background: var(--rams-orange);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .contact-btn svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Footer */
+    .footer-device {
+      background: linear-gradient(145deg, var(--rams-shell) 0%, var(--rams-shell-dark) 100%);
+      border-radius: var(--radius-device);
+      padding: 20px 28px;
+      box-shadow: var(--shadow-device);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-left {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--rams-mid-gray);
+      letter-spacing: 1px;
+    }
+
+    .footer-time {
+      font-family: var(--font-mono);
+      font-size: 18px;
+      color: var(--rams-orange);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .footer-time::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rams-orange);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* 滚动指示器 */
+    .scroll-indicator {
+      position: fixed;
+      left: 24px;
+      bottom: 24px;
+      writing-mode: vertical-rl;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: var(--rams-mid-gray);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+    }
+
+    .scroll-indicator::after {
+      content: '';
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--rams-orange), transparent);
+      animation: scroll-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scroll-pulse {
+      0%, 100% { height: 30px; opacity: 0.5; }
+      50% { height: 50px; opacity: 1; }
+    }
+
+    /* 响应式 */
+    @media (max-width: 1024px) {
+      .device-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .about-device,
+      .stats-device,
+      .works-device,
+      .philosophy-device,
+      .contact-device {
+        grid-column: span 1;
+      }
+
+      .works-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 100px 20px 40px;
+      }
+
+      .works-grid,
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .scroll-indicator {
+        display: none;
+      }
+
+      .nav-device {
+        top: 12px;
+        right: 12px;
+      }
+
+      .status-light {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-frame"></div>
+  
+  <div class="status-light"></div>
+  
+  <nav class="nav-device">
+    <button class="nav-btn active" title="Home">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      </svg>
+    </button>
+    <button class="nav-btn" title="Works">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7"/>
+        <rect x="14" y="3" width="7" height="7"/>
+        <rect x="14" y="14" width="7" height="7"/>
+        <rect x="3" y="14" width="7" height="7"/>
+      </svg>
+    </button>
+    <button class="nav-btn" title="About">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4M12 8h.01"/>
+      </svg>
+    </button>
+    <button class="nav-btn" title="Contact">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+        <polyline points="22,6 12,13 2,6"/>
+      </svg>
+    </button>
+  </nav>
+
+  <main class="main-container">
+    <!-- Hero Device -->
+    <div class="hero-device">
+      <div class="side-switch"></div>
+      <div class="lcd-screen">
+        <div class="lcd-label">Design Engineer / Berlin</div>
+        <h1 class="lcd-title">Dieter Rams</h1>
+        <p class="lcd-subtitle">Less, but better — Weniger, aber besser</p>
+      </div>
+      <div class="button-row">
+        <button class="device-btn primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Resume
+        </button>
+        <button class="device-btn secondary">
+          View Works
+        </button>
+        <button class="indicator-btn">
+          <span class="indicator-dot"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- About + Stats Row -->
+    <div class="device-grid">
+      <div class="about-device">
+        <div class="device-header">
+          <span class="device-label">About</span>
+          <button class="mini-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+              <polyline points="15 3 21 3 21 9"/>
+              <line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          </button>
+        </div>
+        <div class="about-content">
+          <p>I design <span class="highlight">systems</span> that bridge the gap between human intention and digital reality.</p>
+          <p>With 10+ years crafting interfaces at the intersection of <span class="highlight">function</span> and <span class="highlight">form</span>, I believe good design is as little design as possible.</p>
+        </div>
+      </div>
+
+      <div class="stats-device">
+        <div class="device-header">
+          <span class="device-label">Statistics</span>
+          <button class="mini-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+          </button>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-cell">
+            <div class="stat-value">147</div>
+            <div class="stat-label">Projects</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-value">12</div>
+            <div class="stat-label">Years</div>
+          </div>
+          <div class="stat-cell">
+            <div class="stat-value">23</div>
+            <div class="stat-label">Awards</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Works Device -->
+    <div class="device-grid">
+      <div class="works-device">
+        <div class="device-header">
+          <span class="device-label">Selected Works</span>
+          <button class="mini-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+          </button>
+        </div>
+        <div class="works-grid">
+          <div class="work-card">
+            <div class="work-preview">
+              <div class="work-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                  <line x1="8" y1="21" x2="16" y2="21"/>
+                  <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title">Design System</h3>
+              <p class="work-desc">Component library for enterprise</p>
+              <div class="work-meta">
+                <span class="work-year">2024</span>
+                <div class="work-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="work-card">
+            <div class="work-preview">
+              <div class="work-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title">Interface Kit</h3>
+              <p class="work-desc">Modular UI components</p>
+              <div class="work-meta">
+                <span class="work-year">2024</span>
+                <div class="work-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="work-card">
+            <div class="work-preview">
+              <div class="work-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title">Time Device</h3>
+              <p class="work-desc">Temporal visualization system</p>
+              <div class="work-meta">
+                <span class="work-year">2023</span>
+                <div class="work-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Philosophy + Contact Row -->
+    <div class="device-grid">
+      <div class="philosophy-device">
+        <div class="device-header">
+          <span class="device-label">Design Principles</span>
+        </div>
+        <div class="principle-list">
+          <div class="principle-item">
+            <span class="principle-num">01</span>
+            <span class="principle-text">Good design is innovative</span>
+            <span class="principle-dot"></span>
+          </div>
+          <div class="principle-item">
+            <span class="principle-num">02</span>
+            <span class="principle-text">Good design makes a product useful</span>
+            <span class="principle-dot"></span>
+          </div>
+          <div class="principle-item">
+            <span class="principle-num">03</span>
+            <span class="principle-text">Good design is aesthetic</span>
+            <span class="principle-dot"></span>
+          </div>
+          <div class="principle-item">
+            <span class="principle-num">04</span>
+            <span class="principle-text">Good design is as little design as possible</span>
+            <span class="principle-dot"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-device">
+        <div class="device-header">
+          <span class="device-label">Contact</span>
+        </div>
+        <div class="contact-screen">
+          <div class="contact-email">hello@dieter.design</div>
+        </div>
+        <div class="contact-links">
+          <button class="contact-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+            </svg>
+            GH
+          </button>
+          <button class="contact-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/>
+            </svg>
+            TW
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer-device">
+      <div class="footer-left">© 2024 DIETER.DESIGN — ALL RIGHTS RESERVED</div>
+      <div class="footer-time" id="footerTime">00:00:00</div>
+    </div>
+  </main>
+
+  <div class="scroll-indicator">SCROLL</div>
+
+  <script>
+    // 实时时钟
+    function updateTime() {
+      const now = new Date();
+      const time = now.toTimeString().slice(0, 8);
+      document.getElementById('footerTime').textContent = time;
+    }
+    updateTime();
+    setInterval(updateTime, 1000);
+
+    // 导航按钮交互
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // 滚动时隐藏指示器
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    window.addEventListener('scroll', () => {
+      scrollIndicator.style.opacity = window.scrollY > 100 ? '0' : '1';
+    });
+  </script>
+</body>
+</html>

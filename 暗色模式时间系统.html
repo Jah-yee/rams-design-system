@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>暗色模式 - 交互式垂直时间系统</title>
+    <link href="https://fonts.googleapis.com/css2?family=Iceberg&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fafafa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Iceberg', sans-serif;
+            overflow: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: #0a0a0a;
+        }
+
+        .integrated-container {
+            position: relative;
+            width: 280px;
+            height: 680px;
+            cursor: pointer;
+        }
+
+        .integrated-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        body.dark-mode .theme-toggle {
+            background: #1a1a1a;
+            border-color: #333;
+            box-shadow: 0 2px 8px rgba(255,255,255,0.1);
+        }
+
+        body.dark-mode .theme-toggle:hover {
+            box-shadow: 0 4px 12px rgba(255,255,255,0.15);
+        }
+
+        .theme-toggle svg {
+            width: 24px;
+            height: 24px;
+            transition: opacity 0.3s ease;
+        }
+
+        .sun-icon {
+            opacity: 1;
+        }
+
+        body.dark-mode .sun-icon {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .moon-icon {
+            opacity: 0;
+            position: absolute;
+        }
+
+        body.dark-mode .moon-icon {
+            opacity: 1;
+        }
+
+        /* 交互区域 */
+        .interactive-zone {
+            opacity: 0.2;
+            transition: opacity 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .interactive-zone.active {
+            opacity: 1;
+        }
+
+        /* 隐藏的时间显示 */
+        .time-display {
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .active .time-display {
+            opacity: 1;
+        }
+
+        /* 扫描线 - 始终可见 */
+        .sweeping-line {
+            transition: transform 1s linear;
+            opacity: 1 !important;
+        }
+        
+        /* Hour Clock 指针 - 始终可见 */
+        .hour-pointer-group {
+            opacity: 1 !important;
+            transform-origin: 140px 60px;
+            transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        /* 单摆动画 */
+        .pendulum-group {
+            transform-origin: 140px 365px;
+            animation: pendulum-swing 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+        }
+
+        @keyframes pendulum-swing {
+            0% { transform: rotate(-25deg); }
+            50% { transform: rotate(25deg); }
+            100% { transform: rotate(-25deg); }
+        }
+
+        /* 单摆阴影 */
+        .pendulum-shadow {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            width: 100px;
+            height: 14px;
+            background: 
+                radial-gradient(ellipse, rgba(0,0,0,0.28) 0%, rgba(0,0,0,0.15) 40%, transparent 70%),
+                radial-gradient(ellipse, rgba(0,0,0,0.18) 0%, transparent 60%);
+            border-radius: 50%;
+            transform: translateX(-50%);
+            animation: shadow-follow 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+            z-index: 1;
+            filter: blur(1px);
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode .pendulum-shadow {
+            background: 
+                radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 40%, transparent 70%),
+                radial-gradient(ellipse, rgba(0,0,0,0.35) 0%, transparent 60%);
+        }
+
+        @keyframes shadow-follow {
+            0% { transform: translateX(-50%) translateX(95px) scaleX(1.4); opacity: 0.3; }
+            25% { transform: translateX(-50%) translateX(0px) scaleX(0.65); opacity: 0.75; }
+            50% { transform: translateX(-50%) translateX(-95px) scaleX(1.4); opacity: 0.3; }
+            75% { transform: translateX(-50%) translateX(0px) scaleX(0.65); opacity: 0.75; }
+            100% { transform: translateX(-50%) translateX(95px) scaleX(1.4); opacity: 0.3; }
+        }
+
+        /* 时间文本通用样式 */
+        .time-label,
+        .pendulum-time {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 17px;
+            font-weight: 400;
+        }
+
+        .time-label {
+            font-family: 'Iceberg', cursive;
+        }
+
+        .hour-number {
+            font-family: 'Iceberg', sans-serif;
+            font-size: 17px;
+            font-weight: 400;
+            text-anchor: middle;
+        }
+
+        /* 扫描区域半圆线条 */
+        #topHalfCircle, #bottomHalfCircle {
+            transition: opacity 0.4s ease;
+        }
+        
+        #scanOverlay.active #topHalfCircle,
+        #scanOverlay.active #bottomHalfCircle {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .integrated-container {
+                transform: scale(0.85);
+            }
+            
+            .theme-toggle {
+                top: 20px;
+                right: 20px;
+                width: 44px;
+                height: 44px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 主题切换按钮 -->
+    <button class="theme-toggle" id="themeToggle" aria-label="切换主题">
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="#FF5D1F" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="#FF5D1F" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+
+    <div class="integrated-container">
+        <!-- 单摆阴影 -->
+        <div class="pendulum-shadow"></div>
+        
+        <svg viewBox="0 -120 280 800" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <!-- 扫描区域mask -->
+                <mask id="scanAreaMask">
+                    <rect x="0" y="0" width="280" height="800" fill="black"/>
+                    <rect x="74.65" y="60" width="130.7" height="305" fill="white"/>
+                    <circle cx="140" cy="60" r="65.35" fill="black"/>
+                    <circle cx="140" cy="365" r="65.35" fill="black"/>
+                </mask>
+
+                <!-- 裁剪路径 -->
+                <clipPath id="topLowerHalfCircleClip">
+                    <rect x="-10" y="50" width="300" height="80"/>
+                </clipPath>
+                
+                <clipPath id="bottomUpperHalfCircleClip">
+                    <rect x="-10" y="290" width="300" height="80"/>
+                </clipPath>
+                
+                <!-- 单摆球体渐变 - 浅色模式 -->
+                <radialGradient id="ballGradientLight" cx="35%" cy="35%">
+                    <stop offset="0%" style="stop-color:#f0f0f0;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#d0d0d0;stop-opacity:1" />
+                </radialGradient>
+                
+                <!-- 单摆球体渐变 - 暗色模式 -->
+                <radialGradient id="ballGradientDark" cx="35%" cy="35%">
+                    <stop offset="0%" style="stop-color:#3a3a3a;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:1" />
+                </radialGradient>
+                
+                <radialGradient id="ballHighlight" cx="50%" cy="50%">
+                    <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.6" />
+                    <stop offset="70%" style="stop-color:#ffffff;stop-opacity:0" />
+                </radialGradient>
+            </defs>
+            
+            <!-- 扫描区域基础 -->
+            <g id="scanZone" class="scan-zone interactive-zone">
+                <rect id="lowerFillRect" fill="#FF5D1F" 
+                      x="73.65" y="60" width="130.7" height="305" 
+                      mask="url(#scanAreaMask)"/>
+                
+                <!-- 左侧垂直线 -->
+                <rect id="leftLine" fill="#5E5D61" height="305" width="2" x="73.65" y="60"></rect>
+                
+                <!-- 左侧刻度 -->
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="5"    y="70.95" x="68.65"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="11.2" y="131.2" x="62.45"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="5"    y="169.9" x="68.65"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="11.2" y="258.2" x="62.45"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="5"    y="278.8" x="68.65"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="5"    y="362.2" x="68.65"></rect>
+                
+                <!-- 右侧垂直线 -->
+                <rect id="rightLine" fill="#5E5D61" height="305" width="2" x="204.35" y="60"></rect>
+                
+                <!-- 右侧刻度 -->
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="5"    y="337.5" x="204.35"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="5"    y="295.3" x="204.35"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="5"    y="232.5" x="204.35"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="11.2" y="176.9" x="204.35"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="5"    y="103.8" x="204.35"></rect>
+                <rect class="scale-mark" fill="#5E5D61" height="2" width="5"    y="60"   x="204.35"></rect>
+                
+                <!-- 静态刻度数字 -->
+                <text id="label14s" class="time-label" x="56"  y="137.9" text-anchor="end">14s</text>
+                <text id="label23s" class="time-label" x="224" y="183.5" text-anchor="start">23s</text>
+                <text id="label39s" class="time-label" x="56"  y="265.9" text-anchor="end">39s</text>
+            </g>
+            
+            <!-- Scan Overlay -->
+            <g id="scanOverlay" style="pointer-events:none;">
+                <circle id="topHalfCircle" cx="140" cy="60" r="65.35" 
+                        stroke="#5E5D61" 
+                        stroke-width="2.5"
+                        fill="none" 
+                        clip-path="url(#topLowerHalfCircleClip)"
+                        opacity="0"/>
+                
+                <circle id="bottomHalfCircle" cx="140" cy="365" r="65.35" 
+                        stroke="#5E5D61" 
+                        stroke-width="2" 
+                        stroke-dasharray="4 4"
+                        fill="none" 
+                        clip-path="url(#bottomUpperHalfCircleClip)"
+                        opacity="0"/>
+            </g>
+            
+            <!-- 默认激活组 -->
+            <g id="defaultActiveGroup" class="interactive-zone active">
+                <circle id="topCircleDefault" cx="140" cy="60" r="65.35" 
+                        stroke="#5E5D61" 
+                        stroke-width="2.5"
+                        fill="none"/>
+                
+                <circle id="bottomCircleDefault" cx="140" cy="365" r="65.35" 
+                        stroke="#5E5D61" 
+                        stroke-width="2" 
+                        stroke-dasharray="4 4"
+                        fill="none"/>
+                
+                <circle cx="140" cy="365" r="7.3" fill="#FF5D1F"/>
+            </g>
+            
+            <!-- Hour Clock 区域 -->
+            <g id="hourZone" class="hour-zone interactive-zone">
+                <circle id="hourClockBg" cx="140" cy="60" r="65.35" fill="#fafafa"/>
+                
+                <circle id="hourCircle" cx="140" cy="60" r="65.35" 
+                        stroke="#5E5D61" 
+                        stroke-width="2.5"
+                        fill="none"/>
+                
+                <g id="numberContainer"></g>
+            </g>
+            
+            <!-- Hour 指针 -->
+            <g id="hourPointerGroup" class="hour-pointer-group">
+                <g transform="translate(140 6) scale(0.55) translate(-7 -6.5)">
+                    <path id="hourPointer" d="M12.8277 1.90648L9.67581 11.362C9.40973 12.1603 8.36814 12.3519 7.83531 11.7007L0.74367 3.03314C0.196858 2.36482 0.627666 1.35753 1.48864 1.2913L11.7321 0.503343C12.494 0.444738 13.0693 1.18158 12.8277 1.90648Z" 
+                          fill="#5E5D61" stroke="#5E5D61"
+                          transform="rotate(-51, 7, 6.5)"/>
+                </g>
+            </g>
+            
+            <!-- 单摆区域 -->
+            <g id="pendulumZone" class="pendulum-zone interactive-zone">
+                <circle id="bottomCirclePendulum" cx="140" cy="365" r="65.35" 
+                        stroke="#5E5D61" 
+                        stroke-width="2" 
+                        stroke-dasharray="4 4"
+                        fill="none"/>
+                
+                <path id="orangeArc" d="M -46 365 A 186 186 0 0 0 326 365" 
+                      stroke="#FF5D1F"
+                      stroke-width="1.5"
+                      stroke-dasharray="4 4"
+                      fill="none"/>
+                
+                <text id="circleTimeDisplay" class="pendulum-time time-display" 
+                      x="218" y="398" text-anchor="start" fill="#FF5D1F">1s</text>
+                
+                <g id="pendulumGroup" class="pendulum-group">
+                    <circle id="pivotCircle" cx="140" cy="365" r="29.3" fill="#eeeeee"/>
+                    <circle cx="140" cy="365" r="7.3" fill="#FF5D1F"/>
+                    
+                    <path id="pendulumRod" d="M 126.3 375 L 153.7 375 L 153.7 391 L 153.9 428 Q 160.3 481, 160.5 492 L 119.5 492 Q 119.7 481, 126.1 428 L 126.3 391 Z"
+                          fill="#eeeeee"/>
+                    
+                    <circle id="pendulumBall" cx="140" cy="546" r="58.7" 
+                            fill="url(#ballGradientLight)" 
+                            style="filter: drop-shadow(0px 1.4px 2.8px rgba(0,0,0,0.04)) drop-shadow(0px 2.8px 8.4px rgba(0,0,0,0.08))" />
+                    
+                    <ellipse cx="112" cy="518" rx="17.6" ry="17.6" fill="url(#ballHighlight)" />
+                    
+                    <text id="pendulumTimeDisplay" class="pendulum-time time-display" 
+                          x="75" y="551" text-anchor="end" fill="#5E5D61">0s</text>
+                </g>
+            </g>
+            
+            <!-- 扫描线 -->
+            <rect id="sweepingLine" class="sweeping-line" fill="#FF5D1F" 
+                  height="2.8" width="179.55" y="60" x="49.25"></rect>
+        </svg>
+    </div>
+
+    <script>
+        // ========== 主题系统 ==========
+        const themeToggle = document.getElementById('themeToggle');
+        const body = document.body;
+        
+        // 暗色模式需要更新的元素
+        const themeElements = {
+            hourClockBg: document.getElementById('hourClockBg'),
+            pendulumBall: document.getElementById('pendulumBall'),
+            pivotCircle: document.getElementById('pivotCircle'),
+            pendulumRod: document.getElementById('pendulumRod'),
+            
+            // 所有结构线条
+            lines: [
+                ...document.querySelectorAll('.scale-mark'),
+                document.getElementById('leftLine'),
+                document.getElementById('rightLine'),
+                document.getElementById('topCircleDefault'),
+                document.getElementById('bottomCircleDefault'),
+                document.getElementById('hourCircle'),
+                document.getElementById('topHalfCircle'),
+                document.getElementById('bottomHalfCircle'),
+                document.getElementById('bottomCirclePendulum'),
+                document.getElementById('hourPointer')
+            ]
+        };
+        
+        // 检查系统偏好
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        function setTheme(isDark) {
+            if (isDark) {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+                
+                // 更新背景
+                themeElements.hourClockBg.setAttribute('fill', '#0a0a0a');
+                
+                // 更新单摆元素
+                themeElements.pendulumBall.setAttribute('fill', 'url(#ballGradientDark)');
+                themeElements.pivotCircle.setAttribute('fill', '#2a2a2a');
+                themeElements.pendulumRod.setAttribute('fill', '#2a2a2a');
+                
+                // 更新所有结构线条为浅色
+                themeElements.lines.forEach(line => {
+                    if (line) {
+                        const currentStroke = line.getAttribute('stroke');
+                        const currentFill = line.getAttribute('fill');
+                        
+                        if (currentStroke === '#5E5D61') {
+                            line.setAttribute('stroke', '#b0b0b0');
+                        }
+                        if (currentFill === '#5E5D61') {
+                            line.setAttribute('fill', '#b0b0b0');
+                        }
+                    }
+                });
+                
+            } else {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+                
+                // 恢复浅色模式
+                themeElements.hourClockBg.setAttribute('fill', '#fafafa');
+                themeElements.pendulumBall.setAttribute('fill', 'url(#ballGradientLight)');
+                themeElements.pivotCircle.setAttribute('fill', '#eeeeee');
+                themeElements.pendulumRod.setAttribute('fill', '#eeeeee');
+                
+                // 恢复原始颜色
+                themeElements.lines.forEach(line => {
+                    if (line) {
+                        const currentStroke = line.getAttribute('stroke');
+                        const currentFill = line.getAttribute('fill');
+                        
+                        if (currentStroke === '#b0b0b0') {
+                            line.setAttribute('stroke', '#5E5D61');
+                        }
+                        if (currentFill === '#b0b0b0') {
+                            line.setAttribute('fill', '#5E5D61');
+                        }
+                    }
+                });
+            }
+        }
+        
+        // 初始化主题
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            setTheme(savedTheme === 'dark');
+        } else {
+            setTheme(prefersDark.matches);
+        }
+        
+        // 主题切换
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.classList.contains('dark-mode');
+            setTheme(!isDark);
+        });
+        
+        // 监听系统主题变化
+        prefersDark.addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                setTheme(e.matches);
+            }
+        });
+
+        // ========== 交互系统 ==========
+        const hourZone = document.getElementById('hourZone');
+        const scanZone = document.getElementById('scanZone');
+        const pendulumZone = document.getElementById('pendulumZone');
+        const defaultActiveGroup = document.getElementById('defaultActiveGroup');
+        const scanOverlay = document.getElementById('scanOverlay');
+        const container = document.querySelector('.integrated-container');
+        
+        const zones = [hourZone, scanZone, pendulumZone];
+        const defaultGroups = [defaultActiveGroup];
+        
+        function setDefaultActive() {
+            zones.forEach(z => z.classList.remove('active'));
+            defaultGroups.forEach(g => g.classList.add('active'));
+            scanOverlay.classList.remove('active');
+        }
+        
+        setDefaultActive();
+        
+        function activateZone(zone) {
+            zones.forEach(z => z.classList.remove('active'));
+            defaultGroups.forEach(g => g.classList.remove('active'));
+            zone.classList.add('active');
+            scanOverlay.classList.toggle('active', zone === scanZone);
+        }
+        
+        zones.forEach(zone => {
+            zone.addEventListener('mouseenter', () => activateZone(zone));
+            zone.addEventListener('click', (e) => {
+                e.stopPropagation();
+                activateZone(zone);
+            });
+        });
+        
+        container.addEventListener('mouseleave', () => {
+            setDefaultActive();
+        });
+
+        // ========== Sweeping Line Clock Logic ==========
+        const sweepingLine = document.getElementById('sweepingLine');
+        const lowerFillRect = document.getElementById('lowerFillRect');
+        const timeLabels = [
+            { element: document.getElementById('label14s'), threshold: 14 },
+            { element: document.getElementById('label23s'), threshold: 23 },
+            { element: document.getElementById('label39s'), threshold: 39 }
+        ];
+        const COLOR_ORANGE = 'rgba(255, 93, 31, 1)';
+        const COLOR_ORANGE_FADED = 'rgba(255, 93, 31, 0.4)';
+
+        function updateSweepingLine() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            
+            const yPosition = 60 + (seconds / 60) * 305;
+            sweepingLine.setAttribute('y', yPosition);
+            
+            const fillHeight = 305 - (yPosition - 60);
+            lowerFillRect.setAttribute('y', yPosition);
+            lowerFillRect.setAttribute('height', fillHeight);
+
+            timeLabels.forEach(({ element, threshold }) => {
+                element.setAttribute('fill', seconds >= threshold ? COLOR_ORANGE_FADED : COLOR_ORANGE);
+            });
+        }
+
+        // ========== Hour Clock Logic ==========
+        const SVG_NS = "http://www.w3.org/2000/svg";
+        const numberContainer = document.getElementById('numberContainer');
+        const hourPointerGroup = document.getElementById('hourPointerGroup');
+        
+        const CLOCK_CENTER_X = 140;
+        const CLOCK_CENTER_Y = 60;
+        const CLOCK_RADIUS = 78;
+        const DEGREES_PER_HOUR = 30;
+        const HOUR_POINTER_OFFSET = 0;
+        
+        function createNumber(hour, angle, opacity, showH = false) {
+            const isBottom = (angle > 90 && angle < 270);
+            const r = isBottom ? CLOCK_RADIUS + 6 : CLOCK_RADIUS;
+            
+            const radian = (angle - 90) * Math.PI / 180;
+            const x = CLOCK_CENTER_X + r * Math.cos(radian);
+            const y = CLOCK_CENTER_Y + r * Math.sin(radian);
+            
+            const text = document.createElementNS(SVG_NS, 'text');
+            text.setAttribute('class', 'hour-number time-display');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y);
+            text.setAttribute('fill', `rgba(255, 93, 31, ${opacity})`);
+            text.setAttribute('dominant-baseline', 'alphabetic');
+            
+            const numberSpan = document.createElementNS(SVG_NS, 'tspan');
+            numberSpan.textContent = String(hour).padStart(2, '0');
+            numberSpan.setAttribute('font-size', '17');
+            text.appendChild(numberSpan);
+            
+            if (showH) {
+                const hSpan = document.createElementNS(SVG_NS, 'tspan');
+                hSpan.textContent = 'h';
+                hSpan.setAttribute('font-size', '13');
+                hSpan.setAttribute('baseline-shift', '0');
+                text.appendChild(hSpan);
+            }
+            
+            let rotationAngle = angle;
+            if (angle > 90 && angle < 270) {
+                rotationAngle = angle + 180;
+            }
+            text.setAttribute('transform', `rotate(${rotationAngle} ${x} ${y})`);
+            return text;
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            const currentHourAngle = ((hours % 12) + minutes / 60) * DEGREES_PER_HOUR;
+            const currentHour12 = hours % 12;
+            const nextHour12 = (currentHour12 + 1) % 12;
+            
+            numberContainer.innerHTML = '';
+            
+            if (minutes === 0) {
+                const angle = currentHour12 * DEGREES_PER_HOUR;
+                numberContainer.appendChild(createNumber(hours, angle, 1, false));
+            } else {
+                const currentAngle = currentHour12 * DEGREES_PER_HOUR;
+                const nextAngle = nextHour12 * DEGREES_PER_HOUR;
+                
+                numberContainer.appendChild(createNumber(hours, currentAngle, 1, false));
+                
+                const nextHourValue = (hours + 1) % 24;
+                numberContainer.appendChild(createNumber(nextHourValue, nextAngle, 0.4, true));
+            }
+            
+            hourPointerGroup.style.transform = `rotate(${currentHourAngle + HOUR_POINTER_OFFSET}deg)`;
+        }
+
+        // ========== 单摆时间显示 ==========
+        const pendulumTimeDisplay = document.getElementById('pendulumTimeDisplay');
+        const circleTimeDisplay = document.getElementById('circleTimeDisplay');
+        const CYCLE_PERIOD = 3;
+        
+        function updatePendulumTime() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            
+            pendulumTimeDisplay.textContent = `${seconds}s`;
+            
+            const cycle = (seconds % CYCLE_PERIOD) + 1;
+            circleTimeDisplay.textContent = `${cycle}s`;
+        }
+
+        // ========== 初始化并定时更新 ==========
+        function updateAll() {
+            const now = new Date();
+            const seconds = now.getSeconds();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            
+            const yPosition = 60 + (seconds / 60) * 305;
+            sweepingLine.setAttribute('y', yPosition);
+            const fillHeight = 305 - (yPosition - 60);
+            lowerFillRect.setAttribute('y', yPosition);
+            lowerFillRect.setAttribute('height', fillHeight);
+            timeLabels.forEach(({ element, threshold }) => {
+                element.setAttribute('fill', seconds >= threshold ? COLOR_ORANGE_FADED : COLOR_ORANGE);
+            });
+            
+            const currentHourAngle = ((hours % 12) + minutes / 60) * DEGREES_PER_HOUR;
+            const currentHour12 = hours % 12;
+            const nextHour12 = (currentHour12 + 1) % 12;
+            numberContainer.innerHTML = '';
+            if (minutes === 0) {
+                numberContainer.appendChild(createNumber(hours, currentHour12 * DEGREES_PER_HOUR, 1, false));
+            } else {
+                numberContainer.appendChild(createNumber(hours, currentHour12 * DEGREES_PER_HOUR, 1, false));
+                numberContainer.appendChild(createNumber((hours + 1) % 24, nextHour12 * DEGREES_PER_HOUR, 0.4, true));
+            }
+            hourPointerGroup.style.transform = `rotate(${currentHourAngle + HOUR_POINTER_OFFSET}deg)`;
+            
+            pendulumTimeDisplay.textContent = `${seconds}s`;
+            circleTimeDisplay.textContent = `${(seconds % CYCLE_PERIOD) + 1}s`;
+        }
+        
+        updateAll();
+        setInterval(updateAll, 1000);
+    </script>
+</body>
+</html>

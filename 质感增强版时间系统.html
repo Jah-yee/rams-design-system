@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>质感增强版 - 交互式垂直时间系统</title>
+  <link href="https://fonts.googleapis.com/css2?family=Iceberg&display=swap" rel="stylesheet">
+  <style>
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          background: linear-gradient(135deg, #f5f7fa 0%, #e8ebef 100%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          font-family: 'Iceberg', sans-serif;
+          overflow: hidden;
+      }
+
+      .integrated-container {
+          position: relative;
+          width: 280px;
+          height: 680px;
+          cursor: pointer;
+          filter: drop-shadow(0 20px 60px rgba(0,0,0,0.15));
+      }
+
+      .integrated-container svg {
+          width: 100%;
+          height: 100%;
+      }
+
+      /* 交互区域 */
+      .interactive-zone {
+          opacity: 0.2;
+          transition: opacity 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+      }
+
+      .interactive-zone.active {
+          opacity: 1;
+      }
+
+      /* 隐藏的时间显示 */
+      .time-display {
+          opacity: 0;
+          transition: opacity 0.4s ease;
+      }
+
+      .active .time-display {
+          opacity: 1;
+      }
+
+      /* 扫描线 - 始终可见，添加发光效果 */
+      .sweeping-line {
+          transition: transform 1s linear;
+          opacity: 1 !important;
+          filter: drop-shadow(0 0 4px rgba(255, 93, 31, 0.6)) 
+                  drop-shadow(0 0 8px rgba(255, 93, 31, 0.3));
+      }
+      
+      /* Hour Clock 指针 - 始终可见，添加阴影 */
+      .hour-pointer-group {
+          opacity: 1 !important;
+          transform-origin: 140px 60px;
+          transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
+          filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+      }
+
+      /* 单摆动画 */
+      .pendulum-group {
+          transform-origin: 140px 365px;
+          animation: pendulum-swing 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+      }
+
+      @keyframes pendulum-swing {
+          0% { transform: rotate(-25deg); }
+          50% { transform: rotate(25deg); }
+          100% { transform: rotate(-25deg); }
+      }
+
+      /* 单摆阴影 */
+      .pendulum-shadow {
+          position: absolute;
+          bottom: 30px;
+          left: 50%;
+          width: 100px;
+          height: 14px;
+          background: 
+              radial-gradient(ellipse, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.18) 40%, transparent 70%),
+              radial-gradient(ellipse, rgba(0,0,0,0.22) 0%, transparent 60%);
+          border-radius: 50%;
+          transform: translateX(-50%);
+          animation: shadow-follow 3s cubic-bezier(0.42, 0.0, 0.58, 1.0) infinite;
+          z-index: 1;
+          filter: blur(2px);
+      }
+
+      @keyframes shadow-follow {
+          0% { transform: translateX(-50%) translateX(95px) scaleX(1.4); opacity: 0.35; }
+          25% { transform: translateX(-50%) translateX(0px) scaleX(0.65); opacity: 0.8; }
+          50% { transform: translateX(-50%) translateX(-95px) scaleX(1.4); opacity: 0.35; }
+          75% { transform: translateX(-50%) translateX(0px) scaleX(0.65); opacity: 0.8; }
+          100% { transform: translateX(-50%) translateX(95px) scaleX(1.4); opacity: 0.35; }
+      }
+
+      /* 时间文本通用样式 */
+      .time-label,
+      .pendulum-time {
+          font-family: 'Iceberg', sans-serif;
+          font-size: 17px;
+          font-weight: 400;
+      }
+
+      .time-label {
+          font-family: 'Iceberg', cursive;
+      }
+
+      .hour-number {
+          font-family: 'Iceberg', sans-serif;
+          font-size: 17px;
+          font-weight: 400;
+          text-anchor: middle;
+      }
+
+      /* 扫描区域半圆线条 */
+      #topHalfCircle, #bottomHalfCircle {
+          transition: opacity 0.4s ease;
+      }
+      
+      #scanOverlay.active #topHalfCircle,
+      #scanOverlay.active #bottomHalfCircle {
+          opacity: 1;
+      }
+
+      /* 添加脉动效果到橙色中心点 */
+      .center-dot {
+          animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.7; transform: scale(1.1); }
+      }
+
+      @media (max-width: 768px) {
+          .integrated-container {
+              transform: scale(0.85);
+          }
+      }
+
+      @media (prefers-color-scheme: dark) {
+          body { 
+              background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+          }
+      }
+  </style>
+</head>
+<body>
+  <div class="integrated-container">
+      <div class="pendulum-shadow"></div>
+      
+      <svg viewBox="0 -120 280 800" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+              <!-- 扫描区域mask -->
+              <mask id="scanAreaMask">
+                  <rect x="0" y="0" width="280" height="800" fill="black"/>
+                  <rect x="74.65" y="60" width="130.7" height="305" fill="white"/>
+                  <circle cx="140" cy="60" r="65.35" fill="black"/>
+                  <circle cx="140" cy="365" r="65.35" fill="black"/>
+              </mask>
+
+              <!-- 裁剪路径 -->
+              <clipPath id="topLowerHalfCircleClip">
+                  <rect x="-10" y="50" width="300" height="80"/>
+              </clipPath>
+              
+              <clipPath id="bottomUpperHalfCircleClip">
+                  <rect x="-10" y="290" width="300" height="80"/>
+              </clipPath>
+              
+              <!-- 单摆球体渐变 - 增强质感 -->
+              <radialGradient id="ballGradient" cx="30%" cy="30%">
+                  <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+                  <stop offset="40%" style="stop-color:#f5f5f5;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#c8c8c8;stop-opacity:1" />
+              </radialGradient>
+              
+              <radialGradient id="ballHighlight" cx="50%" cy="50%">
+                  <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+                  <stop offset="50%" style="stop-color:#ffffff;stop-opacity:0.3" />
+                  <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0" />
+              </radialGradient>
+
+              <!-- 金属质感渐变 - 用于管壁 -->
+              <linearGradient id="metalGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#4a4a4a;stop-opacity:1" />
+                  <stop offset="50%" style="stop-color:#6e6e6e;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#4a4a4a;stop-opacity:1" />
+              </linearGradient>
+
+              <!-- 橙色发光渐变 -->
+              <linearGradient id="orangeGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#FF5D1F;stop-opacity:0.9" />
+                  <stop offset="100%" style="stop-color:#FF5D1F;stop-opacity:1" />
+              </linearGradient>
+
+              <!-- 玻璃质感渐变 - 用于时钟背景 -->
+              <radialGradient id="glassGradient" cx="50%" cy="50%">
+                  <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+                  <stop offset="70%" style="stop-color:#fafafa;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#f0f0f0;stop-opacity:1" />
+              </radialGradient>
+
+              <!-- 支点装饰渐变 -->
+              <radialGradient id="pivotGradient" cx="35%" cy="35%">
+                  <stop offset="0%" style="stop-color:#f8f8f8;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#d8d8d8;stop-opacity:1" />
+              </radialGradient>
+
+              <!-- 连接杆渐变 -->
+              <linearGradient id="rodGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#d0d0d0;stop-opacity:1" />
+                  <stop offset="50%" style="stop-color:#f0f0f0;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#d0d0d0;stop-opacity:1" />
+              </linearGradient>
+
+              <!-- 阴影滤镜 -->
+              <filter id="softShadow">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+                  <feOffset dx="0" dy="2" result="offsetblur"/>
+                  <feComponentTransfer>
+                      <feFuncA type="linear" slope="0.3"/>
+                  </feComponentTransfer>
+                  <feMerge>
+                      <feMergeNode/>
+                      <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+              </filter>
+
+              <!-- 内阴影效果 -->
+              <filter id="innerShadow">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="1.5"/>
+                  <feOffset dx="0" dy="1" result="offsetblur"/>
+                  <feFlood flood-color="#000000" flood-opacity="0.15"/>
+                  <feComposite in2="offsetblur" operator="in"/>
+                  <feMerge>
+                      <feMergeNode/>
+                      <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+              </filter>
+              
+          </defs>
+          
+          <!-- ========== 扫描区域基础 ========== -->
+          <g id="scanZone" class="scan-zone interactive-zone">
+              <!-- 动态扫描填充 -->
+              <rect id="lowerFillRect" fill="url(#orangeGlow)" 
+                    x="73.65" y="60" width="130.7" height="305" 
+                    mask="url(#scanAreaMask)"
+                    style="filter: drop-shadow(0 0 8px rgba(255, 93, 31, 0.4));"/>
+              
+              <!-- 左侧垂直线 - 金属质感 -->
+              <rect fill="url(#metalGradient)" height="305" width="2.5" x="73.4" y="60"
+                    style="filter: url(#softShadow);"></rect>
+              
+              <!-- 左侧刻度 - 增强立体感 -->
+              <rect fill="#5E5D61" height="2" width="5" y="70.95" x="68.65" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2.5" width="11.2" y="131.2" x="62.45" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2" width="5" y="169.9" x="68.65" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2.5" width="11.2" y="258.2" x="62.45" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2" width="5" y="278.8" x="68.65" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2" width="5" y="362.2" x="68.65" style="filter: url(#softShadow);"></rect>
+              
+              <!-- 右侧垂直线 - 金属质感 -->
+              <rect fill="url(#metalGradient)" height="305" width="2.5" x="204.1" y="60"
+                    style="filter: url(#softShadow);"></rect>
+              
+              <!-- 右侧刻度 - 增强立体感 -->
+              <rect fill="#5E5D61" height="2" width="5" y="337.5" x="204.35" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2" width="5" y="295.3" x="204.35" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2" width="5" y="232.5" x="204.35" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2.5" width="11.2" y="176.9" x="204.35" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2" width="5" y="103.8" x="204.35" style="filter: url(#softShadow);"></rect>
+              <rect fill="#5E5D61" height="2" width="5" y="60" x="204.35" style="filter: url(#softShadow);"></rect>
+              
+              <!-- 静态刻度数字 - 添加文字阴影 -->
+              <text id="label14s" class="time-label" x="56" y="137.9" text-anchor="end"
+                    style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));">14s</text>
+              <text id="label23s" class="time-label" x="224" y="183.5" text-anchor="start"
+                    style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));">23s</text>
+              <text id="label39s" class="time-label" x="56" y="265.9" text-anchor="end"
+                    style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));">39s</text>
+          </g>
+          
+          <!-- ========== Scan Overlay ========== -->
+          <g id="scanOverlay" style="pointer-events:none;">
+              <circle id="topHalfCircle" cx="140" cy="60" r="65.35" 
+                      stroke="url(#metalGradient)" 
+                      stroke-width="2.5"
+                      fill="none" 
+                      clip-path="url(#topLowerHalfCircleClip)"
+                      opacity="0"
+                      style="filter: url(#softShadow);"/>
+              
+              <circle id="bottomHalfCircle" cx="140" cy="365" r="65.35" 
+                      stroke="#5E5D61" 
+                      stroke-width="2" 
+                      stroke-dasharray="4 4"
+                      fill="none" 
+                      clip-path="url(#bottomUpperHalfCircleClip)"
+                      opacity="0"/>
+          </g>
+          
+          <!-- ========== 默认激活组 ========== -->
+          <g id="defaultActiveGroup" class="interactive-zone active">
+              <!-- 顶部完整圆圈 - 金属质感 -->
+              <circle cx="140" cy="60" r="65.35" 
+                      stroke="url(#metalGradient)" 
+                      stroke-width="2.5"
+                      fill="none"
+                      style="filter: url(#softShadow);"/>
+              
+              <!-- 底部完整虚线圆圈 -->
+              <circle cx="140" cy="365" r="65.35" 
+                      stroke="#5E5D61" 
+                      stroke-width="2" 
+                      stroke-dasharray="4 4"
+                      fill="none"/>
+              
+              <!-- 中心橙色点 - 添加脉动和发光 -->
+              <circle class="center-dot" cx="140" cy="365" r="7.3" fill="#FF5D1F"
+                      style="filter: drop-shadow(0 0 6px rgba(255, 93, 31, 0.8)) drop-shadow(0 0 12px rgba(255, 93, 31, 0.4));"/>
+          </g>
+          
+          <!-- ========== Hour Clock 区域 ========== -->
+          <g id="hourZone" class="hour-zone interactive-zone">
+              <!-- 玻璃质感背景 -->
+              <circle id="hourClockBg" cx="140" cy="60" r="65.35" fill="url(#glassGradient)"
+                      style="filter: url(#innerShadow);"/>
+              
+              <!-- 主圆圈 - 金属边框 -->
+              <circle cx="140" cy="60" r="65.35" 
+                      stroke="url(#metalGradient)" 
+                      stroke-width="2.5"
+                      fill="none"
+                      style="filter: url(#softShadow);"/>
+              
+              <!-- 数字容器 -->
+              <g id="numberContainer"></g>
+          </g>
+          
+          <!-- ========== 指针 ========== -->
+          <g id="hourPointerGroup" class="hour-pointer-group">
+              <g transform="translate(140 6) scale(0.55) translate(-7 -6.5)">
+                  <path d="M12.8277 1.90648L9.67581 11.362C9.40973 12.1603 8.36814 12.3519 7.83531 11.7007L0.74367 3.03314C0.196858 2.36482 0.627666 1.35753 1.48864 1.2913L11.7321 0.503343C12.494 0.444738 13.0693 1.18158 12.8277 1.90648Z" 
+                        fill="#5E5D61" stroke="#5E5D61"
+                        transform="rotate(-51, 7, 6.5)"
+                        style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));"/>
+              </g>
+          </g>
+          
+          <!-- ========== 单摆区域 ========== -->
+          <g id="pendulumZone" class="pendulum-zone interactive-zone">
+              <!-- 下部虚线圆 -->
+              <circle cx="140" cy="365" r="65.35" 
+                      stroke="#5E5D61" 
+                      stroke-width="2" 
+                      stroke-dasharray="4 4"
+                      fill="none"/>
+              
+              <!-- 橙色虚线半圆 -->
+              <path d="M -46 365 A 186 186 0 0 0 326 365" 
+                    stroke="#FF5D1F"
+                    stroke-width="1.5"
+                    stroke-dasharray="4 4"
+                    fill="none"
+                    style="filter: drop-shadow(0 0 3px rgba(255, 93, 31, 0.4));"/>
+              
+              <!-- 虚线圆右侧循环计时 -->
+              <text id="circleTimeDisplay" class="pendulum-time time-display" 
+                    x="218" y="398" text-anchor="start" fill="#FF5D1F"
+                    style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));">1s</text>
+              
+              <!-- 摆锤组件 -->
+              <g id="pendulumGroup" class="pendulum-group">
+                  <!-- 支点装饰：立体灰色大圆 -->
+                  <circle cx="140" cy="365" r="29.3" fill="url(#pivotGradient)"
+                          style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.15));"/>
+                  
+                  <!-- 橙色小圆 - 发光效果 -->
+                  <circle cx="140" cy="365" r="7.3" fill="#FF5D1F"
+                          style="filter: drop-shadow(0 0 6px rgba(255, 93, 31, 0.8)) drop-shadow(0 0 12px rgba(255, 93, 31, 0.4));"/>
+                  
+                  <!-- 连接杆 - 金属质感 -->
+                  <path d="M 126.3 375 L 153.7 375 L 153.7 391 L 153.9 428 Q 160.3 481, 160.5 492 L 119.5 492 Q 119.7 481, 126.1 428 L 126.3 391 Z"
+                        fill="url(#rodGradient)"
+                        style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));"/>
+                  
+                  <!-- 单摆球 - 增强质感 -->
+                  <circle cx="140" cy="546" r="58.7" 
+                          fill="url(#ballGradient)" 
+                          style="filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2)) drop-shadow(0 4px 8px rgba(0,0,0,0.15));" />
+                  
+                  <!-- 高光 - 增强 -->
+                  <ellipse cx="112" cy="518" rx="20" ry="20" fill="url(#ballHighlight)" />
+                  
+                  <!-- 摆球左侧时间显示 -->
+                  <text id="pendulumTimeDisplay" class="pendulum-time time-display" 
+                        x="75" y="551" text-anchor="end" fill="#5E5D61"
+                        style="filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));">0s</text>
+              </g>
+          </g>
+          
+          <!-- ========== 扫描线 ========== -->
+          <rect id="sweepingLine" class="sweeping-line" fill="url(#orangeGlow)" 
+                height="3" width="179.55" y="60" x="49.25"></rect>
+
+      </svg>
+  </div>
+
+  <script>
+      // ========== 交互系统 ==========
+      const hourZone = document.getElementById('hourZone');
+      const scanZone = document.getElementById('scanZone');
+      const pendulumZone = document.getElementById('pendulumZone');
+      const defaultActiveGroup = document.getElementById('defaultActiveGroup');
+      const scanOverlay = document.getElementById('scanOverlay');
+      const container = document.querySelector('.integrated-container');
+      
+      const zones = [hourZone, scanZone, pendulumZone];
+      const defaultGroups = [defaultActiveGroup];
+      
+      function setDefaultActive() {
+          zones.forEach(z => z.classList.remove('active'));
+          defaultGroups.forEach(g => g.classList.add('active'));
+          scanOverlay.classList.remove('active');
+      }
+      
+      setDefaultActive();
+      
+      function activateZone(zone) {
+          zones.forEach(z => z.classList.remove('active'));
+          defaultGroups.forEach(g => g.classList.remove('active'));
+          zone.classList.add('active');
+          scanOverlay.classList.toggle('active', zone === scanZone);
+      }
+      
+      zones.forEach(zone => {
+          zone.addEventListener('mouseenter', () => activateZone(zone));
+          zone.addEventListener('click', (e) => {
+              e.stopPropagation();
+              activateZone(zone);
+          });
+      });
+      
+      container.addEventListener('mouseleave', () => {
+          setDefaultActive();
+      });
+
+      // ========== Sweeping Line Clock Logic ==========
+      const sweepingLine = document.getElementById('sweepingLine');
+      const lowerFillRect = document.getElementById('lowerFillRect');
+      const timeLabels = [
+          { element: document.getElementById('label14s'), threshold: 14 },
+          { element: document.getElementById('label23s'), threshold: 23 },
+          { element: document.getElementById('label39s'), threshold: 39 }
+      ];
+      const COLOR_ORANGE = 'rgba(255, 93, 31, 1)';
+      const COLOR_ORANGE_FADED = 'rgba(255, 93, 31, 0.4)';
+
+      function updateSweepingLine() {
+          const now = new Date();
+          const seconds = now.getSeconds();
+          
+          const yPosition = 60 + (seconds / 60) * 305;
+          sweepingLine.setAttribute('y', yPosition);
+          
+          const fillHeight = 305 - (yPosition - 60);
+          lowerFillRect.setAttribute('y', yPosition);
+          lowerFillRect.setAttribute('height', fillHeight);
+
+          timeLabels.forEach(({ element, threshold }) => {
+              element.setAttribute('fill', seconds >= threshold ? COLOR_ORANGE_FADED : COLOR_ORANGE);
+          });
+      }
+
+      // ========== Hour Clock Logic ==========
+      const SVG_NS = "http://www.w3.org/2000/svg";
+      const numberContainer = document.getElementById('numberContainer');
+      const hourPointerGroup = document.getElementById('hourPointerGroup');
+      
+      const CLOCK_CENTER_X = 140;
+      const CLOCK_CENTER_Y = 60;
+      const CLOCK_RADIUS = 78;
+      const DEGREES_PER_HOUR = 30;
+      const HOUR_POINTER_OFFSET = 0;
+      
+      function createNumber(hour, angle, opacity, showH = false) {
+          const isBottom = (angle > 90 && angle < 270);
+          const r = isBottom ? CLOCK_RADIUS + 6 : CLOCK_RADIUS;
+          
+          const radian = (angle - 90) * Math.PI / 180;
+          const x = CLOCK_CENTER_X + r * Math.cos(radian);
+          const y = CLOCK_CENTER_Y + r * Math.sin(radian);
+          
+          const text = document.createElementNS(SVG_NS, 'text');
+          text.setAttribute('class', 'hour-number time-display');
+          text.setAttribute('x', x);
+          text.setAttribute('y', y);
+          text.setAttribute('fill', `rgba(255, 93, 31, ${opacity})`);
+          text.setAttribute('dominant-baseline', 'alphabetic');
+          text.setAttribute('style', 'filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));');
+          
+          const numberSpan = document.createElementNS(SVG_NS, 'tspan');
+          numberSpan.textContent = String(hour).padStart(2, '0');
+          numberSpan.setAttribute('font-size', '17');
+          text.appendChild(numberSpan);
+          
+          if (showH) {
+              const hSpan = document.createElementNS(SVG_NS, 'tspan');
+              hSpan.textContent = 'h';
+              hSpan.setAttribute('font-size', '13');
+              hSpan.setAttribute('baseline-shift', '0');
+              text.appendChild(hSpan);
+          }
+          
+          let rotationAngle = angle;
+          if (angle > 90 && angle < 270) {
+              rotationAngle = angle + 180;
+          }
+          text.setAttribute('transform', `rotate(${rotationAngle} ${x} ${y})`);
+          return text;
+      }
+      
+      function updateClock() {
+          const now = new Date();
+          const hours = now.getHours();
+          const minutes = now.getMinutes();
+          
+          const currentHourAngle = ((hours % 12) + minutes / 60) * DEGREES_PER_HOUR;
+          const currentHour12 = hours % 12;
+          const nextHour12 = (currentHour12 + 1) % 12;
+          
+          numberContainer.innerHTML = '';
+          
+          if (minutes === 0) {
+              const angle = currentHour12 * DEGREES_PER_HOUR;
+              numberContainer.appendChild(createNumber(hours, angle, 1, false));
+          } else {
+              const currentAngle = currentHour12 * DEGREES_PER_HOUR;
+              const nextAngle = nextHour12 * DEGREES_PER_HOUR;
+              
+              numberContainer.appendChild(createNumber(hours, currentAngle, 1, false));
+              
+              const nextHourValue = (hours + 1) % 24;
+              numberContainer.appendChild(createNumber(nextHourValue, nextAngle, 0.4, true));
+          }
+          
+          hourPointerGroup.style.transform = `rotate(${currentHourAngle + HOUR_POINTER_OFFSET}deg)`;
+      }
+
+      // ========== 单摆时间显示 ==========
+      const pendulumTimeDisplay = document.getElementById('pendulumTimeDisplay');
+      const circleTimeDisplay = document.getElementById('circleTimeDisplay');
+      const CYCLE_PERIOD = 3;
+      
+      function updatePendulumTime() {
+          const now = new Date();
+          const seconds = now.getSeconds();
+          
+          pendulumTimeDisplay.textContent = `${seconds}s`;
+          
+          const cycle = (seconds % CYCLE_PERIOD) + 1;
+          circleTimeDisplay.textContent = `${cycle}s`;
+      }
+
+      // ========== 暗黑模式支持 ==========
+      const hourClockBg = document.getElementById('hourClockBg');
+      
+      function updateTheme() {
+          const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          hourClockBg.setAttribute('fill', isDark ? 'url(#glassGradient)' : 'url(#glassGradient)');
+      }
+      
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateTheme);
+      updateTheme();
+
+      // ========== 初始化并定时更新 ==========
+      function updateAll() {
+          const now = new Date();
+          const seconds = now.getSeconds();
+          const hours = now.getHours();
+          const minutes = now.getMinutes();
+          
+          const yPosition = 60 + (seconds / 60) * 305;
+          sweepingLine.setAttribute('y', yPosition);
+          const fillHeight = 305 - (yPosition - 60);
+          lowerFillRect.setAttribute('y', yPosition);
+          lowerFillRect.setAttribute('height', fillHeight);
+          timeLabels.forEach(({ element, threshold }) => {
+              element.setAttribute('fill', seconds >= threshold ? COLOR_ORANGE_FADED : COLOR_ORANGE);
+          });
+          
+          const currentHourAngle = ((hours % 12) + minutes / 60) * DEGREES_PER_HOUR;
+          const currentHour12 = hours % 12;
+          const nextHour12 = (currentHour12 + 1) % 12;
+          numberContainer.innerHTML = '';
+          if (minutes === 0) {
+              numberContainer.appendChild(createNumber(hours, currentHour12 * DEGREES_PER_HOUR, 1, false));
+          } else {
+              numberContainer.appendChild(createNumber(hours, currentHour12 * DEGREES_PER_HOUR, 1, false));
+              numberContainer.appendChild(createNumber((hours + 1) % 24, nextHour12 * DEGREES_PER_HOUR, 0.4, true));
+          }
+          hourPointerGroup.style.transform = `rotate(${currentHourAngle + HOUR_POINTER_OFFSET}deg)`;
+          
+          pendulumTimeDisplay.textContent = `${seconds}s`;
+          circleTimeDisplay.textContent = `${(seconds % CYCLE_PERIOD) + 1}s`;
+      }
+      
+      updateAll();
+      setInterval(updateAll, 1000);
+  </script>
+</body>
+</html>
